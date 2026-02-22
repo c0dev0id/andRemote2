@@ -7,8 +7,8 @@ import android.os.Looper
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import android.app.Instrumentation
-import java.util.concurrent.Executors
+import android.util.Log
+import de.codevoid.andremote2.KeyInjectionService
 
 class LeverView @JvmOverloads constructor(
     context: Context,
@@ -23,8 +23,6 @@ class LeverView @JvmOverloads constructor(
     private var currentKeyCode = -1
     private var startY = 0f
     private var leverY = 0f
-    private val instrumentation = Instrumentation()
-    private val executor = Executors.newSingleThreadExecutor()
 
     private val paintTrack = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#333333")
@@ -141,12 +139,11 @@ class LeverView @JvmOverloads constructor(
     }
 
     private fun sendKeyEvent(keyCode: Int) {
-        executor.execute {
-            try {
-                instrumentation.sendKeyDownUpSync(keyCode)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
+        val service = KeyInjectionService.instance
+        if (service != null) {
+            service.injectKey(keyCode)
+        } else {
+            Log.w("LeverView", "KeyInjectionService not available")
         }
     }
 

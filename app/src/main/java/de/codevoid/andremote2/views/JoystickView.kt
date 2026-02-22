@@ -5,8 +5,8 @@ import android.graphics.*
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import android.app.Instrumentation
-import java.util.concurrent.Executors
+import android.util.Log
+import de.codevoid.andremote2.KeyInjectionService
 import kotlin.math.abs
 import kotlin.math.sqrt
 
@@ -19,9 +19,6 @@ class JoystickView @JvmOverloads constructor(
     private var keycodeDown = 20
     private var keycodeLeft = 21
     private var keycodeRight = 22
-
-    private val instrumentation = Instrumentation()
-    private val executor = Executors.newSingleThreadExecutor()
 
     private val paintBase = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#444444")
@@ -129,12 +126,11 @@ class JoystickView @JvmOverloads constructor(
     }
 
     private fun sendKeyEvent(keyCode: Int) {
-        executor.execute {
-            try {
-                instrumentation.sendKeyDownUpSync(keyCode)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
+        val service = KeyInjectionService.instance
+        if (service != null) {
+            service.injectKey(keyCode)
+        } else {
+            Log.w("JoystickView", "KeyInjectionService not available")
         }
     }
 
