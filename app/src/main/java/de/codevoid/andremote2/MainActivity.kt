@@ -103,6 +103,14 @@ class MainActivity : AppCompatActivity() {
             saveKeyMappings()
             Toast.makeText(this, R.string.mappings_saved, Toast.LENGTH_SHORT).show()
         }
+
+        findViewById<TextView>(R.id.btnCoffee).setOnClickListener {
+            try {
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://buymeacoffee.com/codevoid")))
+            } catch (_: android.content.ActivityNotFoundException) {
+                Toast.makeText(this, "No browser app found", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     override fun onResume() {
