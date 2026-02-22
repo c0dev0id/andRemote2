@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@color/overlay_bg"
+    android:padding="4dp">
+
+    <!-- Drag handle -->
+    <View
+        android:id="@+id/dragHandle"
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        android:background="#88FFFFFF"
+        android:layout_marginBottom="4dp"/>
+
+    <!-- Controls row: Lever | Joystick | Buttons -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <!-- Lever on the left -->
+        <com.c0dev0id.andremote2.views.LeverView
+            android:id="@+id/leverView"
+            android:layout_width="50dp"
+            android:layout_height="150dp"
+            android:layout_marginEnd="8dp"/>
+
+        <!-- Joystick in center -->
+        <com.c0dev0id.andremote2.views.JoystickView
+            android:id="@+id/joystickView"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:layout_marginEnd="8dp"/>
+
+        <!-- Buttons stacked on right -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <com.c0dev0id.andremote2.views.ButtonView
+                android:id="@+id/buttonTop"
+                android:layout_width="70dp"
+                android:layout_height="65dp"
+                android:layout_marginBottom="8dp"/>
+
+            <com.c0dev0id.andremote2.views.ButtonView
+                android:id="@+id/buttonBottom"
+                android:layout_width="70dp"
+                android:layout_height="65dp"/>
+
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>
