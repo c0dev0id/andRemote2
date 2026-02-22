@@ -1,0 +1,18 @@
+[
+    {
+        "merged": "de.codevoid.andremote2.app-merged_res-31:/layout_overlay_remote.xml.flat",
+        "source": "de.codevoid.andremote2.app-main-33:/layout/overlay_remote.xml"
+    },
+    {
+        "merged": "/home/runner/.gradle/daemon/8.4/de.codevoid.andremote2.app-merged_res-31:/layout_overlay_remote.xml.flat",
+        "source": "/home/runner/.gradle/daemon/8.4/de.codevoid.andremote2.app-main-33:/layout/overlay_remote.xml"
+    },
+    {
+        "merged": "/home/runner/.gradle/daemon/8.4/de.codevoid.andremote2.app-merged_res-31:/layout_activity_main.xml.flat",
+        "source": "/home/runner/.gradle/daemon/8.4/de.codevoid.andremote2.app-main-33:/layout/activity_main.xml"
+    },
+    {
+        "merged": "/home/runner/.gradle/daemon/8.4/de.codevoid.andremote2.app-merged_res-31:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "/home/runner/.gradle/daemon/8.4/de.codevoid.andremote2.app-main-33:/mipmap-anydpi-v26/ic_launcher.xml"
+    }
+]

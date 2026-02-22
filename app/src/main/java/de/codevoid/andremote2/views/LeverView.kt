@@ -1,13 +1,13 @@
 package de.codevoid.andremote2.views
 
 import android.content.Context
-import android.content.Intent
 import android.graphics.*
 import android.os.Handler
 import android.os.Looper
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import android.app.Instrumentation
 
 class LeverView @JvmOverloads constructor(
     context: Context,
@@ -138,11 +138,13 @@ class LeverView @JvmOverloads constructor(
     }
 
     private fun sendKeyEvent(keyCode: Int) {
-        val intent = Intent("de.codevoid.andremote2.KEY_EVENT").apply {
-            putExtra("keycode", keyCode)
-            setPackage(context.packageName)
-        }
-        context.sendBroadcast(intent)
+        Thread {
+            try {
+                Instrumentation().sendKeyDownUpSync(keyCode)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }.start()
     }
 
     fun setKeyCodes(up: Int, down: Int) {
