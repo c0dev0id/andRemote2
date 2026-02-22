@@ -1,18 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<de.codevoid.andremote2.views.DraggableOverlayLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/overlayRoot"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:background="@color/overlay_bg"
     android:padding="4dp">
-
-    <!-- Drag handle -->
-    <View
-        android:id="@+id/dragHandle"
-        android:layout_width="match_parent"
-        android:layout_height="20dp"
-        android:background="#88FFFFFF"
-        android:layout_marginBottom="4dp"/>
 
     <!-- Controls row: Lever | Joystick | Buttons -->
     <LinearLayout
@@ -55,4 +48,4 @@
 
         </LinearLayout>
     </LinearLayout>
-</LinearLayout>
+</de.codevoid.andremote2.views.DraggableOverlayLayout>

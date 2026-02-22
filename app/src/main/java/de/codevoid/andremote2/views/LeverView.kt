@@ -1,13 +1,14 @@
 package de.codevoid.andremote2.views
 
 import android.content.Context
-import android.content.Intent
 import android.graphics.*
 import android.os.Handler
 import android.os.Looper
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import android.app.Instrumentation
+import java.util.concurrent.Executors
 
 class LeverView @JvmOverloads constructor(
     context: Context,
@@ -22,6 +23,8 @@ class LeverView @JvmOverloads constructor(
     private var currentKeyCode = -1
     private var startY = 0f
     private var leverY = 0f
+    private val instrumentation = Instrumentation()
+    private val executor = Executors.newSingleThreadExecutor()
 
     private val paintTrack = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#333333")
@@ -138,11 +141,13 @@ class LeverView @JvmOverloads constructor(
     }
 
     private fun sendKeyEvent(keyCode: Int) {
-        val intent = Intent("de.codevoid.andremote2.KEY_EVENT").apply {
-            putExtra("keycode", keyCode)
-            setPackage(context.packageName)
+        executor.execute {
+            try {
+                instrumentation.sendKeyDownUpSync(keyCode)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
-        context.sendBroadcast(intent)
     }
 
     fun setKeyCodes(up: Int, down: Int) {

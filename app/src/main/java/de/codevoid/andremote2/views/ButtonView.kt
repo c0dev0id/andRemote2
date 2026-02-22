@@ -1,13 +1,14 @@
 package de.codevoid.andremote2.views
 
 import android.content.Context
-import android.content.Intent
 import android.graphics.*
 import android.os.Handler
 import android.os.Looper
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import android.app.Instrumentation
+import java.util.concurrent.Executors
 
 class ButtonView @JvmOverloads constructor(
     context: Context,
@@ -18,6 +19,8 @@ class ButtonView @JvmOverloads constructor(
     private var isPressed = false
     private val handler = Handler(Looper.getMainLooper())
     private val repeatInterval = 500L
+    private val instrumentation = Instrumentation()
+    private val executor = Executors.newSingleThreadExecutor()
 
     private val paintNormal = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#555555")
@@ -82,11 +85,13 @@ class ButtonView @JvmOverloads constructor(
     }
 
     private fun sendKeyEvent() {
-        val intent = Intent("de.codevoid.andremote2.KEY_EVENT").apply {
-            putExtra("keycode", keyCode)
-            setPackage(context.packageName)
+        executor.execute {
+            try {
+                instrumentation.sendKeyDownUpSync(keyCode)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
-        context.sendBroadcast(intent)
     }
 
     fun setKeyCode(code: Int) {

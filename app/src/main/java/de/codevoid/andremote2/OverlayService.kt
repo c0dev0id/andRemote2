@@ -92,7 +92,13 @@ class OverlayService : Service() {
         overlayView.scaleY = scale
 
         setupControls()
-        setupDragHandle(params)
+
+        val root = overlayView.findViewById<de.codevoid.andremote2.views.DraggableOverlayLayout>(R.id.overlayRoot)
+        root.onDrag = { dx, dy ->
+            params.x += dx
+            params.y += dy
+            windowManager.updateViewLayout(overlayView, params)
+        }
 
         windowManager.addView(overlayView, params)
     }
@@ -122,30 +128,4 @@ class OverlayService : Service() {
         )
     }
 
-    private fun setupDragHandle(params: WindowManager.LayoutParams) {
-        val dragHandle = overlayView.findViewById<View>(R.id.dragHandle)
-        var lastX = 0f
-        var lastY = 0f
-
-        dragHandle.setOnTouchListener { _, event ->
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    lastX = event.rawX
-                    lastY = event.rawY
-                    true
-                }
-                MotionEvent.ACTION_MOVE -> {
-                    val dx = (event.rawX - lastX).toInt()
-                    val dy = (event.rawY - lastY).toInt()
-                    params.x += dx
-                    params.y += dy
-                    windowManager.updateViewLayout(overlayView, params)
-                    lastX = event.rawX
-                    lastY = event.rawY
-                    true
-                }
-                else -> false
-            }
-        }
-    }
 }
