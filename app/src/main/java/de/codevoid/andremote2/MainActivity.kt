@@ -85,6 +85,10 @@ class MainActivity : AppCompatActivity() {
                 requestOverlayPermission()
                 return@setOnClickListener
             }
+            if (!isAccessibilityServiceEnabled()) {
+                requestAccessibilityPermission()
+                return@setOnClickListener
+            }
             saveKeyMappings()
             if (OverlayService.isRunning) {
                 stopService(Intent(this, OverlayService::class.java))
@@ -148,5 +152,19 @@ class MainActivity : AppCompatActivity() {
             Uri.parse("package:$packageName")
         )
         startActivity(intent)
+    }
+
+    private fun isAccessibilityServiceEnabled(): Boolean {
+        val expectedComponent = "$packageName/${KeyInjectionService::class.java.name}"
+        val enabledServices = Settings.Secure.getString(
+            contentResolver,
+            Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+        ) ?: return false
+        return enabledServices.split(":").any { it.equals(expectedComponent, ignoreCase = true) }
+    }
+
+    private fun requestAccessibilityPermission() {
+        Toast.makeText(this, R.string.enable_accessibility_service, Toast.LENGTH_LONG).show()
+        startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
     }
 }

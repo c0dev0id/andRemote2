@@ -15,4 +15,6 @@
     <string name="button_bottom">Button Bottom</string>
     <string name="lever_up">Lever Up</string>
     <string name="lever_down">Lever Down</string>
+    <string name="accessibility_service_description">andRemote2 key injection service — required to forward overlay key presses to the foreground application</string>
+    <string name="enable_accessibility_service">Please enable the andRemote2 Accessibility Service in Settings to allow key injection</string>
 </resources>
