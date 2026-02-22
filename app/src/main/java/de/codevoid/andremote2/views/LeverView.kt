@@ -8,6 +8,7 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import android.app.Instrumentation
+import java.util.concurrent.Executors
 
 class LeverView @JvmOverloads constructor(
     context: Context,
@@ -22,6 +23,8 @@ class LeverView @JvmOverloads constructor(
     private var currentKeyCode = -1
     private var startY = 0f
     private var leverY = 0f
+    private val instrumentation = Instrumentation()
+    private val executor = Executors.newSingleThreadExecutor()
 
     private val paintTrack = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#333333")
@@ -138,13 +141,13 @@ class LeverView @JvmOverloads constructor(
     }
 
     private fun sendKeyEvent(keyCode: Int) {
-        Thread {
+        executor.execute {
             try {
-                Instrumentation().sendKeyDownUpSync(keyCode)
+                instrumentation.sendKeyDownUpSync(keyCode)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
-        }.start()
+        }
     }
 
     fun setKeyCodes(up: Int, down: Int) {

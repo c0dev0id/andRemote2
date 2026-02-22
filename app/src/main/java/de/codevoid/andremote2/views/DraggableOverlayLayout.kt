@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.widget.LinearLayout
+import kotlin.math.abs
 
 class DraggableOverlayLayout @JvmOverloads constructor(
     context: Context,
@@ -31,7 +32,7 @@ class DraggableOverlayLayout @JvmOverloads constructor(
             MotionEvent.ACTION_MOVE -> {
                 val dx = ev.rawX - startRawX
                 val dy = ev.rawY - startRawY
-                if (Math.abs(dx) > dragThreshold || Math.abs(dy) > dragThreshold) {
+                if (abs(dx) > dragThreshold || abs(dy) > dragThreshold) {
                     isDragging = true
                     return true
                 }
