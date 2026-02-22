@@ -1,4 +1,4 @@
-package com.c0dev0id.andremote2.views
+package de.codevoid.andremote2.views
 
 import android.content.Context
 import android.content.Intent
@@ -138,7 +138,7 @@ class LeverView @JvmOverloads constructor(
     }
 
     private fun sendKeyEvent(keyCode: Int) {
-        val intent = Intent("com.c0dev0id.andremote2.KEY_EVENT").apply {
+        val intent = Intent("de.codevoid.andremote2.KEY_EVENT").apply {
             putExtra("keycode", keyCode)
             setPackage(context.packageName)
         }

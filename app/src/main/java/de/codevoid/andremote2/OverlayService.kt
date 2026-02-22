@@ -1,4 +1,4 @@
-package com.c0dev0id.andremote2
+package de.codevoid.andremote2
 
 import android.app.*
 import android.content.Intent
@@ -98,10 +98,10 @@ class OverlayService : Service() {
     }
 
     private fun setupControls() {
-        val joystick = overlayView.findViewById<com.c0dev0id.andremote2.views.JoystickView>(R.id.joystickView)
-        val buttonTop = overlayView.findViewById<com.c0dev0id.andremote2.views.ButtonView>(R.id.buttonTop)
-        val buttonBottom = overlayView.findViewById<com.c0dev0id.andremote2.views.ButtonView>(R.id.buttonBottom)
-        val lever = overlayView.findViewById<com.c0dev0id.andremote2.views.LeverView>(R.id.leverView)
+        val joystick = overlayView.findViewById<de.codevoid.andremote2.views.JoystickView>(R.id.joystickView)
+        val buttonTop = overlayView.findViewById<de.codevoid.andremote2.views.ButtonView>(R.id.buttonTop)
+        val buttonBottom = overlayView.findViewById<de.codevoid.andremote2.views.ButtonView>(R.id.buttonBottom)
+        val lever = overlayView.findViewById<de.codevoid.andremote2.views.LeverView>(R.id.leverView)
 
         joystick.setKeyCodes(
             prefs.getInt("keycode_joystick_up", 19),
