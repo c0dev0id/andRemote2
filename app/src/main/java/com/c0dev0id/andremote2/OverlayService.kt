@@ -54,7 +54,7 @@ class OverlayService : Service() {
         )
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("DMD Remote Active")
-            .setContentText("Tap to stop overlay")
+            .setContentText("Use Stop action to dismiss")
             .setSmallIcon(android.R.drawable.ic_media_play)
             .addAction(android.R.drawable.ic_media_pause, "Stop", stopIntent)
             .build()

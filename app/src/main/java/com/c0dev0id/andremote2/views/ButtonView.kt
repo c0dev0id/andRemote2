@@ -17,7 +17,7 @@ class ButtonView @JvmOverloads constructor(
     private var keyCode = 66
     private var isPressed = false
     private val handler = Handler(Looper.getMainLooper())
-    private val longPressInterval = 500L
+    private val repeatInterval = 500L
 
     private val paintNormal = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#555555")
@@ -49,7 +49,7 @@ class ButtonView @JvmOverloads constructor(
         override fun run() {
             if (isPressed) {
                 sendKeyEvent()
-                handler.postDelayed(this, longPressInterval)
+                handler.postDelayed(this, repeatInterval)
             }
         }
     }
@@ -68,7 +68,7 @@ class ButtonView @JvmOverloads constructor(
                 isPressed = true
                 invalidate()
                 sendKeyEvent()
-                handler.postDelayed(repeatRunnable, longPressInterval)
+                handler.postDelayed(repeatRunnable, repeatInterval)
                 return true
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
