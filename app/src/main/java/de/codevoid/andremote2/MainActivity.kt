@@ -1,4 +1,4 @@
-package com.c0dev0id.andremote2
+package de.codevoid.andremote2
 
 import android.content.Intent
 import android.content.SharedPreferences

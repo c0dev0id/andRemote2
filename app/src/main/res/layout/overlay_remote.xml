@@ -22,14 +22,14 @@
         android:gravity="center_vertical">
 
         <!-- Lever on the left -->
-        <com.c0dev0id.andremote2.views.LeverView
+        <de.codevoid.andremote2.views.LeverView
             android:id="@+id/leverView"
             android:layout_width="50dp"
             android:layout_height="150dp"
             android:layout_marginEnd="8dp"/>
 
         <!-- Joystick in center -->
-        <com.c0dev0id.andremote2.views.JoystickView
+        <de.codevoid.andremote2.views.JoystickView
             android:id="@+id/joystickView"
             android:layout_width="150dp"
             android:layout_height="150dp"
@@ -42,13 +42,13 @@
             android:orientation="vertical"
             android:gravity="center">
 
-            <com.c0dev0id.andremote2.views.ButtonView
+            <de.codevoid.andremote2.views.ButtonView
                 android:id="@+id/buttonTop"
                 android:layout_width="70dp"
                 android:layout_height="65dp"
                 android:layout_marginBottom="8dp"/>
 
-            <com.c0dev0id.andremote2.views.ButtonView
+            <de.codevoid.andremote2.views.ButtonView
                 android:id="@+id/buttonBottom"
                 android:layout_width="70dp"
                 android:layout_height="65dp"/>

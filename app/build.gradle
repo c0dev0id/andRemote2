@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace 'com.c0dev0id.andremote2'
+    namespace 'de.codevoid.andremote2'
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.c0dev0id.andremote2"
+        applicationId "de.codevoid.andremote2"
         minSdk 26
         targetSdk 34
         versionCode 1
