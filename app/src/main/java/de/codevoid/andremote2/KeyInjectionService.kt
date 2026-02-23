@@ -14,7 +14,6 @@ class KeyInjectionService : Service() {
 
     companion object {
         private const val TAG = "KeyInjectionService"
-        private const val KEY_REPEAT_DELAY_MS = 100L
         private const val SHIZUKU_PROCESS_TIMEOUT_MS = 2000L
         var instance: KeyInjectionService? = null
             private set
@@ -36,7 +35,6 @@ class KeyInjectionService : Service() {
 
     private lateinit var handlerThread: HandlerThread
     private lateinit var bgHandler: Handler
-    private val shizukuRepeatRunnables = mutableMapOf<Int, Runnable>()
 
     override fun onCreate() {
         super.onCreate()
@@ -67,7 +65,7 @@ class KeyInjectionService : Service() {
 
     fun injectKeyDown(keyCode: Int) {
         if (shizukuEnabled) {
-            bgHandler.post { startShizukuKeyRepeat(keyCode) }
+            bgHandler.post { runShizukuKeyEvent(keyCode, "--down") }
         } else {
             Log.w(TAG, "injectKeyDown: Shizuku not enabled, key $keyCode dropped")
         }
@@ -75,37 +73,23 @@ class KeyInjectionService : Service() {
 
     fun injectKeyUp(keyCode: Int) {
         if (shizukuEnabled) {
-            bgHandler.post { stopShizukuKeyRepeat(keyCode) }
+            bgHandler.post { runShizukuKeyEvent(keyCode, "--up") }
         } else {
             Log.w(TAG, "injectKeyUp: Shizuku not enabled, key $keyCode dropped")
         }
     }
 
-    private fun startShizukuKeyRepeat(keyCode: Int) {
-        stopShizukuKeyRepeat(keyCode)
-        val runnable = object : Runnable {
-            override fun run() {
-                if (!shizukuRepeatRunnables.containsKey(keyCode)) return
-                runShizukuKeyEvent(keyCode)
-                if (shizukuRepeatRunnables.containsKey(keyCode)) {
-                    bgHandler.postDelayed(this, KEY_REPEAT_DELAY_MS)
-                }
-            }
-        }
-        shizukuRepeatRunnables[keyCode] = runnable
-        bgHandler.post(runnable)
-    }
-
-    private fun stopShizukuKeyRepeat(keyCode: Int) {
-        shizukuRepeatRunnables.remove(keyCode)?.let { bgHandler.removeCallbacks(it) }
-    }
-
-    private fun runShizukuKeyEvent(keyCode: Int) {
+    private fun runShizukuKeyEvent(keyCode: Int, action: String? = null) {
         try {
             val method = shizukuNewProcess ?: return
+            val args = if (action != null) {
+                arrayOf("input", "keyevent", action, keyCode.toString())
+            } else {
+                arrayOf("input", "keyevent", keyCode.toString())
+            }
             val process = method.invoke(
                 null,
-                arrayOf("input", "keyevent", keyCode.toString()),
+                args,
                 null as Array<String>?,
                 null as String?
             ) as Process
