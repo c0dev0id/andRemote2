@@ -4,7 +4,9 @@ import android.app.*
 import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.PixelFormat
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.view.*
 import androidx.core.app.NotificationCompat
 
@@ -18,6 +20,15 @@ class OverlayService : Service() {
     private lateinit var windowManager: WindowManager
     private lateinit var overlayView: View
     private lateinit var prefs: SharedPreferences
+    private lateinit var overlayParams: WindowManager.LayoutParams
+
+    private val mainHandler = Handler(Looper.getMainLooper())
+
+    private val prefListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+        if (key == "overlay_size" || key == "overlay_opacity") {
+            mainHandler.post { applyScaleAndAlpha() }
+        }
+    }
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -29,11 +40,13 @@ class OverlayService : Service() {
         startForeground(1, buildNotification())
         startService(Intent(this, KeyInjectionService::class.java))
         showOverlay()
+        prefs.registerOnSharedPreferenceChangeListener(prefListener)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         isRunning = false
+        prefs.unregisterOnSharedPreferenceChangeListener(prefListener)
         if (::overlayView.isInitialized) {
             windowManager.removeView(overlayView)
         }
@@ -71,12 +84,18 @@ class OverlayService : Service() {
 
     private fun showOverlay() {
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
-        val size = prefs.getInt("overlay_size", 100)
-        val opacity = prefs.getInt("overlay_opacity", 80)
 
-        val params = WindowManager.LayoutParams(
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            WindowManager.LayoutParams.WRAP_CONTENT,
+        overlayView = LayoutInflater.from(this).inflate(R.layout.overlay_remote, null)
+
+        // Measure at natural size to calculate scaled window dimensions
+        overlayView.measure(
+            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+        )
+
+        overlayParams = WindowManager.LayoutParams(
+            overlayView.measuredWidth,
+            overlayView.measuredHeight,
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                 WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
@@ -87,23 +106,38 @@ class OverlayService : Service() {
             y = 200
         }
 
-        overlayView = LayoutInflater.from(this).inflate(R.layout.overlay_remote, null)
-        overlayView.alpha = opacity / 100f
-
-        val scale = size / 100f
-        overlayView.scaleX = scale
-        overlayView.scaleY = scale
+        overlayView.pivotX = 0f
+        overlayView.pivotY = 0f
+        applyScaleAndAlpha()
 
         setupControls()
 
         val root = overlayView.findViewById<de.codevoid.andremote2.views.DraggableOverlayLayout>(R.id.overlayRoot)
         root.onDrag = { dx, dy ->
-            params.x += dx
-            params.y += dy
-            windowManager.updateViewLayout(overlayView, params)
+            overlayParams.x += dx
+            overlayParams.y += dy
+            windowManager.updateViewLayout(overlayView, overlayParams)
         }
 
-        windowManager.addView(overlayView, params)
+        windowManager.addView(overlayView, overlayParams)
+    }
+
+    private fun applyScaleAndAlpha() {
+        val size = prefs.getInt("overlay_size", 100)
+        val opacity = prefs.getInt("overlay_opacity", 80)
+        val scale = size / 100f
+
+        overlayView.alpha = opacity / 100f
+        overlayView.scaleX = scale
+        overlayView.scaleY = scale
+
+        overlayParams.width = (overlayView.measuredWidth * scale).toInt()
+        overlayParams.height = (overlayView.measuredHeight * scale).toInt()
+
+        if (::overlayView.isInitialized && ::overlayParams.isInitialized &&
+            ::windowManager.isInitialized && overlayView.isAttachedToWindow) {
+            windowManager.updateViewLayout(overlayView, overlayParams)
+        }
     }
 
     private fun setupControls() {
