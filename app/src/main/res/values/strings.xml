@@ -17,4 +17,8 @@
     <string name="lever_down">Lever Down</string>
     <string name="accessibility_service_description">andRemote2 key injection service — required to forward overlay key presses to the foreground application</string>
     <string name="enable_accessibility_service">Please enable the andRemote2 Accessibility Service in Settings to allow key injection</string>
+    <string name="restricted_settings_title">Allow Restricted Settings</string>
+    <string name="restricted_settings_message">Android 13+ hides accessibility services for sideloaded apps.\n\n1. Tap \"Open App Info\" below\n2. Tap the \u22ee menu in the top-right corner\n3. Select \"Allow restricted settings\"\n4. Return here and tap \"Open Accessibility Settings\"</string>
+    <string name="open_app_info">Open App Info</string>
+    <string name="open_accessibility_settings">Accessibility Settings</string>
 </resources>
