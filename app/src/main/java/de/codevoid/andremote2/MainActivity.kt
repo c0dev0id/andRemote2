@@ -83,7 +83,7 @@ class MainActivity : AppCompatActivity() {
 
         seekBarSize.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                val size = progress + 50
+                val size = progress + 25
                 tvSize.text = "$size%"
                 if (fromUser) saveIntPref("overlay_size", size)
             }
@@ -229,9 +229,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loadSettings() {
-        val size = prefs.getInt("overlay_size", 100)
+        val size = prefs.getInt("overlay_size", 75)
         val opacity = prefs.getInt("overlay_opacity", 80)
-        seekBarSize.progress = size - 50
+        seekBarSize.progress = size - 25
         seekBarOpacity.progress = opacity - 20
         tvSize.text = "$size%"
         tvOpacity.text = "$opacity%"
