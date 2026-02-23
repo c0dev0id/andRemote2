@@ -3,6 +3,7 @@ package de.codevoid.andremote2.views
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
+import android.os.SystemClock
 import android.view.MotionEvent
 import android.view.View
 import android.util.Log
@@ -13,8 +14,13 @@ class ButtonView @JvmOverloads constructor(
     attrs: AttributeSet? = null
 ) : View(context, attrs) {
 
+    companion object {
+        private const val LONG_PRESS_THRESHOLD_MS = 500L
+    }
+
     private var keyCode = 66
     private var isPressed = false
+    private var pressStartTime = 0L
 
     private val paintNormal = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#555555")
@@ -54,33 +60,44 @@ class ButtonView @JvmOverloads constructor(
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
                 isPressed = true
+                pressStartTime = SystemClock.elapsedRealtime()
                 invalidate()
-                sendKeyDown()
                 return true
             }
-            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+            MotionEvent.ACTION_UP -> {
                 isPressed = false
                 invalidate()
-                sendKeyUp()
+                val duration = SystemClock.elapsedRealtime() - pressStartTime
+                if (duration >= LONG_PRESS_THRESHOLD_MS) {
+                    sendKeyLongPress()
+                } else {
+                    sendKey()
+                }
+                return true
+            }
+            MotionEvent.ACTION_CANCEL -> {
+                isPressed = false
+                pressStartTime = 0L
+                invalidate()
                 return true
             }
         }
         return super.onTouchEvent(event)
     }
 
-    private fun sendKeyDown() {
+    private fun sendKey() {
         val service = KeyInjectionService.instance
         if (service != null) {
-            service.injectKeyDown(keyCode)
+            service.injectKey(keyCode)
         } else {
             Log.w("ButtonView", "KeyInjectionService not available")
         }
     }
 
-    private fun sendKeyUp() {
+    private fun sendKeyLongPress() {
         val service = KeyInjectionService.instance
         if (service != null) {
-            service.injectKeyUp(keyCode)
+            service.injectKeyLongPress(keyCode)
         } else {
             Log.w("ButtonView", "KeyInjectionService not available")
         }

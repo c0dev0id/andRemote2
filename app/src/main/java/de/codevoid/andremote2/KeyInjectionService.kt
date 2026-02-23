@@ -63,19 +63,11 @@ class KeyInjectionService : Service() {
         }
     }
 
-    fun injectKeyDown(keyCode: Int) {
+    fun injectKeyLongPress(keyCode: Int) {
         if (shizukuEnabled) {
-            bgHandler.post { runShizukuKeyEvent(keyCode, "--down") }
+            bgHandler.post { runShizukuKeyEvent(keyCode, "--longpress") }
         } else {
-            Log.w(TAG, "injectKeyDown: Shizuku not enabled, key $keyCode dropped")
-        }
-    }
-
-    fun injectKeyUp(keyCode: Int) {
-        if (shizukuEnabled) {
-            bgHandler.post { runShizukuKeyEvent(keyCode, "--up") }
-        } else {
-            Log.w(TAG, "injectKeyUp: Shizuku not enabled, key $keyCode dropped")
+            Log.w(TAG, "injectKeyLongPress: Shizuku not enabled, key $keyCode dropped")
         }
     }
 
