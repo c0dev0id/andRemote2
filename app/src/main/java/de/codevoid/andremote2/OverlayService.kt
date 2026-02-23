@@ -123,16 +123,16 @@ class OverlayService : Service() {
     }
 
     private fun applyScaleAndAlpha() {
-        val size = prefs.getInt("overlay_size", 100)
-        val opacity = prefs.getInt("overlay_opacity", 80)
+        val size = prefs.getInt("overlay_size", 100).coerceIn(10, 200)
+        val opacity = prefs.getInt("overlay_opacity", 80).coerceIn(0, 100)
         val scale = size / 100f
 
         overlayView.alpha = opacity / 100f
         overlayView.scaleX = scale
         overlayView.scaleY = scale
 
-        overlayParams.width = (overlayView.measuredWidth * scale).toInt()
-        overlayParams.height = (overlayView.measuredHeight * scale).toInt()
+        // Don't also resize the window — the view scale already handles it.
+        // Keep window at natural measured size so the scaled view fits.
 
         if (::overlayView.isInitialized && ::overlayParams.isInitialized &&
             ::windowManager.isInitialized && overlayView.isAttachedToWindow) {
