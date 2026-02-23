@@ -3,6 +3,7 @@ package de.codevoid.andremote2.views
 import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
+import android.view.ViewGroup
 import android.widget.LinearLayout
 
 class DraggableOverlayLayout @JvmOverloads constructor(
@@ -10,39 +11,46 @@ class DraggableOverlayLayout @JvmOverloads constructor(
     attrs: AttributeSet? = null
 ) : LinearLayout(context, attrs) {
 
-    companion object {
-        private const val DRAG_THRESHOLD_PX = 10f
-    }
-
     private var lastRawX = 0f
     private var lastRawY = 0f
-    private var initialRawX = 0f
-    private var initialRawY = 0f
     private var isDragging = false
+    private var touchStartedOnChild = false
 
     var onDrag: ((dx: Int, dy: Int) -> Unit)? = null
+
+    private fun isTouchOnInteractiveChild(group: ViewGroup, rawX: Float, rawY: Float): Boolean {
+        val location = IntArray(2)
+        for (i in 0 until group.childCount) {
+            val child = group.getChildAt(i)
+            if (child is JoystickView || child is LeverView || child is ButtonView) {
+                child.getLocationOnScreen(location)
+                if (rawX >= location[0] && rawX <= location[0] + child.width &&
+                    rawY >= location[1] && rawY <= location[1] + child.height) {
+                    return true
+                }
+            } else if (child is ViewGroup) {
+                if (isTouchOnInteractiveChild(child, rawX, rawY)) return true
+            }
+        }
+        return false
+    }
 
     override fun onInterceptTouchEvent(event: MotionEvent): Boolean {
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
-                initialRawX = event.rawX
-                initialRawY = event.rawY
                 lastRawX = event.rawX
                 lastRawY = event.rawY
                 isDragging = false
+                touchStartedOnChild = isTouchOnInteractiveChild(this, event.rawX, event.rawY)
             }
             MotionEvent.ACTION_MOVE -> {
-                if (!isDragging) {
-                    val dx = event.rawX - initialRawX
-                    val dy = event.rawY - initialRawY
-                    if (dx * dx + dy * dy > DRAG_THRESHOLD_PX * DRAG_THRESHOLD_PX) {
-                        isDragging = true
-                        return true
-                    }
-                }
+                if (touchStartedOnChild) return false
+                isDragging = true
+                return true
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 isDragging = false
+                touchStartedOnChild = false
             }
         }
         return false
