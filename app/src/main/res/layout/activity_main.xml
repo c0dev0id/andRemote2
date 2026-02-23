@@ -138,6 +138,27 @@
             android:textStyle="bold"
             android:layout_marginBottom="12dp"/>
 
+        <!-- Preset -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:text="@string/preset"/>
+
+            <Spinner
+                android:id="@+id/spPreset"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
         <!-- Joystick Up -->
         <LinearLayout
             android:layout_width="match_parent"
@@ -147,15 +168,24 @@
             android:layout_marginBottom="8dp">
 
             <TextView
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_marginEnd="16dp"
                 android:text="@string/joystick_up"/>
 
             <Spinner
                 android:id="@+id/spJoystickUp"
-                android:layout_width="180dp"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"/>
+
+            <Button
+                android:id="@+id/btnSetJoystickUp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/set_key"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_marginStart="8dp"/>
         </LinearLayout>
 
         <!-- Joystick Down -->
@@ -167,15 +197,24 @@
             android:layout_marginBottom="8dp">
 
             <TextView
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_marginEnd="16dp"
                 android:text="@string/joystick_down"/>
 
             <Spinner
                 android:id="@+id/spJoystickDown"
-                android:layout_width="180dp"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"/>
+
+            <Button
+                android:id="@+id/btnSetJoystickDown"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/set_key"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_marginStart="8dp"/>
         </LinearLayout>
 
         <!-- Joystick Left -->
@@ -187,15 +226,24 @@
             android:layout_marginBottom="8dp">
 
             <TextView
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_marginEnd="16dp"
                 android:text="@string/joystick_left"/>
 
             <Spinner
                 android:id="@+id/spJoystickLeft"
-                android:layout_width="180dp"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"/>
+
+            <Button
+                android:id="@+id/btnSetJoystickLeft"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/set_key"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_marginStart="8dp"/>
         </LinearLayout>
 
         <!-- Joystick Right -->
@@ -207,15 +255,24 @@
             android:layout_marginBottom="8dp">
 
             <TextView
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_marginEnd="16dp"
                 android:text="@string/joystick_right"/>
 
             <Spinner
                 android:id="@+id/spJoystickRight"
-                android:layout_width="180dp"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"/>
+
+            <Button
+                android:id="@+id/btnSetJoystickRight"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/set_key"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_marginStart="8dp"/>
         </LinearLayout>
 
         <!-- Button Top -->
@@ -227,15 +284,24 @@
             android:layout_marginBottom="8dp">
 
             <TextView
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_marginEnd="16dp"
                 android:text="@string/button_top"/>
 
             <Spinner
                 android:id="@+id/spButtonTop"
-                android:layout_width="180dp"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"/>
+
+            <Button
+                android:id="@+id/btnSetButtonTop"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/set_key"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_marginStart="8dp"/>
         </LinearLayout>
 
         <!-- Button Bottom -->
@@ -247,15 +313,24 @@
             android:layout_marginBottom="8dp">
 
             <TextView
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_marginEnd="16dp"
                 android:text="@string/button_bottom"/>
 
             <Spinner
                 android:id="@+id/spButtonBottom"
-                android:layout_width="180dp"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"/>
+
+            <Button
+                android:id="@+id/btnSetButtonBottom"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/set_key"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_marginStart="8dp"/>
         </LinearLayout>
 
         <!-- Lever Up -->
@@ -267,15 +342,24 @@
             android:layout_marginBottom="8dp">
 
             <TextView
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_marginEnd="16dp"
                 android:text="@string/lever_up"/>
 
             <Spinner
                 android:id="@+id/spLeverUp"
-                android:layout_width="180dp"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"/>
+
+            <Button
+                android:id="@+id/btnSetLeverUp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/set_key"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_marginStart="8dp"/>
         </LinearLayout>
 
         <!-- Lever Down -->
@@ -287,15 +371,24 @@
             android:layout_marginBottom="16dp">
 
             <TextView
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_marginEnd="16dp"
                 android:text="@string/lever_down"/>
 
             <Spinner
                 android:id="@+id/spLeverDown"
-                android:layout_width="180dp"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"/>
+
+            <Button
+                android:id="@+id/btnSetLeverDown"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/set_key"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_marginStart="8dp"/>
         </LinearLayout>
 
         <!-- Save Mappings Button -->
