@@ -4,12 +4,10 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
 import android.widget.*
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import rikka.shizuku.Shizuku
 
@@ -108,8 +106,8 @@ class MainActivity : AppCompatActivity() {
                 requestOverlayPermission()
                 return@setOnClickListener
             }
-            if (!isAccessibilityServiceEnabled()) {
-                requestAccessibilityPermission()
+            if (!isShizukuAuthorized()) {
+                onGrantShizukuClicked()
                 return@setOnClickListener
             }
             saveKeyMappings()
@@ -156,16 +154,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateShizukuButtonVisibility() {
-        if (hasInjectEventsPermission() || isShizukuAuthorized()) {
+        if (isShizukuAuthorized()) {
             btnGrantShizuku.visibility = android.view.View.GONE
         } else {
             btnGrantShizuku.visibility = android.view.View.VISIBLE
         }
-    }
-
-    private fun hasInjectEventsPermission(): Boolean {
-        return checkSelfPermission("android.permission.INJECT_EVENTS") ==
-            PackageManager.PERMISSION_GRANTED
     }
 
     private fun isShizukuInstalled(): Boolean {
@@ -194,12 +187,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun onGrantShizukuClicked() {
-        if (hasInjectEventsPermission()) {
-            Toast.makeText(this, R.string.inject_permission_already_granted, Toast.LENGTH_SHORT).show()
-            updateShizukuButtonVisibility()
-            return
-        }
-
         if (!isShizukuInstalled()) {
             Toast.makeText(this, R.string.shizuku_not_installed, Toast.LENGTH_LONG).show()
             return
@@ -280,59 +267,5 @@ class MainActivity : AppCompatActivity() {
             Uri.parse("package:$packageName")
         )
         startActivity(intent)
-    }
-
-    private fun isAccessibilityServiceEnabled(): Boolean {
-        val expectedComponent = "$packageName/${KeyInjectionService::class.java.name}"
-        val enabledServices = Settings.Secure.getString(
-            contentResolver,
-            Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
-        ) ?: return false
-        return enabledServices.split(":").any { it.equals(expectedComponent, ignoreCase = true) }
-    }
-
-    private fun requestAccessibilityPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !isInstalledFromTrustedSource()) {
-            AlertDialog.Builder(this)
-                .setTitle(R.string.restricted_settings_title)
-                .setMessage(R.string.restricted_settings_message)
-                .setPositiveButton(R.string.open_app_info) { _, _ ->
-                    openAppInfo()
-                }
-                .setNeutralButton(R.string.open_accessibility_settings) { _, _ ->
-                    startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
-                }
-                .setNegativeButton(android.R.string.cancel, null)
-                .show()
-        } else {
-            Toast.makeText(this, R.string.enable_accessibility_service, Toast.LENGTH_LONG).show()
-            startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
-        }
-    }
-
-    private fun isInstalledFromTrustedSource(): Boolean {
-        val trustedInstallers = setOf(
-            "com.android.vending",
-            "com.amazon.venezia",
-            "com.huawei.appmarket",
-            "com.sec.android.app.samsungapps"
-        )
-        return try {
-            val installer = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                packageManager.getInstallSourceInfo(packageName).installingPackageName
-            } else {
-                @Suppress("DEPRECATION")
-                packageManager.getInstallerPackageName(packageName)
-            }
-            installer in trustedInstallers
-        } catch (_: Exception) {
-            false
-        }
-    }
-
-    private fun openAppInfo() {
-        startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-            data = Uri.parse("package:$packageName")
-        })
     }
 }
