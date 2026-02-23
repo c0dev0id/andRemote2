@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/action_coffee"
+        android:icon="@drawable/ic_coffee"
         android:title="@string/buy_me_coffee"
         app:showAsAction="always"/>
 </menu>
