@@ -21,4 +21,8 @@
     <string name="restricted_settings_message">Android 13+ hides accessibility services for sideloaded apps.\n\n1. Tap \"Open App Info\" below\n2. Tap the \u22ee menu in the top-right corner\n3. Select \"Allow restricted settings\"\n4. Return here and tap \"Open Accessibility Settings\"</string>
     <string name="open_app_info">Open App Info</string>
     <string name="open_accessibility_settings">Accessibility Settings</string>
+    <string name="inject_permission_title">Permission Required</string>
+    <string name="inject_permission_message">This app needs the INJECT_EVENTS permission to send key events to other apps.\n\nConnect your device via USB and run:\n\n%1$s\n\nThis only needs to be done once.</string>
+    <string name="copy_command">Copy Command</string>
+    <string name="command_copied">ADB command copied to clipboard</string>
 </resources>
