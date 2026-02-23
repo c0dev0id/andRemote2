@@ -7,7 +7,9 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
+import android.view.KeyEvent
 import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import rikka.shizuku.Shizuku
 
@@ -16,6 +18,7 @@ class MainActivity : AppCompatActivity() {
     companion object {
         private const val TAG = "MainActivity"
         private const val SHIZUKU_PERMISSION_REQUEST_CODE = 100
+        private const val PRESET_DMD_REMOTE_2 = 1
         const val DEFAULT_JOYSTICK_UP = 19
         const val DEFAULT_JOYSTICK_DOWN = 20
         const val DEFAULT_JOYSTICK_LEFT = 21
@@ -42,6 +45,18 @@ class MainActivity : AppCompatActivity() {
     private lateinit var spButtonBottom: Spinner
     private lateinit var spLeverUp: Spinner
     private lateinit var spLeverDown: Spinner
+    private lateinit var spPreset: Spinner
+
+    private val keySpinners: List<Spinner> by lazy {
+        listOf(spJoystickUp, spJoystickDown, spJoystickLeft, spJoystickRight,
+            spButtonTop, spButtonBottom, spLeverUp, spLeverDown)
+    }
+    private val setKeyButtonIds = listOf(
+        R.id.btnSetJoystickUp, R.id.btnSetJoystickDown,
+        R.id.btnSetJoystickLeft, R.id.btnSetJoystickRight,
+        R.id.btnSetButtonTop, R.id.btnSetButtonBottom,
+        R.id.btnSetLeverUp, R.id.btnSetLeverDown
+    )
 
     private val shizukuPermissionListener =
         Shizuku.OnRequestPermissionResultListener { requestCode, grantResult ->
@@ -75,11 +90,19 @@ class MainActivity : AppCompatActivity() {
         spButtonBottom = findViewById(R.id.spButtonBottom)
         spLeverUp = findViewById(R.id.spLeverUp)
         spLeverDown = findViewById(R.id.spLeverDown)
+        spPreset = findViewById(R.id.spPreset)
 
+        setupPresetSpinner()
         setupSpinners()
         loadSettings()
 
         Shizuku.addRequestPermissionResultListener(shizukuPermissionListener)
+
+        // Set Key buttons
+        val setKeyMappings = setKeyButtonIds.zip(keySpinners)
+        for ((btnId, spinner) in setKeyMappings) {
+            findViewById<Button>(btnId).setOnClickListener { showSetKeyDialog(spinner) }
+        }
 
         seekBarSize.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
@@ -222,10 +245,51 @@ class MainActivity : AppCompatActivity() {
     private fun setupSpinners() {
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, KeyEventCodes.displayNames)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        listOf(spJoystickUp, spJoystickDown, spJoystickLeft, spJoystickRight,
-            spButtonTop, spButtonBottom, spLeverUp, spLeverDown).forEach {
-            it.adapter = adapter
+        keySpinners.forEach { it.adapter = adapter }
+    }
+
+    private fun setupPresetSpinner() {
+        val presets = listOf(getString(R.string.preset_custom), getString(R.string.preset_dmd_remote_2))
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, presets)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spPreset.adapter = adapter
+        spPreset.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: android.view.View?, position: Int, id: Long) {
+                val isDmdPreset = position == PRESET_DMD_REMOTE_2
+                keySpinners.forEach { it.isEnabled = !isDmdPreset }
+                setKeyButtonIds.forEach { findViewById<Button>(it).isEnabled = !isDmdPreset }
+                if (isDmdPreset) {
+                    spJoystickUp.setSelection(KeyEventCodes.indexOfCode(DEFAULT_JOYSTICK_UP))
+                    spJoystickDown.setSelection(KeyEventCodes.indexOfCode(DEFAULT_JOYSTICK_DOWN))
+                    spJoystickLeft.setSelection(KeyEventCodes.indexOfCode(DEFAULT_JOYSTICK_LEFT))
+                    spJoystickRight.setSelection(KeyEventCodes.indexOfCode(DEFAULT_JOYSTICK_RIGHT))
+                    spButtonTop.setSelection(KeyEventCodes.indexOfCode(DEFAULT_BUTTON_TOP))
+                    spButtonBottom.setSelection(KeyEventCodes.indexOfCode(DEFAULT_BUTTON_BOTTOM))
+                    spLeverUp.setSelection(KeyEventCodes.indexOfCode(DEFAULT_LEVER_UP))
+                    spLeverDown.setSelection(KeyEventCodes.indexOfCode(DEFAULT_LEVER_DOWN))
+                }
+            }
+            override fun onNothingSelected(parent: AdapterView<*>) {}
         }
+    }
+
+    private fun showSetKeyDialog(spinner: Spinner) {
+        val dialog = AlertDialog.Builder(this)
+            .setMessage(R.string.press_key_to_configure)
+            .setNegativeButton(android.R.string.cancel, null)
+            .create()
+        dialog.setOnKeyListener { _, keyCode, event ->
+            if (event.action == KeyEvent.ACTION_DOWN) {
+                val idx = KeyEventCodes.entries.indexOfFirst { it.code == keyCode }
+                if (idx >= 0) {
+                    spinner.setSelection(idx)
+                    dialog.dismiss()
+                    return@setOnKeyListener true
+                }
+            }
+            false
+        }
+        dialog.show()
     }
 
     private fun loadSettings() {
