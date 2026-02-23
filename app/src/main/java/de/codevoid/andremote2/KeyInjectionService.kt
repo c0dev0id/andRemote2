@@ -62,6 +62,8 @@ class KeyInjectionService : AccessibilityService() {
                 return
             }
         }
+        Log.d("KeyInjectionService",
+            "injectKeyUp ignored for keyCode=$keyCode (API < 33 or no input connection)")
     }
 
     private fun keyCodeToGlobalAction(keyCode: Int): Int? {
