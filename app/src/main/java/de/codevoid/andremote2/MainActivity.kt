@@ -216,10 +216,19 @@ class MainActivity : AppCompatActivity() {
     private fun grantInjectEventsViaShizuku() {
         Thread {
             try {
-                val process = Shizuku.newProcess(
-                    arrayOf("pm", "grant", packageName, "android.permission.INJECT_EVENTS"),
-                    null, null
+                val method = Shizuku::class.java.getDeclaredMethod(
+                    "newProcess",
+                    Array<String>::class.java,
+                    Array<String>::class.java,
+                    String::class.java
                 )
+                method.isAccessible = true
+                val process = method.invoke(
+                    null,
+                    arrayOf("pm", "grant", packageName, "android.permission.INJECT_EVENTS"),
+                    null as Array<String>?,
+                    null as String?
+                ) as Process
                 val exitCode = process.waitFor()
                 val errorOutput = BufferedReader(InputStreamReader(process.errorStream)).use { it.readText().trim() }
 
