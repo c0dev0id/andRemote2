@@ -93,9 +93,12 @@ class OverlayService : Service() {
             View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
         )
 
+        val size = prefs.getInt("overlay_size", 75).coerceIn(10, 200)
+        val scale = size / 100f
+
         overlayParams = WindowManager.LayoutParams(
-            overlayView.measuredWidth,
-            overlayView.measuredHeight,
+            (overlayView.measuredWidth * scale).toInt(),
+            (overlayView.measuredHeight * scale).toInt(),
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                 WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
@@ -132,8 +135,14 @@ class OverlayService : Service() {
         overlayView.scaleX = scale
         overlayView.scaleY = scale
 
-        // Don't also resize the window — the view scale already handles it.
-        // Keep window at natural measured size so the scaled view fits.
+        // Resize the window to match the scaled view dimensions
+        // so there's no invisible area extending beyond the visible content
+        overlayView.measure(
+            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+        )
+        overlayParams.width = (overlayView.measuredWidth * scale).toInt()
+        overlayParams.height = (overlayView.measuredHeight * scale).toInt()
 
         if (::overlayView.isInitialized && ::overlayParams.isInitialized &&
             ::windowManager.isInitialized && overlayView.isAttachedToWindow) {
