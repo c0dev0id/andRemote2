@@ -1,404 +1,270 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="?attr/colorSurface">
+    android:layout_height="match_parent">
 
-    <LinearLayout
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:layout_height="wrap_content">
 
-        <!-- Title -->
-        <LinearLayout
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="8dp">
+            android:layout_height="?attr/actionBarSize"
+            app:title="@string/app_name"
+            app:subtitle="DMD Remote 2 Emulator"
+            app:menu="@menu/main_menu"/>
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="andRemote2"
-                android:textSize="24sp"
-                android:textStyle="bold"
-                android:textColor="?attr/colorPrimary"/>
+    </com.google.android.material.appbar.AppBarLayout>
 
-            <TextView
-                android:id="@+id/btnCoffee"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="☕"
-                android:textSize="24sp"
-                android:clickable="true"
-                android:focusable="true"
-                android:background="?attr/selectableItemBackground"
-                android:contentDescription="Buy Me A Coffee"/>
-
-        </LinearLayout>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="DMD Remote 2 Emulator"
-            android:textSize="14sp"
-            android:alpha="0.7"
-            android:layout_marginBottom="24dp"/>
-
-        <!-- Toggle Overlay Button -->
-        <Button
-            android:id="@+id/btnToggleOverlay"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/start_overlay"
-            android:layout_marginBottom="24dp"/>
-
-        <!-- Grant Permission via Shizuku -->
-        <Button
-            android:id="@+id/btnGrantShizuku"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/grant_via_shizuku"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_marginBottom="24dp"/>
-
-        <!-- Overlay Size -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/overlay_size"
-            android:textStyle="bold"
-            android:layout_marginBottom="4dp"/>
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="16dp">
+            android:orientation="vertical"
+            android:padding="16dp">
 
-            <SeekBar
-                android:id="@+id/seekBarSize"
-                android:layout_width="0dp"
+            <!-- Toggle Overlay Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnToggleOverlay"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:max="75"
-                android:progress="50"/>
+                android:text="@string/start_overlay"
+                android:layout_marginBottom="8dp"/>
 
-            <TextView
-                android:id="@+id/tvSize"
-                android:layout_width="60dp"
+            <!-- Grant Permission via Shizuku -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnGrantShizuku"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="75%"
-                android:textAlignment="center"
-                android:layout_marginStart="8dp"/>
+                android:text="@string/grant_via_shizuku"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_marginBottom="16dp"/>
+
+            <!-- Overlay Settings Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/overlay_settings"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp"/>
+
+                    <com.google.android.material.divider.MaterialDivider
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="12dp"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/overlay_size"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="4dp"/>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="8dp">
+
+                        <com.google.android.material.slider.Slider
+                            android:id="@+id/sliderSize"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:valueFrom="25"
+                            android:valueTo="100"
+                            android:stepSize="1"
+                            app:labelBehavior="gone"
+                            android:value="75"/>
+
+                        <TextView
+                            android:id="@+id/tvSize"
+                            android:layout_width="60dp"
+                            android:layout_height="wrap_content"
+                            android:text="75%"
+                            android:textAlignment="center"
+                            android:layout_marginStart="8dp"/>
+
+                    </LinearLayout>
+
+                    <com.google.android.material.divider.MaterialDivider
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="12dp"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/overlay_opacity"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="4dp"/>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <com.google.android.material.slider.Slider
+                            android:id="@+id/sliderOpacity"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:valueFrom="20"
+                            android:valueTo="100"
+                            android:stepSize="1"
+                            app:labelBehavior="gone"
+                            android:value="80"/>
+
+                        <TextView
+                            android:id="@+id/tvOpacity"
+                            android:layout_width="60dp"
+                            android:layout_height="wrap_content"
+                            android:text="80%"
+                            android:textAlignment="center"
+                            android:layout_marginStart="8dp"/>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Key Mappings Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/key_mappings"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="12dp"/>
+
+                    <!-- Preset -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/preset"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        android:layout_marginBottom="12dp">
+
+                        <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                            android:id="@+id/actvPreset"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="none"/>
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.divider.MaterialDivider
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"/>
+
+                    <!-- Joystick Controls -->
+                    <include android:id="@+id/rowJoystickUp" layout="@layout/item_key_mapping"/>
+
+                    <com.google.android.material.divider.MaterialDivider
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"/>
+
+                    <include android:id="@+id/rowJoystickDown" layout="@layout/item_key_mapping"/>
+
+                    <com.google.android.material.divider.MaterialDivider
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"/>
+
+                    <include android:id="@+id/rowJoystickLeft" layout="@layout/item_key_mapping"/>
+
+                    <com.google.android.material.divider.MaterialDivider
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"/>
+
+                    <include android:id="@+id/rowJoystickRight" layout="@layout/item_key_mapping"/>
+
+                    <com.google.android.material.divider.MaterialDivider
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"/>
+
+                    <!-- Button Controls -->
+                    <include android:id="@+id/rowButtonTop" layout="@layout/item_key_mapping"/>
+
+                    <com.google.android.material.divider.MaterialDivider
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"/>
+
+                    <include android:id="@+id/rowButtonBottom" layout="@layout/item_key_mapping"/>
+
+                    <com.google.android.material.divider.MaterialDivider
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"/>
+
+                    <!-- Lever Controls -->
+                    <include android:id="@+id/rowLeverUp" layout="@layout/item_key_mapping"/>
+
+                    <com.google.android.material.divider.MaterialDivider
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"/>
+
+                    <include android:id="@+id/rowLeverDown" layout="@layout/item_key_mapping"/>
+
+                    <com.google.android.material.divider.MaterialDivider
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"/>
+
+                    <!-- Save Mappings Button -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnSaveMappings"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/save_key_mappings"
+                        style="@style/Widget.Material3.Button.TonalButton"
+                        android:layout_marginTop="12dp"/>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
         </LinearLayout>
 
-        <!-- Overlay Opacity -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/overlay_opacity"
-            android:textStyle="bold"
-            android:layout_marginBottom="4dp"/>
+    </androidx.core.widget.NestedScrollView>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="24dp">
-
-            <SeekBar
-                android:id="@+id/seekBarOpacity"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:max="80"
-                android:progress="60"/>
-
-            <TextView
-                android:id="@+id/tvOpacity"
-                android:layout_width="60dp"
-                android:layout_height="wrap_content"
-                android:text="80%"
-                android:textAlignment="center"
-                android:layout_marginStart="8dp"/>
-        </LinearLayout>
-
-        <!-- Key Mappings Section -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/key_mappings"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="12dp"/>
-
-        <!-- Preset -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="8dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
-                android:text="@string/preset"/>
-
-            <Spinner
-                android:id="@+id/spPreset"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"/>
-        </LinearLayout>
-
-        <!-- Joystick Up -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="8dp">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
-                android:text="@string/joystick_up"/>
-
-            <Spinner
-                android:id="@+id/spJoystickUp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-
-            <Button
-                android:id="@+id/btnSetJoystickUp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/set_key"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_marginStart="8dp"/>
-        </LinearLayout>
-
-        <!-- Joystick Down -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="8dp">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
-                android:text="@string/joystick_down"/>
-
-            <Spinner
-                android:id="@+id/spJoystickDown"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-
-            <Button
-                android:id="@+id/btnSetJoystickDown"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/set_key"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_marginStart="8dp"/>
-        </LinearLayout>
-
-        <!-- Joystick Left -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="8dp">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
-                android:text="@string/joystick_left"/>
-
-            <Spinner
-                android:id="@+id/spJoystickLeft"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-
-            <Button
-                android:id="@+id/btnSetJoystickLeft"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/set_key"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_marginStart="8dp"/>
-        </LinearLayout>
-
-        <!-- Joystick Right -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="8dp">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
-                android:text="@string/joystick_right"/>
-
-            <Spinner
-                android:id="@+id/spJoystickRight"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-
-            <Button
-                android:id="@+id/btnSetJoystickRight"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/set_key"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_marginStart="8dp"/>
-        </LinearLayout>
-
-        <!-- Button Top -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="8dp">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
-                android:text="@string/button_top"/>
-
-            <Spinner
-                android:id="@+id/spButtonTop"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-
-            <Button
-                android:id="@+id/btnSetButtonTop"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/set_key"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_marginStart="8dp"/>
-        </LinearLayout>
-
-        <!-- Button Bottom -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="8dp">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
-                android:text="@string/button_bottom"/>
-
-            <Spinner
-                android:id="@+id/spButtonBottom"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-
-            <Button
-                android:id="@+id/btnSetButtonBottom"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/set_key"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_marginStart="8dp"/>
-        </LinearLayout>
-
-        <!-- Lever Up -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="8dp">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
-                android:text="@string/lever_up"/>
-
-            <Spinner
-                android:id="@+id/spLeverUp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-
-            <Button
-                android:id="@+id/btnSetLeverUp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/set_key"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_marginStart="8dp"/>
-        </LinearLayout>
-
-        <!-- Lever Down -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="16dp">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
-                android:text="@string/lever_down"/>
-
-            <Spinner
-                android:id="@+id/spLeverDown"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-
-            <Button
-                android:id="@+id/btnSetLeverDown"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/set_key"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_marginStart="8dp"/>
-        </LinearLayout>
-
-        <!-- Save Mappings Button -->
-        <Button
-            android:id="@+id/btnSaveMappings"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Save Key Mappings"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_marginBottom="24dp"/>
-
-    </LinearLayout>
-</ScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
