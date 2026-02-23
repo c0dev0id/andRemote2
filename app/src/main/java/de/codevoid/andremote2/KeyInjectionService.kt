@@ -1,11 +1,11 @@
 package de.codevoid.andremote2
 
 import android.accessibilityservice.AccessibilityService
+import android.accessibilityservice.AccessibilityServiceInfo
+import android.os.Build
 import android.util.Log
 import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 
 class KeyInjectionService : AccessibilityService() {
 
@@ -14,16 +14,18 @@ class KeyInjectionService : AccessibilityService() {
             private set
     }
 
-    private val executor: ExecutorService = Executors.newSingleThreadExecutor()
-
     override fun onServiceConnected() {
         instance = this
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            serviceInfo = serviceInfo.apply {
+                flags = flags or AccessibilityServiceInfo.FLAG_INPUT_METHOD_EDITOR
+            }
+        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
         instance = null
-        executor.shutdownNow()
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {}
@@ -31,23 +33,33 @@ class KeyInjectionService : AccessibilityService() {
     override fun onInterrupt() {}
 
     fun injectKey(keyCode: Int) {
+        injectKeyDown(keyCode)
+        injectKeyUp(keyCode)
+    }
+
+    fun injectKeyDown(keyCode: Int) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val conn = getInputMethod()?.getCurrentInputConnection()
+            if (conn != null) {
+                conn.sendKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, keyCode))
+                return
+            }
+        }
         val globalAction = keyCodeToGlobalAction(keyCode)
         if (globalAction != null) {
-            val success = performGlobalAction(globalAction)
-            if (!success) {
-                Log.w("KeyInjectionService",
-                    "performGlobalAction failed for keyCode=$keyCode action=$globalAction")
-            }
+            performGlobalAction(globalAction)
         } else {
-            executor.execute {
-                try {
-                    Runtime.getRuntime()
-                        .exec(arrayOf("input", "keyevent", keyCode.toString()))
-                        .waitFor()
-                } catch (e: Exception) {
-                    Log.w("KeyInjectionService",
-                        "input keyevent failed for keyCode=$keyCode", e)
-                }
+            Log.w("KeyInjectionService",
+                "Cannot inject keyCode=$keyCode: no input connection and no global action mapping")
+        }
+    }
+
+    fun injectKeyUp(keyCode: Int) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val conn = getInputMethod()?.getCurrentInputConnection()
+            if (conn != null) {
+                conn.sendKeyEvent(KeyEvent(KeyEvent.ACTION_UP, keyCode))
+                return
             }
         }
     }

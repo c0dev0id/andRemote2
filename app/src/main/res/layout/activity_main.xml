@@ -143,13 +143,10 @@
                 android:layout_weight="1"
                 android:text="@string/joystick_up"/>
 
-            <EditText
-                android:id="@+id/etJoystickUp"
-                android:layout_width="80dp"
-                android:layout_height="wrap_content"
-                android:inputType="number"
-                android:text="19"
-                android:textAlignment="center"/>
+            <Spinner
+                android:id="@+id/spJoystickUp"
+                android:layout_width="180dp"
+                android:layout_height="wrap_content"/>
         </LinearLayout>
 
         <!-- Joystick Down -->
@@ -166,13 +163,10 @@
                 android:layout_weight="1"
                 android:text="@string/joystick_down"/>
 
-            <EditText
-                android:id="@+id/etJoystickDown"
-                android:layout_width="80dp"
-                android:layout_height="wrap_content"
-                android:inputType="number"
-                android:text="20"
-                android:textAlignment="center"/>
+            <Spinner
+                android:id="@+id/spJoystickDown"
+                android:layout_width="180dp"
+                android:layout_height="wrap_content"/>
         </LinearLayout>
 
         <!-- Joystick Left -->
@@ -189,13 +183,10 @@
                 android:layout_weight="1"
                 android:text="@string/joystick_left"/>
 
-            <EditText
-                android:id="@+id/etJoystickLeft"
-                android:layout_width="80dp"
-                android:layout_height="wrap_content"
-                android:inputType="number"
-                android:text="21"
-                android:textAlignment="center"/>
+            <Spinner
+                android:id="@+id/spJoystickLeft"
+                android:layout_width="180dp"
+                android:layout_height="wrap_content"/>
         </LinearLayout>
 
         <!-- Joystick Right -->
@@ -212,13 +203,10 @@
                 android:layout_weight="1"
                 android:text="@string/joystick_right"/>
 
-            <EditText
-                android:id="@+id/etJoystickRight"
-                android:layout_width="80dp"
-                android:layout_height="wrap_content"
-                android:inputType="number"
-                android:text="22"
-                android:textAlignment="center"/>
+            <Spinner
+                android:id="@+id/spJoystickRight"
+                android:layout_width="180dp"
+                android:layout_height="wrap_content"/>
         </LinearLayout>
 
         <!-- Button Top -->
@@ -235,13 +223,10 @@
                 android:layout_weight="1"
                 android:text="@string/button_top"/>
 
-            <EditText
-                android:id="@+id/etButtonTop"
-                android:layout_width="80dp"
-                android:layout_height="wrap_content"
-                android:inputType="number"
-                android:text="66"
-                android:textAlignment="center"/>
+            <Spinner
+                android:id="@+id/spButtonTop"
+                android:layout_width="180dp"
+                android:layout_height="wrap_content"/>
         </LinearLayout>
 
         <!-- Button Bottom -->
@@ -258,13 +243,10 @@
                 android:layout_weight="1"
                 android:text="@string/button_bottom"/>
 
-            <EditText
-                android:id="@+id/etButtonBottom"
-                android:layout_width="80dp"
-                android:layout_height="wrap_content"
-                android:inputType="number"
-                android:text="111"
-                android:textAlignment="center"/>
+            <Spinner
+                android:id="@+id/spButtonBottom"
+                android:layout_width="180dp"
+                android:layout_height="wrap_content"/>
         </LinearLayout>
 
         <!-- Lever Up -->
@@ -281,13 +263,10 @@
                 android:layout_weight="1"
                 android:text="@string/lever_up"/>
 
-            <EditText
-                android:id="@+id/etLeverUp"
-                android:layout_width="80dp"
-                android:layout_height="wrap_content"
-                android:inputType="number"
-                android:text="136"
-                android:textAlignment="center"/>
+            <Spinner
+                android:id="@+id/spLeverUp"
+                android:layout_width="180dp"
+                android:layout_height="wrap_content"/>
         </LinearLayout>
 
         <!-- Lever Down -->
@@ -304,13 +283,10 @@
                 android:layout_weight="1"
                 android:text="@string/lever_down"/>
 
-            <EditText
-                android:id="@+id/etLeverDown"
-                android:layout_width="80dp"
-                android:layout_height="wrap_content"
-                android:inputType="number"
-                android:text="137"
-                android:textAlignment="center"/>
+            <Spinner
+                android:id="@+id/spLeverDown"
+                android:layout_width="180dp"
+                android:layout_height="wrap_content"/>
         </LinearLayout>
 
         <!-- Save Mappings Button -->

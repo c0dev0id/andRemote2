@@ -2,8 +2,6 @@ package de.codevoid.andremote2.views
 
 import android.content.Context
 import android.graphics.*
-import android.os.Handler
-import android.os.Looper
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
@@ -18,8 +16,6 @@ class LeverView @JvmOverloads constructor(
     private var keycodeUp = 136
     private var keycodeDown = 137
 
-    private val handler = Handler(Looper.getMainLooper())
-    private val repeatInterval = 200L
     private var currentKeyCode = -1
     private var startY = 0f
     private var leverY = 0f
@@ -40,15 +36,6 @@ class LeverView @JvmOverloads constructor(
     private val paintArrow = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#CCCCCC")
         style = Paint.Style.FILL
-    }
-
-    private val repeatRunnable = object : Runnable {
-        override fun run() {
-            if (currentKeyCode != -1) {
-                sendKeyEvent(currentKeyCode)
-                handler.postDelayed(this, repeatInterval)
-            }
-        }
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
@@ -118,17 +105,20 @@ class LeverView @JvmOverloads constructor(
                 }
 
                 if (newKeyCode != currentKeyCode) {
-                    handler.removeCallbacks(repeatRunnable)
+                    if (currentKeyCode != -1) {
+                        sendKeyUp(currentKeyCode)
+                    }
                     currentKeyCode = newKeyCode
                     if (newKeyCode != -1) {
-                        sendKeyEvent(newKeyCode)
-                        handler.postDelayed(repeatRunnable, repeatInterval)
+                        sendKeyDown(newKeyCode)
                     }
                 }
                 return true
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                handler.removeCallbacks(repeatRunnable)
+                if (currentKeyCode != -1) {
+                    sendKeyUp(currentKeyCode)
+                }
                 currentKeyCode = -1
                 leverY = height / 2f
                 invalidate()
@@ -138,10 +128,19 @@ class LeverView @JvmOverloads constructor(
         return super.onTouchEvent(event)
     }
 
-    private fun sendKeyEvent(keyCode: Int) {
+    private fun sendKeyDown(keyCode: Int) {
         val service = KeyInjectionService.instance
         if (service != null) {
-            service.injectKey(keyCode)
+            service.injectKeyDown(keyCode)
+        } else {
+            Log.w("LeverView", "KeyInjectionService not available")
+        }
+    }
+
+    private fun sendKeyUp(keyCode: Int) {
+        val service = KeyInjectionService.instance
+        if (service != null) {
+            service.injectKeyUp(keyCode)
         } else {
             Log.w("LeverView", "KeyInjectionService not available")
         }
