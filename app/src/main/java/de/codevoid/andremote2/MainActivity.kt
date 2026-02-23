@@ -92,6 +92,10 @@ class MainActivity : AppCompatActivity() {
                 requestAccessibilityPermission()
                 return@setOnClickListener
             }
+            if (!hasInjectEventsPermission()) {
+                showInjectEventsDialog()
+                return@setOnClickListener
+            }
             saveKeyMappings()
             if (OverlayService.isRunning) {
                 stopService(Intent(this, OverlayService::class.java))
@@ -226,5 +230,24 @@ class MainActivity : AppCompatActivity() {
         startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
             data = Uri.parse("package:$packageName")
         })
+    }
+
+    private fun hasInjectEventsPermission(): Boolean {
+        return checkSelfPermission("android.permission.INJECT_EVENTS") ==
+            android.content.pm.PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun showInjectEventsDialog() {
+        val adbCommand = "adb shell pm grant $packageName android.permission.INJECT_EVENTS"
+        AlertDialog.Builder(this)
+            .setTitle(R.string.inject_permission_title)
+            .setMessage(getString(R.string.inject_permission_message, adbCommand))
+            .setPositiveButton(R.string.copy_command) { _, _ ->
+                val clipboard = getSystemService(android.content.ClipboardManager::class.java)
+                clipboard.setPrimaryClip(android.content.ClipData.newPlainText("ADB command", adbCommand))
+                Toast.makeText(this, R.string.command_copied, Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
     }
 }
