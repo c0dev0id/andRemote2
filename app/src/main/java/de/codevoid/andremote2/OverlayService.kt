@@ -123,7 +123,7 @@ class OverlayService : Service() {
     }
 
     private fun applyScaleAndAlpha() {
-        val size = prefs.getInt("overlay_size", 100).coerceIn(10, 200)
+        val size = prefs.getInt("overlay_size", 75).coerceIn(10, 200)
         val opacity = prefs.getInt("overlay_opacity", 80).coerceIn(0, 100)
         val scale = size / 100f
 
