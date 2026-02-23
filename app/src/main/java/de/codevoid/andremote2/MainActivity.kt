@@ -2,17 +2,24 @@ package de.codevoid.andremote2
 
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Log
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import rikka.shizuku.Shizuku
+import java.io.BufferedReader
+import java.io.InputStreamReader
 
 class MainActivity : AppCompatActivity() {
 
     companion object {
+        private const val TAG = "MainActivity"
+        private const val SHIZUKU_PERMISSION_REQUEST_CODE = 100
         const val DEFAULT_JOYSTICK_UP = 19
         const val DEFAULT_JOYSTICK_DOWN = 20
         const val DEFAULT_JOYSTICK_LEFT = 21
@@ -25,6 +32,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var prefs: SharedPreferences
     private lateinit var btnToggleOverlay: Button
+    private lateinit var btnGrantShizuku: Button
     private lateinit var seekBarSize: SeekBar
     private lateinit var seekBarOpacity: SeekBar
     private lateinit var tvSize: TextView
@@ -39,6 +47,17 @@ class MainActivity : AppCompatActivity() {
     private lateinit var spLeverUp: Spinner
     private lateinit var spLeverDown: Spinner
 
+    private val shizukuPermissionListener =
+        Shizuku.OnRequestPermissionResultListener { requestCode, grantResult ->
+            if (requestCode == SHIZUKU_PERMISSION_REQUEST_CODE) {
+                if (grantResult == PackageManager.PERMISSION_GRANTED) {
+                    grantInjectEventsViaShizuku()
+                } else {
+                    Toast.makeText(this, R.string.shizuku_permission_denied, Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -46,6 +65,7 @@ class MainActivity : AppCompatActivity() {
         prefs = getSharedPreferences("andremote2", MODE_PRIVATE)
 
         btnToggleOverlay = findViewById(R.id.btnToggleOverlay)
+        btnGrantShizuku = findViewById(R.id.btnGrantShizuku)
         seekBarSize = findViewById(R.id.seekBarSize)
         seekBarOpacity = findViewById(R.id.seekBarOpacity)
         tvSize = findViewById(R.id.tvSize)
@@ -62,6 +82,8 @@ class MainActivity : AppCompatActivity() {
 
         setupSpinners()
         loadSettings()
+
+        Shizuku.addRequestPermissionResultListener(shizukuPermissionListener)
 
         seekBarSize.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
@@ -92,10 +114,6 @@ class MainActivity : AppCompatActivity() {
                 requestAccessibilityPermission()
                 return@setOnClickListener
             }
-            if (!hasInjectEventsPermission()) {
-                showInjectEventsDialog()
-                return@setOnClickListener
-            }
             saveKeyMappings()
             if (OverlayService.isRunning) {
                 stopService(Intent(this, OverlayService::class.java))
@@ -104,6 +122,10 @@ class MainActivity : AppCompatActivity() {
                 startForegroundService(Intent(this, OverlayService::class.java))
                 btnToggleOverlay.text = getString(R.string.stop_overlay)
             }
+        }
+
+        btnGrantShizuku.setOnClickListener {
+            onGrantShizukuClicked()
         }
 
         findViewById<Button>(R.id.btnSaveMappings).setOnClickListener {
@@ -126,6 +148,97 @@ class MainActivity : AppCompatActivity() {
             getString(R.string.stop_overlay)
         else
             getString(R.string.start_overlay)
+        updateShizukuButtonVisibility()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Shizuku.removeRequestPermissionResultListener(shizukuPermissionListener)
+    }
+
+    private fun updateShizukuButtonVisibility() {
+        if (hasInjectEventsPermission()) {
+            btnGrantShizuku.visibility = android.view.View.GONE
+        } else {
+            btnGrantShizuku.visibility = android.view.View.VISIBLE
+        }
+    }
+
+    private fun hasInjectEventsPermission(): Boolean {
+        return checkSelfPermission("android.permission.INJECT_EVENTS") ==
+            PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun isShizukuInstalled(): Boolean {
+        return try {
+            packageManager.getPackageInfo("moe.shizuku.privileged.api", 0)
+            true
+        } catch (_: PackageManager.NameNotFoundException) {
+            false
+        }
+    }
+
+    private fun onGrantShizukuClicked() {
+        if (hasInjectEventsPermission()) {
+            Toast.makeText(this, R.string.inject_permission_already_granted, Toast.LENGTH_SHORT).show()
+            updateShizukuButtonVisibility()
+            return
+        }
+
+        if (!isShizukuInstalled()) {
+            Toast.makeText(this, R.string.shizuku_not_installed, Toast.LENGTH_LONG).show()
+            return
+        }
+
+        try {
+            if (!Shizuku.pingBinder()) {
+                Toast.makeText(this, R.string.shizuku_not_running, Toast.LENGTH_LONG).show()
+                return
+            }
+        } catch (e: Exception) {
+            Toast.makeText(this, R.string.shizuku_not_running, Toast.LENGTH_LONG).show()
+            return
+        }
+
+        if (Shizuku.isPreV11()) {
+            // Shizuku pre-v11 not supported
+            Toast.makeText(this, R.string.shizuku_not_running, Toast.LENGTH_LONG).show()
+            return
+        }
+
+        if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
+            grantInjectEventsViaShizuku()
+        } else {
+            Shizuku.requestPermission(SHIZUKU_PERMISSION_REQUEST_CODE)
+        }
+    }
+
+    private fun grantInjectEventsViaShizuku() {
+        Thread {
+            try {
+                val process = Shizuku.newProcess(
+                    arrayOf("pm", "grant", packageName, "android.permission.INJECT_EVENTS"),
+                    null, null
+                )
+                val exitCode = process.waitFor()
+                val errorOutput = BufferedReader(InputStreamReader(process.errorStream)).use { it.readText().trim() }
+
+                runOnUiThread {
+                    if (exitCode == 0) {
+                        Toast.makeText(this, R.string.shizuku_grant_success, Toast.LENGTH_LONG).show()
+                        updateShizukuButtonVisibility()
+                    } else {
+                        val msg = if (errorOutput.isNotEmpty()) errorOutput else "exit code $exitCode"
+                        Toast.makeText(this, getString(R.string.shizuku_grant_failed, msg), Toast.LENGTH_LONG).show()
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Shizuku grant failed", e)
+                runOnUiThread {
+                    Toast.makeText(this, getString(R.string.shizuku_grant_failed, e.message ?: "unknown error"), Toast.LENGTH_LONG).show()
+                }
+            }
+        }.start()
     }
 
     private fun setupSpinners() {
@@ -230,24 +343,5 @@ class MainActivity : AppCompatActivity() {
         startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
             data = Uri.parse("package:$packageName")
         })
-    }
-
-    private fun hasInjectEventsPermission(): Boolean {
-        return checkSelfPermission("android.permission.INJECT_EVENTS") ==
-            android.content.pm.PackageManager.PERMISSION_GRANTED
-    }
-
-    private fun showInjectEventsDialog() {
-        val adbCommand = "adb shell pm grant $packageName android.permission.INJECT_EVENTS"
-        AlertDialog.Builder(this)
-            .setTitle(R.string.inject_permission_title)
-            .setMessage(getString(R.string.inject_permission_message, adbCommand))
-            .setPositiveButton(R.string.copy_command) { _, _ ->
-                val clipboard = getSystemService(android.content.ClipboardManager::class.java)
-                clipboard.setPrimaryClip(android.content.ClipData.newPlainText("ADB command", adbCommand))
-                Toast.makeText(this, R.string.command_copied, Toast.LENGTH_SHORT).show()
-            }
-            .setNegativeButton(android.R.string.cancel, null)
-            .show()
     }
 }
