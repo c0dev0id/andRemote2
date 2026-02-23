@@ -2,6 +2,8 @@ package de.codevoid.andremote2.views
 
 import android.content.Context
 import android.graphics.*
+import android.os.Handler
+import android.os.Looper
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
@@ -38,6 +40,9 @@ class JoystickView @JvmOverloads constructor(
         style = Paint.Style.FILL
     }
 
+    private val handler = Handler(Looper.getMainLooper())
+    private val repeatInterval = 200L
+
     private var centerX = 0f
     private var centerY = 0f
     private var baseRadius = 0f
@@ -45,6 +50,15 @@ class JoystickView @JvmOverloads constructor(
     private var knobX = 0f
     private var knobY = 0f
     private var currentKeyCode = -1
+
+    private val repeatRunnable = object : Runnable {
+        override fun run() {
+            if (currentKeyCode != -1) {
+                sendKeyEvent(currentKeyCode)
+                handler.postDelayed(this, repeatInterval)
+            }
+        }
+    }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         centerX = w / 2f
@@ -98,15 +112,19 @@ class JoystickView @JvmOverloads constructor(
                 if (dist > baseRadius * 0.3f) {
                     val direction = getDirection(dx, dy)
                     if (direction != currentKeyCode) {
+                        handler.removeCallbacks(repeatRunnable)
                         currentKeyCode = direction
                         sendKeyEvent(direction)
+                        handler.postDelayed(repeatRunnable, repeatInterval)
                     }
                 } else {
+                    handler.removeCallbacks(repeatRunnable)
                     currentKeyCode = -1
                 }
                 return true
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                handler.removeCallbacks(repeatRunnable)
                 knobX = centerX
                 knobY = centerY
                 currentKeyCode = -1
