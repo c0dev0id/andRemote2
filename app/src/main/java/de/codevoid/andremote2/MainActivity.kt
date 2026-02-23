@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import rikka.shizuku.Shizuku
 import java.io.BufferedReader
 import java.io.InputStreamReader
+import java.lang.reflect.InvocationTargetException
 
 class MainActivity : AppCompatActivity() {
 
@@ -206,10 +207,14 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
-            grantInjectEventsViaShizuku()
-        } else {
-            Shizuku.requestPermission(SHIZUKU_PERMISSION_REQUEST_CODE)
+        try {
+            if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
+                grantInjectEventsViaShizuku()
+            } else {
+                Shizuku.requestPermission(SHIZUKU_PERMISSION_REQUEST_CODE)
+            }
+        } catch (e: RuntimeException) {
+            Toast.makeText(this, getString(R.string.shizuku_grant_failed, e.message ?: e.javaClass.simpleName), Toast.LENGTH_LONG).show()
         }
     }
 
@@ -243,8 +248,9 @@ class MainActivity : AppCompatActivity() {
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Shizuku grant failed", e)
+                val cause = (e as? InvocationTargetException)?.targetException ?: e
                 runOnUiThread {
-                    Toast.makeText(this, getString(R.string.shizuku_grant_failed, e.message ?: "unknown error"), Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, getString(R.string.shizuku_grant_failed, cause.message ?: cause.javaClass.simpleName), Toast.LENGTH_LONG).show()
                 }
             }
         }.start()
