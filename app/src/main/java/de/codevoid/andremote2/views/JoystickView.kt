@@ -98,24 +98,15 @@ class JoystickView @JvmOverloads constructor(
                 if (dist > baseRadius * 0.3f) {
                     val direction = getDirection(dx, dy)
                     if (direction != currentKeyCode) {
-                        if (currentKeyCode != -1) {
-                            sendKeyUp(currentKeyCode)
-                        }
                         currentKeyCode = direction
-                        sendKeyDown(direction)
+                        sendKey(direction)
                     }
                 } else {
-                    if (currentKeyCode != -1) {
-                        sendKeyUp(currentKeyCode)
-                    }
                     currentKeyCode = -1
                 }
                 return true
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                if (currentKeyCode != -1) {
-                    sendKeyUp(currentKeyCode)
-                }
                 knobX = centerX
                 knobY = centerY
                 currentKeyCode = -1
@@ -134,19 +125,10 @@ class JoystickView @JvmOverloads constructor(
         }
     }
 
-    private fun sendKeyDown(keyCode: Int) {
+    private fun sendKey(keyCode: Int) {
         val service = KeyInjectionService.instance
         if (service != null) {
-            service.injectKeyDown(keyCode)
-        } else {
-            Log.w("JoystickView", "KeyInjectionService not available")
-        }
-    }
-
-    private fun sendKeyUp(keyCode: Int) {
-        val service = KeyInjectionService.instance
-        if (service != null) {
-            service.injectKeyUp(keyCode)
+            service.injectKey(keyCode)
         } else {
             Log.w("JoystickView", "KeyInjectionService not available")
         }
