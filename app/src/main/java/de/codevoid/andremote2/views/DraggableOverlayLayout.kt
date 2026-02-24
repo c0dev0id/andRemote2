@@ -34,13 +34,11 @@ class DraggableOverlayLayout @JvmOverloads constructor(
         if (sx == 0f || sy == 0f) return false
         for (i in 0 until group.childCount) {
             val child = group.getChildAt(i)
-            if (child is JoystickView || child is LeverView || child is ButtonView) {
+            if (child is InteractiveOverlayView) {
                 child.getLocationOnScreen(location)
                 val localX = (rawX - location[0]) / sx
                 val localY = (rawY - location[1]) / sy
-                if (child is JoystickView && child.isInsideShape(localX, localY)) return true
-                if (child is LeverView && child.isInsideShape(localX, localY)) return true
-                if (child is ButtonView && child.isInsideShape(localX, localY)) return true
+                if (child.isInsideShape(localX, localY)) return true
             } else if (child is ViewGroup) {
                 if (isTouchOnInteractiveChild(child, rawX, rawY)) return true
             }

@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.Path
 import android.util.AttributeSet
 import android.os.SystemClock
 import android.view.MotionEvent
@@ -16,7 +15,7 @@ import de.codevoid.andremote2.KeyInjectionService
 class ButtonView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
-) : View(context, attrs) {
+) : View(context, attrs), InteractiveOverlayView {
 
     companion object {
         private const val LONG_PRESS_THRESHOLD_MS = 500L
@@ -101,7 +100,7 @@ class ButtonView @JvmOverloads constructor(
             ?: Log.w("ButtonView", "KeyInjectionService not available")
     }
 
-    fun isInsideShape(localX: Float, localY: Float): Boolean {
+    override fun isInsideShape(localX: Float, localY: Float): Boolean {
         val cornerRadius = height / 4f
         val left = 4f
         val right = width - 4f

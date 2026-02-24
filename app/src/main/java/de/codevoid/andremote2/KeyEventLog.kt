@@ -2,13 +2,13 @@ package de.codevoid.andremote2
 
 import android.os.Handler
 import android.os.Looper
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 
 object KeyEventLog {
 
     private const val MAX_ENTRIES = 200
+    private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS")
 
     private val entries = ArrayDeque<String>()
     private val lock = Any()
@@ -18,7 +18,7 @@ object KeyEventLog {
     private var onNewEntry: (() -> Unit)? = null
 
     fun log(source: String, message: String) {
-        val timestamp = SimpleDateFormat("HH:mm:ss.SSS", Locale.US).format(Date())
+        val timestamp = LocalTime.now().format(timeFormatter)
         val entry = "$timestamp [$source] $message"
         synchronized(lock) {
             entries.addLast(entry)

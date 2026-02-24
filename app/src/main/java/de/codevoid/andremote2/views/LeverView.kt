@@ -15,7 +15,7 @@ import de.codevoid.andremote2.KeyInjectionService
 class LeverView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
-) : View(context, attrs) {
+) : View(context, attrs), InteractiveOverlayView {
 
     private var keycodeUp = 136
     private var keycodeDown = 137
@@ -132,7 +132,7 @@ class LeverView @JvmOverloads constructor(
             ?: Log.w("LeverView", "KeyInjectionService not available")
     }
 
-    fun isInsideShape(localX: Float, localY: Float): Boolean {
+    override fun isInsideShape(localX: Float, localY: Float): Boolean {
         val trackWidth = width * 0.4f
         val left = (width - trackWidth) / 2f - 8f
         val right = (width + trackWidth) / 2f + 8f

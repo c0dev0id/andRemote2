@@ -229,11 +229,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateShizukuButtonVisibility() {
-        if (isShizukuAuthorized()) {
-            btnGrantShizuku.visibility = android.view.View.GONE
-        } else {
-            btnGrantShizuku.visibility = android.view.View.VISIBLE
-        }
+        btnGrantShizuku.visibility = if (isShizukuAuthorized()) android.view.View.GONE else android.view.View.VISIBLE
     }
 
     private fun updateEventLogView() {
@@ -316,7 +312,7 @@ class MainActivity : AppCompatActivity() {
             val currentPreset = prefs.getInt("preset", 0)
             if (isDmdPreset && currentPreset != PRESET_DMD_REMOTE_2) {
                 // Preserve custom mapping before switching away from Custom preset
-                saveCustomPresetMappings()
+                writeKeyMappingsToPrefs("custom_")
             }
             saveIntPref("preset", position)
             keyActvs.forEach { it.isEnabled = !isDmdPreset }
@@ -383,31 +379,22 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun saveKeyMappings() {
-        prefs.edit()
-            .putInt("keycode_joystick_up", actvToKeyCode(actvJoystickUp))
-            .putInt("keycode_joystick_down", actvToKeyCode(actvJoystickDown))
-            .putInt("keycode_joystick_left", actvToKeyCode(actvJoystickLeft))
-            .putInt("keycode_joystick_right", actvToKeyCode(actvJoystickRight))
-            .putInt("keycode_button_top", actvToKeyCode(actvButtonTop))
-            .putInt("keycode_button_bottom", actvToKeyCode(actvButtonBottom))
-            .putInt("keycode_lever_up", actvToKeyCode(actvLeverUp))
-            .putInt("keycode_lever_down", actvToKeyCode(actvLeverDown))
-            .apply()
+        writeKeyMappingsToPrefs("")
         if (prefs.getInt("preset", 0) != PRESET_DMD_REMOTE_2) {
-            saveCustomPresetMappings()
+            writeKeyMappingsToPrefs("custom_")
         }
     }
 
-    private fun saveCustomPresetMappings() {
+    private fun writeKeyMappingsToPrefs(prefix: String) {
         prefs.edit()
-            .putInt("custom_keycode_joystick_up", actvToKeyCode(actvJoystickUp))
-            .putInt("custom_keycode_joystick_down", actvToKeyCode(actvJoystickDown))
-            .putInt("custom_keycode_joystick_left", actvToKeyCode(actvJoystickLeft))
-            .putInt("custom_keycode_joystick_right", actvToKeyCode(actvJoystickRight))
-            .putInt("custom_keycode_button_top", actvToKeyCode(actvButtonTop))
-            .putInt("custom_keycode_button_bottom", actvToKeyCode(actvButtonBottom))
-            .putInt("custom_keycode_lever_up", actvToKeyCode(actvLeverUp))
-            .putInt("custom_keycode_lever_down", actvToKeyCode(actvLeverDown))
+            .putInt("${prefix}keycode_joystick_up", actvToKeyCode(actvJoystickUp))
+            .putInt("${prefix}keycode_joystick_down", actvToKeyCode(actvJoystickDown))
+            .putInt("${prefix}keycode_joystick_left", actvToKeyCode(actvJoystickLeft))
+            .putInt("${prefix}keycode_joystick_right", actvToKeyCode(actvJoystickRight))
+            .putInt("${prefix}keycode_button_top", actvToKeyCode(actvButtonTop))
+            .putInt("${prefix}keycode_button_bottom", actvToKeyCode(actvButtonBottom))
+            .putInt("${prefix}keycode_lever_up", actvToKeyCode(actvLeverUp))
+            .putInt("${prefix}keycode_lever_down", actvToKeyCode(actvLeverDown))
             .apply()
     }
 

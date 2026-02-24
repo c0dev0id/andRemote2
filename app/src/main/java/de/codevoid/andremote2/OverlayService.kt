@@ -144,8 +144,7 @@ class OverlayService : Service() {
         overlayParams.width = (baseWidth * scale).toInt()
         overlayParams.height = (baseHeight * scale).toInt()
 
-        if (::overlayView.isInitialized && ::overlayParams.isInitialized &&
-            ::windowManager.isInitialized && overlayView.isAttachedToWindow) {
+        if (overlayView.isAttachedToWindow) {
             windowManager.updateViewLayout(overlayView, overlayParams)
         }
     }

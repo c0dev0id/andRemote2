@@ -17,7 +17,7 @@ import kotlin.math.sqrt
 class JoystickView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
-) : View(context, attrs) {
+) : View(context, attrs), InteractiveOverlayView {
 
     private var keycodeUp = 19
     private var keycodeDown = 20
@@ -135,7 +135,7 @@ class JoystickView @JvmOverloads constructor(
             ?: Log.w("JoystickView", "KeyInjectionService not available")
     }
 
-    fun isInsideShape(localX: Float, localY: Float): Boolean {
+    override fun isInsideShape(localX: Float, localY: Float): Boolean {
         val dx = localX - centerX
         val dy = localY - centerY
         return dx * dx + dy * dy <= baseRadius * baseRadius
