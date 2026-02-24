@@ -74,6 +74,9 @@ jobs:
           mv app/build/outputs/apk/release/app-release.apk \
              "app/build/outputs/apk/release/andRemote2-${VERSION}.apk"
           echo "apk_path=app/build/outputs/apk/release/andRemote2-${VERSION}.apk" >> "$GITHUB_OUTPUT"
+          mv keytester/build/outputs/apk/release/keytester-release-unsigned.apk \
+             "keytester/build/outputs/apk/release/keytester-${VERSION}.apk"
+          echo "keytester_apk_path=keytester/build/outputs/apk/release/keytester-${VERSION}.apk" >> "$GITHUB_OUTPUT"
 
       - name: Create and push tag
         run: |
@@ -88,4 +91,6 @@ jobs:
           name: ${{ steps.version.outputs.version }}
           draft: true
           generate_release_notes: true
-          files: ${{ steps.rename.outputs.apk_path }}
+          files: |
+            ${{ steps.rename.outputs.apk_path }}
+            ${{ steps.rename.outputs.keytester_apk_path }}
