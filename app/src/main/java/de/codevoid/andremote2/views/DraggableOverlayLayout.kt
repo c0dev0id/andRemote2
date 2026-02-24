@@ -70,9 +70,6 @@ class DraggableOverlayLayout @JvmOverloads constructor(
     }
 
     override fun onInterceptTouchEvent(event: MotionEvent): Boolean {
-        if (event.action != MotionEvent.ACTION_DOWN && touchStartedOnChild) {
-            return false
-        }
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
                 lastRawX = event.rawX
@@ -80,13 +77,17 @@ class DraggableOverlayLayout @JvmOverloads constructor(
                 isDragging = false
                 touchStartedOnChild = isTouchOnInteractiveChild(this, event.rawX, event.rawY)
             }
+        }
+        // If the touch started on a button/joystick/lever, never intercept — just let the child handle everything
+        if (touchStartedOnChild) return false
+
+        when (event.action) {
             MotionEvent.ACTION_MOVE -> {
                 isDragging = true
                 return true
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 isDragging = false
-                touchStartedOnChild = false
             }
         }
         return false
