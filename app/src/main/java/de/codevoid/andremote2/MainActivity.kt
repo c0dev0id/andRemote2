@@ -230,17 +230,6 @@ class MainActivity : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
     }
 
-    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
-        val action = when (event.action) {
-            KeyEvent.ACTION_DOWN -> "ACTION_DOWN"
-            KeyEvent.ACTION_UP -> "ACTION_UP"
-            KeyEvent.ACTION_MULTIPLE -> "ACTION_MULTIPLE"
-            else -> event.action.toString()
-        }
-        KeyEventLog.log("Received", "$action keyCode=${event.keyCode} flags=0x${event.flags.toString(16)} repeat=${event.repeatCount}")
-        return super.dispatchKeyEvent(event)
-    }
-
     override fun onDestroy() {
         super.onDestroy()
         Shizuku.removeRequestPermissionResultListener(shizukuPermissionListener)
