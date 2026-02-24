@@ -1,7 +1,10 @@
 package de.codevoid.andremote2.views
 
 import android.content.Context
-import android.graphics.*
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.Path
 import android.util.AttributeSet
 import android.os.SystemClock
 import android.view.MotionEvent
@@ -86,21 +89,13 @@ class ButtonView @JvmOverloads constructor(
     }
 
     private fun sendKey() {
-        val service = KeyInjectionService.instance
-        if (service != null) {
-            service.injectKey(keyCode)
-        } else {
-            Log.w("ButtonView", "KeyInjectionService not available")
-        }
+        KeyInjectionService.instance?.injectKey(keyCode)
+            ?: Log.w("ButtonView", "KeyInjectionService not available")
     }
 
     private fun sendKeyLongPress() {
-        val service = KeyInjectionService.instance
-        if (service != null) {
-            service.injectKeyLongPress(keyCode)
-        } else {
-            Log.w("ButtonView", "KeyInjectionService not available")
-        }
+        KeyInjectionService.instance?.injectKeyLongPress(keyCode)
+            ?: Log.w("ButtonView", "KeyInjectionService not available")
     }
 
     fun isInsideShape(localX: Float, localY: Float): Boolean {

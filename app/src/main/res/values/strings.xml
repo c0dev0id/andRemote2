@@ -30,4 +30,7 @@
     <string name="overlay_settings">Overlay Settings</string>
     <string name="buy_me_coffee">☕ Buy Me a Coffee</string>
     <string name="no_browser_app">No browser app found</string>
+    <string name="notification_title">DMD Remote Active</string>
+    <string name="notification_content">Use Stop action to dismiss</string>
+    <string name="notification_action_stop">Stop</string>
 </resources>
