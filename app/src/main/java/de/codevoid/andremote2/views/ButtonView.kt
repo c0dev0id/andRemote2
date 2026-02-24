@@ -52,6 +52,8 @@ class ButtonView @JvmOverloads constructor(
             invalidate()
         }
 
+    var holdMode: Boolean = false
+
     override fun onDraw(canvas: Canvas) {
         val paint = if (isPressed) paintPressed else paintNormal
         val cornerRadius = height / 4f
@@ -64,24 +66,36 @@ class ButtonView @JvmOverloads constructor(
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
                 isPressed = true
-                pressStartTime = SystemClock.elapsedRealtime()
+                if (holdMode) {
+                    sendKeyDown()
+                } else {
+                    pressStartTime = SystemClock.elapsedRealtime()
+                }
                 invalidate()
                 return true
             }
             MotionEvent.ACTION_UP -> {
                 isPressed = false
                 invalidate()
-                val duration = SystemClock.elapsedRealtime() - pressStartTime
-                if (duration >= LONG_PRESS_THRESHOLD_MS) {
-                    sendKeyLongPress()
+                if (holdMode) {
+                    sendKeyUp()
                 } else {
-                    sendKey()
+                    val duration = SystemClock.elapsedRealtime() - pressStartTime
+                    if (duration >= LONG_PRESS_THRESHOLD_MS) {
+                        sendKeyLongPress()
+                    } else {
+                        sendKey()
+                    }
                 }
                 return true
             }
             MotionEvent.ACTION_CANCEL -> {
                 isPressed = false
-                pressStartTime = 0L
+                if (holdMode) {
+                    sendKeyUp()
+                } else {
+                    pressStartTime = 0L
+                }
                 invalidate()
                 return true
             }
@@ -98,6 +112,18 @@ class ButtonView @JvmOverloads constructor(
     private fun sendKeyLongPress() {
         KeyEventLog.log("ButtonView", "sendKeyLongPress key=$keyCode label=$label shizukuEnabled=${KeyInjectionService.shizukuEnabled}")
         KeyInjectionService.instance?.injectKeyLongPress(keyCode)
+            ?: Log.w("ButtonView", "KeyInjectionService not available")
+    }
+
+    private fun sendKeyDown() {
+        KeyEventLog.log("ButtonView", "sendKeyDown key=$keyCode label=$label shizukuEnabled=${KeyInjectionService.shizukuEnabled}")
+        KeyInjectionService.instance?.injectKeyDown(keyCode)
+            ?: Log.w("ButtonView", "KeyInjectionService not available")
+    }
+
+    private fun sendKeyUp() {
+        KeyEventLog.log("ButtonView", "sendKeyUp key=$keyCode label=$label shizukuEnabled=${KeyInjectionService.shizukuEnabled}")
+        KeyInjectionService.instance?.injectKeyUp(keyCode)
             ?: Log.w("ButtonView", "KeyInjectionService not available")
     }
 
