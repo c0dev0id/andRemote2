@@ -10,6 +10,7 @@ import android.os.SystemClock
 import android.view.MotionEvent
 import android.view.View
 import android.util.Log
+import de.codevoid.andremote2.KeyEventLog
 import de.codevoid.andremote2.KeyInjectionService
 
 class ButtonView @JvmOverloads constructor(
@@ -89,11 +90,13 @@ class ButtonView @JvmOverloads constructor(
     }
 
     private fun sendKey() {
+        KeyEventLog.log("ButtonView", "sendKey key=$keyCode label=$label shizukuEnabled=${KeyInjectionService.shizukuEnabled}")
         KeyInjectionService.instance?.injectKey(keyCode)
             ?: Log.w("ButtonView", "KeyInjectionService not available")
     }
 
     private fun sendKeyLongPress() {
+        KeyEventLog.log("ButtonView", "sendKeyLongPress key=$keyCode label=$label shizukuEnabled=${KeyInjectionService.shizukuEnabled}")
         KeyInjectionService.instance?.injectKeyLongPress(keyCode)
             ?: Log.w("ButtonView", "KeyInjectionService not available")
     }

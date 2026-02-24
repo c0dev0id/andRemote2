@@ -10,6 +10,7 @@ import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.ArrayAdapter
+import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -43,6 +44,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var sliderOpacity: Slider
     private lateinit var tvSize: TextView
     private lateinit var tvOpacity: TextView
+    private lateinit var tvEventLog: TextView
+    private lateinit var scrollEventLog: ScrollView
 
     private lateinit var actvJoystickUp: MaterialAutoCompleteTextView
     private lateinit var actvJoystickDown: MaterialAutoCompleteTextView
@@ -86,6 +89,8 @@ class MainActivity : AppCompatActivity() {
         sliderOpacity = findViewById(R.id.sliderOpacity)
         tvSize = findViewById(R.id.tvSize)
         tvOpacity = findViewById(R.id.tvOpacity)
+        tvEventLog = findViewById(R.id.tvEventLog)
+        scrollEventLog = findViewById(R.id.scrollEventLog)
         actvPreset = findViewById(R.id.actvPreset)
 
         // Bind key-mapping rows via include IDs
@@ -178,6 +183,10 @@ class MainActivity : AppCompatActivity() {
             saveKeyMappings()
             Toast.makeText(this, R.string.mappings_saved, Toast.LENGTH_SHORT).show()
         }
+
+        findViewById<MaterialButton>(R.id.btnClearLog).setOnClickListener {
+            KeyEventLog.clear()
+        }
     }
 
     override fun onResume() {
@@ -188,6 +197,13 @@ class MainActivity : AppCompatActivity() {
             getString(R.string.start_overlay)
         KeyInjectionService.shizukuEnabled = isShizukuAuthorized()
         updateShizukuButtonVisibility()
+        KeyEventLog.setOnNewEntryListener { updateEventLogView() }
+        updateEventLogView()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        KeyEventLog.setOnNewEntryListener(null)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -218,6 +234,12 @@ class MainActivity : AppCompatActivity() {
         } else {
             btnGrantShizuku.visibility = android.view.View.VISIBLE
         }
+    }
+
+    private fun updateEventLogView() {
+        val text = KeyEventLog.getEntries().joinToString("\n")
+        tvEventLog.text = text
+        scrollEventLog.post { scrollEventLog.fullScroll(ScrollView.FOCUS_DOWN) }
     }
 
     private fun isShizukuInstalled(): Boolean {
