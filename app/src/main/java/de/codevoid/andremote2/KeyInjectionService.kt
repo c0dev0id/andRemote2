@@ -73,23 +73,45 @@ class KeyInjectionService : Service() {
         }
     }
 
+    fun injectKeyDown(keyCode: Int) {
+        KeyEventLog.log("KeyInjectionService", "injectKeyDown keyCode=$keyCode shizukuEnabled=$shizukuEnabled")
+        if (shizukuEnabled) {
+            bgHandler.post { runShizukuInputCommand("input", "keyevent", "--down", keyCode.toString()) }
+        } else {
+            Log.w(TAG, "injectKeyDown: Shizuku not enabled, key $keyCode dropped")
+        }
+    }
+
+    fun injectKeyUp(keyCode: Int) {
+        KeyEventLog.log("KeyInjectionService", "injectKeyUp keyCode=$keyCode shizukuEnabled=$shizukuEnabled")
+        if (shizukuEnabled) {
+            bgHandler.post { runShizukuInputCommand("input", "keyevent", "--up", keyCode.toString()) }
+        } else {
+            Log.w(TAG, "injectKeyUp: Shizuku not enabled, key $keyCode dropped")
+        }
+    }
+
     private fun runShizukuKeyEvent(keyCode: Int, action: String? = null) {
+        val args = if (action != null) {
+            arrayOf("input", "keyevent", action, keyCode.toString())
+        } else {
+            arrayOf("input", "keyevent", keyCode.toString())
+        }
+        runShizukuInputCommand(*args)
+    }
+
+    private fun runShizukuInputCommand(vararg args: String) {
         try {
             val method = shizukuNewProcess ?: return
-            val args = if (action != null) {
-                arrayOf("input", "keyevent", action, keyCode.toString())
-            } else {
-                arrayOf("input", "keyevent", keyCode.toString())
-            }
             val process = method.invoke(
                 null,
-                args,
+                arrayOf(*args),
                 null as Array<String>?,
                 null as String?
             ) as Process
             process.waitFor(SHIZUKU_PROCESS_TIMEOUT_MS, TimeUnit.MILLISECONDS)
         } catch (e: Exception) {
-            Log.e(TAG, "Shizuku key injection failed for keyCode $keyCode", e)
+            Log.e(TAG, "Shizuku command failed: ${args.joinToString(" ")}", e)
         }
     }
 
