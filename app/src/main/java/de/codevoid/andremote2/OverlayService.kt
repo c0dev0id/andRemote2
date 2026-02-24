@@ -1,19 +1,26 @@
 package de.codevoid.andremote2
 
-import android.app.*
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.app.Service
 import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.PixelFormat
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
-import android.view.*
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.view.View
+import android.view.WindowManager
 import androidx.core.app.NotificationCompat
 
 class OverlayService : Service() {
 
     companion object {
-        var isRunning = false
+        @Volatile var isRunning = false
         const val CHANNEL_ID = "overlay_channel"
     }
 
@@ -38,7 +45,7 @@ class OverlayService : Service() {
     override fun onCreate() {
         super.onCreate()
         isRunning = true
-        prefs = getSharedPreferences("andremote2", MODE_PRIVATE)
+        prefs = getSharedPreferences(MainActivity.PREFS_NAME, MODE_PRIVATE)
         createNotificationChannel()
         startForeground(1, buildNotification())
         startService(Intent(this, KeyInjectionService::class.java))
@@ -71,10 +78,10 @@ class OverlayService : Service() {
             PendingIntent.FLAG_IMMUTABLE
         )
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("DMD Remote Active")
-            .setContentText("Use Stop action to dismiss")
+            .setContentTitle(getString(R.string.notification_title))
+            .setContentText(getString(R.string.notification_content))
             .setSmallIcon(android.R.drawable.ic_media_play)
-            .addAction(android.R.drawable.ic_media_pause, "Stop", stopIntent)
+            .addAction(android.R.drawable.ic_media_pause, getString(R.string.notification_action_stop), stopIntent)
             .build()
     }
 
@@ -150,20 +157,20 @@ class OverlayService : Service() {
         val lever = overlayView.findViewById<de.codevoid.andremote2.views.LeverView>(R.id.leverView)
 
         joystick.setKeyCodes(
-            prefs.getInt("keycode_joystick_up", 19),
-            prefs.getInt("keycode_joystick_down", 20),
-            prefs.getInt("keycode_joystick_left", 21),
-            prefs.getInt("keycode_joystick_right", 22)
+            prefs.getInt("keycode_joystick_up", MainActivity.DEFAULT_JOYSTICK_UP),
+            prefs.getInt("keycode_joystick_down", MainActivity.DEFAULT_JOYSTICK_DOWN),
+            prefs.getInt("keycode_joystick_left", MainActivity.DEFAULT_JOYSTICK_LEFT),
+            prefs.getInt("keycode_joystick_right", MainActivity.DEFAULT_JOYSTICK_RIGHT)
         )
         buttonTop.label = ""
-        buttonTop.setKeyCode(prefs.getInt("keycode_button_top", 66))
+        buttonTop.setKeyCode(prefs.getInt("keycode_button_top", MainActivity.DEFAULT_BUTTON_TOP))
 
         buttonBottom.label = ""
-        buttonBottom.setKeyCode(prefs.getInt("keycode_button_bottom", 111))
+        buttonBottom.setKeyCode(prefs.getInt("keycode_button_bottom", MainActivity.DEFAULT_BUTTON_BOTTOM))
 
         lever.setKeyCodes(
-            prefs.getInt("keycode_lever_up", 136),
-            prefs.getInt("keycode_lever_down", 137)
+            prefs.getInt("keycode_lever_up", MainActivity.DEFAULT_LEVER_UP),
+            prefs.getInt("keycode_lever_down", MainActivity.DEFAULT_LEVER_DOWN)
         )
     }
 

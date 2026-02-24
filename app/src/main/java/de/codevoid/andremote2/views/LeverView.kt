@@ -1,7 +1,10 @@
 package de.codevoid.andremote2.views
 
 import android.content.Context
-import android.graphics.*
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.Path
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
@@ -123,12 +126,8 @@ class LeverView @JvmOverloads constructor(
     }
 
     private fun sendKey(keyCode: Int) {
-        val service = KeyInjectionService.instance
-        if (service != null) {
-            service.injectKey(keyCode)
-        } else {
-            Log.w("LeverView", "KeyInjectionService not available")
-        }
+        KeyInjectionService.instance?.injectKey(keyCode)
+            ?: Log.w("LeverView", "KeyInjectionService not available")
     }
 
     fun isInsideShape(localX: Float, localY: Float): Boolean {
