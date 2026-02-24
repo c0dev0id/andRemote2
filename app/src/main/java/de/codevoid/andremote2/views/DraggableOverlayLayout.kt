@@ -70,6 +70,9 @@ class DraggableOverlayLayout @JvmOverloads constructor(
     }
 
     override fun onInterceptTouchEvent(event: MotionEvent): Boolean {
+        if (event.action != MotionEvent.ACTION_DOWN && touchStartedOnChild) {
+            return false
+        }
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
                 lastRawX = event.rawX
@@ -78,7 +81,6 @@ class DraggableOverlayLayout @JvmOverloads constructor(
                 touchStartedOnChild = isTouchOnInteractiveChild(this, event.rawX, event.rawY)
             }
             MotionEvent.ACTION_MOVE -> {
-                if (touchStartedOnChild) return false
                 isDragging = true
                 return true
             }
