@@ -33,4 +33,6 @@
     <string name="notification_title">DMD Remote Active</string>
     <string name="notification_content">Use Stop action to dismiss</string>
     <string name="notification_action_stop">Stop</string>
+    <string name="event_log">Event Log</string>
+    <string name="clear_log">Clear Log</string>
 </resources>

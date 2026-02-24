@@ -9,6 +9,7 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import android.util.Log
+import de.codevoid.andremote2.KeyEventLog
 import de.codevoid.andremote2.KeyInjectionService
 import kotlin.math.abs
 import kotlin.math.sqrt
@@ -129,6 +130,7 @@ class JoystickView @JvmOverloads constructor(
     }
 
     private fun sendKey(keyCode: Int) {
+        KeyEventLog.log("JoystickView", "sendKey keyCode=$keyCode shizukuEnabled=${KeyInjectionService.shizukuEnabled}")
         KeyInjectionService.instance?.injectKey(keyCode)
             ?: Log.w("JoystickView", "KeyInjectionService not available")
     }
