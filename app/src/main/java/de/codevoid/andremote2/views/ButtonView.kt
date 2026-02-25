@@ -4,13 +4,14 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.Path
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import android.util.Log
+import androidx.core.content.ContextCompat
 import de.codevoid.andremote2.KeyEventLog
 import de.codevoid.andremote2.KeyInjectionService
+import de.codevoid.andremote2.R
 
 class ButtonView @JvmOverloads constructor(
     context: Context,
@@ -21,15 +22,15 @@ class ButtonView @JvmOverloads constructor(
     private var isPressed = false
 
     private val paintNormal = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#555555")
+        color = ContextCompat.getColor(context, R.color.control_button_normal)
         style = Paint.Style.FILL
     }
     private val paintPressed = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#888888")
+        color = ContextCompat.getColor(context, R.color.control_knob)
         style = Paint.Style.FILL
     }
     private val paintBorder = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#AAAAAA")
+        color = ContextCompat.getColor(context, R.color.control_border)
         style = Paint.Style.STROKE
         strokeWidth = 4f
     }

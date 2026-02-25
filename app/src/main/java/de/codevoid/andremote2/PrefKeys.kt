@@ -1,0 +1,26 @@
+package de.codevoid.andremote2
+
+object PrefKeys {
+    const val OVERLAY_SIZE = "overlay_size"
+    const val OVERLAY_OPACITY = "overlay_opacity"
+    const val OVERLAY_X = "overlay_x"
+    const val OVERLAY_Y = "overlay_y"
+    const val PRESET = "preset"
+    const val KEYCODE_PREFIX = "keycode_"
+    const val KEYCODE_JOYSTICK_UP = "keycode_joystick_up"
+    const val KEYCODE_JOYSTICK_DOWN = "keycode_joystick_down"
+    const val KEYCODE_JOYSTICK_LEFT = "keycode_joystick_left"
+    const val KEYCODE_JOYSTICK_RIGHT = "keycode_joystick_right"
+    const val KEYCODE_BUTTON_TOP = "keycode_button_top"
+    const val KEYCODE_BUTTON_BOTTOM = "keycode_button_bottom"
+    const val KEYCODE_LEVER_UP = "keycode_lever_up"
+    const val KEYCODE_LEVER_DOWN = "keycode_lever_down"
+    const val CUSTOM_KEYCODE_JOYSTICK_UP = "custom_keycode_joystick_up"
+    const val CUSTOM_KEYCODE_JOYSTICK_DOWN = "custom_keycode_joystick_down"
+    const val CUSTOM_KEYCODE_JOYSTICK_LEFT = "custom_keycode_joystick_left"
+    const val CUSTOM_KEYCODE_JOYSTICK_RIGHT = "custom_keycode_joystick_right"
+    const val CUSTOM_KEYCODE_BUTTON_TOP = "custom_keycode_button_top"
+    const val CUSTOM_KEYCODE_BUTTON_BOTTOM = "custom_keycode_button_bottom"
+    const val CUSTOM_KEYCODE_LEVER_UP = "custom_keycode_lever_up"
+    const val CUSTOM_KEYCODE_LEVER_DOWN = "custom_keycode_lever_down"
+}

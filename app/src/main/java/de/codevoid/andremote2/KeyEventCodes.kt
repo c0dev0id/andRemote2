@@ -6,7 +6,7 @@ object KeyEventCodes {
 
     data class KeyCodeEntry(val code: Int, val name: String)
 
-    val entries: List<KeyCodeEntry> = listOf(
+    val keyCodes: List<KeyCodeEntry> = listOf(
         KeyCodeEntry(KeyEvent.KEYCODE_DPAD_UP, "KEYCODE_DPAD_UP"),
         KeyCodeEntry(KeyEvent.KEYCODE_DPAD_DOWN, "KEYCODE_DPAD_DOWN"),
         KeyCodeEntry(KeyEvent.KEYCODE_DPAD_LEFT, "KEYCODE_DPAD_LEFT"),
@@ -118,14 +118,14 @@ object KeyEventCodes {
         KeyCodeEntry(KeyEvent.KEYCODE_ZOOM_OUT, "KEYCODE_ZOOM_OUT")
     )
 
-    val displayNames: List<String> = entries.map { "${it.code} - ${it.name}" }
+    val displayNames: List<String> = keyCodes.map { "${it.code} - ${it.name}" }
 
     fun indexOfCode(code: Int): Int {
-        val idx = entries.indexOfFirst { it.code == code }
+        val idx = keyCodes.indexOfFirst { it.code == code }
         return if (idx >= 0) idx else 0
     }
 
     fun codeAtIndex(index: Int): Int {
-        return entries.getOrElse(index) { entries[0] }.code
+        return keyCodes.getOrElse(index) { keyCodes[0] }.code
     }
 }
