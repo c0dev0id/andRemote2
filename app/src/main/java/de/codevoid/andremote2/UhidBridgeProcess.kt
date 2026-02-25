@@ -117,17 +117,18 @@ object UhidBridgeProcess {
     }
 
     /**
-     * Writes a UHID_INPUT2 event to /dev/uhid (10 bytes minimum for a 4-byte report).
+     * Writes a UHID_INPUT2 event to /dev/uhid (4102 bytes = full sizeof(uhid_event)).
      *
      * uhid_event layout for input2:
-     *   [0..3] type (uint32 LE) = 12
-     *   [4..5] size (uint16 LE) = 4
-     *   [6..9] report data: [x, y, z, buttons]
+     *   [0..3]    type (uint32 LE) = 12
+     *   [4..5]    size (uint16 LE) = 4
+     *   [6..9]    report data: [x, y, z, buttons]
+     *   [10..4101] zero-filled padding (required by kernel)
      */
     private fun writeInput2(out: java.io.OutputStream, x: Byte, y: Byte, z: Byte, buttons: Byte) {
-        val buf = ByteArray(10)
+        val buf = ByteArray(4102)  // full sizeof(uhid_event) for input2
         writeInt32LE(buf, 0, UHID_INPUT2)
-        writeInt16LE(buf, 4, 4)
+        writeInt16LE(buf, 4, 4)    // report size = 4
         buf[6] = x
         buf[7] = y
         buf[8] = z
