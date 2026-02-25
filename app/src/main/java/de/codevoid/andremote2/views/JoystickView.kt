@@ -2,15 +2,16 @@ package de.codevoid.andremote2.views
 
 import android.content.Context
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import android.util.Log
+import androidx.core.content.ContextCompat
 import de.codevoid.andremote2.KeyEventLog
 import de.codevoid.andremote2.KeyInjectionService
+import de.codevoid.andremote2.R
 import kotlin.math.abs
 import kotlin.math.sqrt
 
@@ -25,20 +26,20 @@ class JoystickView @JvmOverloads constructor(
     private var keycodeRight = 22
 
     private val paintBase = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#444444")
+        color = ContextCompat.getColor(context, R.color.control_base)
         style = Paint.Style.FILL
     }
     private val paintKnob = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#888888")
+        color = ContextCompat.getColor(context, R.color.control_knob)
         style = Paint.Style.FILL
     }
     private val paintBorder = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#AAAAAA")
+        color = ContextCompat.getColor(context, R.color.control_border)
         style = Paint.Style.STROKE
         strokeWidth = 4f
     }
     private val paintArrow = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#CCCCCC")
+        color = ContextCompat.getColor(context, R.color.control_arrow)
         style = Paint.Style.FILL
     }
 

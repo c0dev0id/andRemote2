@@ -8,4 +8,11 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="overlay_bg">#CC1A1A2E</color>
+    <color name="control_base">#444444</color>
+    <color name="control_knob">#888888</color>
+    <color name="control_border">#AAAAAA</color>
+    <color name="control_arrow">#CCCCCC</color>
+    <color name="control_button_normal">#555555</color>
+    <color name="control_track">#333333</color>
+    <color name="control_lever">#777777</color>
 </resources>

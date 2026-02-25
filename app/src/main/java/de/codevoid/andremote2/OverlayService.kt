@@ -22,6 +22,8 @@ class OverlayService : Service() {
     companion object {
         @Volatile var isRunning = false
         const val CHANNEL_ID = "overlay_channel"
+        private const val BASE_WIDTH_DP = 242
+        private const val BASE_HEIGHT_DP = 426
     }
 
     private lateinit var windowManager: WindowManager
@@ -35,10 +37,10 @@ class OverlayService : Service() {
     private val mainHandler = Handler(Looper.getMainLooper())
 
     private val prefListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-        if (key == "overlay_size" || key == "overlay_opacity") {
+        if (key == PrefKeys.OVERLAY_SIZE || key == PrefKeys.OVERLAY_OPACITY) {
             mainHandler.post { applyScaleAndAlpha() }
         }
-        if (key != null && (key.startsWith("keycode_") || key == "preset")) {
+        if (key != null && (key.startsWith(PrefKeys.KEYCODE_PREFIX) || key == PrefKeys.PRESET)) {
             mainHandler.post { setupControls() }
         }
     }
@@ -48,7 +50,7 @@ class OverlayService : Service() {
     override fun onCreate() {
         super.onCreate()
         isRunning = true
-        prefs = getSharedPreferences(MainActivity.PREFS_NAME, MODE_PRIVATE)
+        prefs = getSharedPreferences(KeyMappingDefaults.PREFS_NAME, MODE_PRIVATE)
         createNotificationChannel()
         startForeground(1, buildNotification())
         startService(Intent(this, KeyInjectionService::class.java))
@@ -103,10 +105,10 @@ class OverlayService : Service() {
         // Compute base natural dimensions from the overlay's design dp values:
         // 200dp content + 21dp padding each side = 242dp wide; 384dp content + 42dp padding = 426dp tall
         val density = resources.displayMetrics.density
-        baseWidth = (242 * density + 0.5f).toInt()
-        baseHeight = (426 * density + 0.5f).toInt()
+        baseWidth = (BASE_WIDTH_DP * density + 0.5f).toInt()
+        baseHeight = (BASE_HEIGHT_DP * density + 0.5f).toInt()
 
-        val size = prefs.getInt("overlay_size", 75).coerceIn(10, 200)
+        val size = prefs.getInt(PrefKeys.OVERLAY_SIZE, 75).coerceIn(10, 200)
         val scale = size / 100f
 
         overlayParams = WindowManager.LayoutParams(
@@ -119,8 +121,8 @@ class OverlayService : Service() {
             PixelFormat.TRANSLUCENT
         ).apply {
             gravity = Gravity.TOP or Gravity.START
-            x = 100
-            y = 200
+            x = prefs.getInt(PrefKeys.OVERLAY_X, 100)
+            y = prefs.getInt(PrefKeys.OVERLAY_Y, 200)
         }
 
         applyScaleAndAlpha()
@@ -132,14 +134,18 @@ class OverlayService : Service() {
             overlayParams.x += dx
             overlayParams.y += dy
             windowManager.updateViewLayout(overlayView, overlayParams)
+            prefs.edit()
+                .putInt(PrefKeys.OVERLAY_X, overlayParams.x)
+                .putInt(PrefKeys.OVERLAY_Y, overlayParams.y)
+                .apply()
         }
 
         windowManager.addView(overlayView, overlayParams)
     }
 
     private fun applyScaleAndAlpha() {
-        val size = prefs.getInt("overlay_size", 75).coerceIn(10, 200)
-        val opacity = prefs.getInt("overlay_opacity", 80).coerceIn(0, 100)
+        val size = prefs.getInt(PrefKeys.OVERLAY_SIZE, 75).coerceIn(10, 200)
+        val opacity = prefs.getInt(PrefKeys.OVERLAY_OPACITY, 80).coerceIn(0, 100)
         val scale = size / 100f
 
         overlayView.alpha = opacity / 100f
@@ -160,20 +166,20 @@ class OverlayService : Service() {
         val lever = overlayView.findViewById<de.codevoid.andremote2.views.LeverView>(R.id.leverView)
 
         joystick.setKeyCodes(
-            prefs.getInt("keycode_joystick_up", MainActivity.DEFAULT_JOYSTICK_UP),
-            prefs.getInt("keycode_joystick_down", MainActivity.DEFAULT_JOYSTICK_DOWN),
-            prefs.getInt("keycode_joystick_left", MainActivity.DEFAULT_JOYSTICK_LEFT),
-            prefs.getInt("keycode_joystick_right", MainActivity.DEFAULT_JOYSTICK_RIGHT)
+            prefs.getInt(PrefKeys.KEYCODE_JOYSTICK_UP, KeyMappingDefaults.DEFAULT_JOYSTICK_UP),
+            prefs.getInt(PrefKeys.KEYCODE_JOYSTICK_DOWN, KeyMappingDefaults.DEFAULT_JOYSTICK_DOWN),
+            prefs.getInt(PrefKeys.KEYCODE_JOYSTICK_LEFT, KeyMappingDefaults.DEFAULT_JOYSTICK_LEFT),
+            prefs.getInt(PrefKeys.KEYCODE_JOYSTICK_RIGHT, KeyMappingDefaults.DEFAULT_JOYSTICK_RIGHT)
         )
         buttonTop.label = ""
-        buttonTop.setKeyCode(prefs.getInt("keycode_button_top", MainActivity.DEFAULT_BUTTON_TOP))
+        buttonTop.setKeyCode(prefs.getInt(PrefKeys.KEYCODE_BUTTON_TOP, KeyMappingDefaults.DEFAULT_BUTTON_TOP))
 
         buttonBottom.label = ""
-        buttonBottom.setKeyCode(prefs.getInt("keycode_button_bottom", MainActivity.DEFAULT_BUTTON_BOTTOM))
+        buttonBottom.setKeyCode(prefs.getInt(PrefKeys.KEYCODE_BUTTON_BOTTOM, KeyMappingDefaults.DEFAULT_BUTTON_BOTTOM))
 
         lever.setKeyCodes(
-            prefs.getInt("keycode_lever_up", MainActivity.DEFAULT_LEVER_UP),
-            prefs.getInt("keycode_lever_down", MainActivity.DEFAULT_LEVER_DOWN)
+            prefs.getInt(PrefKeys.KEYCODE_LEVER_UP, KeyMappingDefaults.DEFAULT_LEVER_UP),
+            prefs.getInt(PrefKeys.KEYCODE_LEVER_DOWN, KeyMappingDefaults.DEFAULT_LEVER_DOWN)
         )
     }
 
