@@ -108,7 +108,9 @@ object UhidBridge {
                 os.flush()
             } catch (e: Exception) {
                 Log.w(TAG, "sendReport failed: ${e.message}")
-                isRunning = false
+                if (remoteProcess?.asBinder()?.isBinderAlive != true) {
+                    isRunning = false
+                }
             }
         }
     }

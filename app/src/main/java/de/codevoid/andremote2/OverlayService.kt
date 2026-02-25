@@ -35,8 +35,10 @@ class OverlayService : Service() {
     private val mainHandler = Handler(Looper.getMainLooper())
 
     private val prefListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-        if (key == "overlay_size" || key == "overlay_opacity") {
-            mainHandler.post { applyScaleAndAlpha() }
+        when {
+            key == "overlay_size" || key == "overlay_opacity" -> mainHandler.post { applyScaleAndAlpha() }
+            key == "input_mode_uhid" -> mainHandler.post { applyUhidMode() }
+            key != null && key.startsWith("keycode_") -> mainHandler.post { applyKeyMappings() }
         }
     }
 
@@ -48,10 +50,6 @@ class OverlayService : Service() {
         prefs = getSharedPreferences(MainActivity.PREFS_NAME, MODE_PRIVATE)
         createNotificationChannel()
         startForeground(1, buildNotification())
-        val uhidModeEnabled = prefs.getBoolean("input_mode_uhid", false)
-        if (uhidModeEnabled) {
-            UhidBridge.start(this)
-        }
         startService(Intent(this, KeyInjectionService::class.java))
         showOverlay()
         prefs.registerOnSharedPreferenceChangeListener(prefListener)
@@ -156,17 +154,32 @@ class OverlayService : Service() {
     }
 
     private fun setupControls() {
+        applyUhidMode()
+        applyKeyMappings()
+    }
+
+    private fun applyUhidMode() {
+        val uhidEnabled = prefs.getBoolean("input_mode_uhid", false)
+        if (uhidEnabled) {
+            if (!UhidBridge.isRunning) UhidBridge.start(this)
+        } else {
+            UhidBridge.stop()
+        }
         val joystick = overlayView.findViewById<de.codevoid.andremote2.views.JoystickView>(R.id.joystickView)
         val buttonTop = overlayView.findViewById<de.codevoid.andremote2.views.ButtonView>(R.id.buttonTop)
         val buttonBottom = overlayView.findViewById<de.codevoid.andremote2.views.ButtonView>(R.id.buttonBottom)
         val lever = overlayView.findViewById<de.codevoid.andremote2.views.LeverView>(R.id.leverView)
+        joystick.setUhidMode(uhidEnabled)
+        buttonTop.setUhidMode(uhidEnabled, 0)
+        buttonBottom.setUhidMode(uhidEnabled, 1)
+        lever.setUhidMode(uhidEnabled)
+    }
 
-        val uhidModeEnabled = prefs.getBoolean("input_mode_uhid", false)
-        joystick.setUhidMode(uhidModeEnabled)
-        buttonTop.setUhidMode(uhidModeEnabled, 0)
-        buttonBottom.setUhidMode(uhidModeEnabled, 1)
-        lever.setUhidMode(uhidModeEnabled)
-
+    private fun applyKeyMappings() {
+        val joystick = overlayView.findViewById<de.codevoid.andremote2.views.JoystickView>(R.id.joystickView)
+        val buttonTop = overlayView.findViewById<de.codevoid.andremote2.views.ButtonView>(R.id.buttonTop)
+        val buttonBottom = overlayView.findViewById<de.codevoid.andremote2.views.ButtonView>(R.id.buttonBottom)
+        val lever = overlayView.findViewById<de.codevoid.andremote2.views.LeverView>(R.id.leverView)
         joystick.setKeyCodes(
             prefs.getInt("keycode_joystick_up", MainActivity.DEFAULT_JOYSTICK_UP),
             prefs.getInt("keycode_joystick_down", MainActivity.DEFAULT_JOYSTICK_DOWN),
@@ -175,10 +188,8 @@ class OverlayService : Service() {
         )
         buttonTop.label = ""
         buttonTop.setKeyCode(prefs.getInt("keycode_button_top", MainActivity.DEFAULT_BUTTON_TOP))
-
         buttonBottom.label = ""
         buttonBottom.setKeyCode(prefs.getInt("keycode_button_bottom", MainActivity.DEFAULT_BUTTON_BOTTOM))
-
         lever.setKeyCodes(
             prefs.getInt("keycode_lever_up", MainActivity.DEFAULT_LEVER_UP),
             prefs.getInt("keycode_lever_down", MainActivity.DEFAULT_LEVER_DOWN)
