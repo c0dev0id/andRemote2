@@ -109,14 +109,14 @@ class LeverView @JvmOverloads constructor(
                 }
 
                 if (newKeyCode != currentKeyCode) {
+                    if (currentKeyCode != -1) sendKeyUp(currentKeyCode)
                     currentKeyCode = newKeyCode
-                    if (newKeyCode != -1) {
-                        sendKey(newKeyCode)
-                    }
+                    if (newKeyCode != -1) sendKeyDown(newKeyCode)
                 }
                 return true
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                if (currentKeyCode != -1) sendKeyUp(currentKeyCode)
                 currentKeyCode = -1
                 leverY = height / 2f
                 invalidate()
@@ -126,9 +126,15 @@ class LeverView @JvmOverloads constructor(
         return super.onTouchEvent(event)
     }
 
-    private fun sendKey(keyCode: Int) {
-        KeyEventLog.log("LeverView", "sendKey keyCode=$keyCode shizukuEnabled=${KeyInjectionService.shizukuEnabled}")
-        KeyInjectionService.instance?.injectKey(keyCode)
+    private fun sendKeyDown(keyCode: Int) {
+        KeyEventLog.log("LeverView", "sendKeyDown keyCode=$keyCode shizukuEnabled=${KeyInjectionService.shizukuEnabled}")
+        KeyInjectionService.instance?.injectKeyDown(keyCode)
+            ?: Log.w("LeverView", "KeyInjectionService not available")
+    }
+
+    private fun sendKeyUp(keyCode: Int) {
+        KeyEventLog.log("LeverView", "sendKeyUp keyCode=$keyCode shizukuEnabled=${KeyInjectionService.shizukuEnabled}")
+        KeyInjectionService.instance?.injectKeyUp(keyCode)
             ?: Log.w("LeverView", "KeyInjectionService not available")
     }
 
