@@ -6,7 +6,6 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
 import android.util.AttributeSet
-import android.os.SystemClock
 import android.view.MotionEvent
 import android.view.View
 import android.util.Log
@@ -18,13 +17,8 @@ class ButtonView @JvmOverloads constructor(
     attrs: AttributeSet? = null
 ) : View(context, attrs) {
 
-    companion object {
-        private const val LONG_PRESS_THRESHOLD_MS = 500L
-    }
-
     private var keyCode = 66
     private var isPressed = false
-    private var pressStartTime = 0L
 
     private val paintNormal = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#555555")
@@ -52,8 +46,6 @@ class ButtonView @JvmOverloads constructor(
             invalidate()
         }
 
-    var holdMode: Boolean = false
-
     override fun onDraw(canvas: Canvas) {
         val paint = if (isPressed) paintPressed else paintNormal
         val cornerRadius = height / 4f
@@ -66,53 +58,24 @@ class ButtonView @JvmOverloads constructor(
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
                 isPressed = true
-                if (holdMode) {
-                    sendKeyDown()
-                } else {
-                    pressStartTime = SystemClock.elapsedRealtime()
-                }
+                sendKeyDown()
                 invalidate()
                 return true
             }
             MotionEvent.ACTION_UP -> {
                 isPressed = false
                 invalidate()
-                if (holdMode) {
-                    sendKeyUp()
-                } else {
-                    val duration = SystemClock.elapsedRealtime() - pressStartTime
-                    if (duration >= LONG_PRESS_THRESHOLD_MS) {
-                        sendKeyLongPress()
-                    } else {
-                        sendKey()
-                    }
-                }
+                sendKeyUp()
                 return true
             }
             MotionEvent.ACTION_CANCEL -> {
                 isPressed = false
-                if (holdMode) {
-                    sendKeyUp()
-                } else {
-                    pressStartTime = 0L
-                }
+                sendKeyUp()
                 invalidate()
                 return true
             }
         }
         return super.onTouchEvent(event)
-    }
-
-    private fun sendKey() {
-        KeyEventLog.log("ButtonView", "sendKey key=$keyCode label=$label shizukuEnabled=${KeyInjectionService.shizukuEnabled}")
-        KeyInjectionService.instance?.injectKey(keyCode)
-            ?: Log.w("ButtonView", "KeyInjectionService not available")
-    }
-
-    private fun sendKeyLongPress() {
-        KeyEventLog.log("ButtonView", "sendKeyLongPress key=$keyCode label=$label shizukuEnabled=${KeyInjectionService.shizukuEnabled}")
-        KeyInjectionService.instance?.injectKeyLongPress(keyCode)
-            ?: Log.w("ButtonView", "KeyInjectionService not available")
     }
 
     private fun sendKeyDown() {

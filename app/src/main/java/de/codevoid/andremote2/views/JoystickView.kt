@@ -102,15 +102,18 @@ class JoystickView @JvmOverloads constructor(
                 if (dist > baseRadius * 0.3f) {
                     val direction = getDirection(dx, dy)
                     if (direction != currentKeyCode) {
+                        if (currentKeyCode != -1) sendKeyUp(currentKeyCode)
                         currentKeyCode = direction
-                        sendKey(direction)
+                        sendKeyDown(direction)
                     }
                 } else {
+                    if (currentKeyCode != -1) sendKeyUp(currentKeyCode)
                     currentKeyCode = -1
                 }
                 return true
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                if (currentKeyCode != -1) sendKeyUp(currentKeyCode)
                 knobX = centerX
                 knobY = centerY
                 currentKeyCode = -1
@@ -129,9 +132,15 @@ class JoystickView @JvmOverloads constructor(
         }
     }
 
-    private fun sendKey(keyCode: Int) {
-        KeyEventLog.log("JoystickView", "sendKey keyCode=$keyCode shizukuEnabled=${KeyInjectionService.shizukuEnabled}")
-        KeyInjectionService.instance?.injectKey(keyCode)
+    private fun sendKeyDown(keyCode: Int) {
+        KeyEventLog.log("JoystickView", "sendKeyDown keyCode=$keyCode shizukuEnabled=${KeyInjectionService.shizukuEnabled}")
+        KeyInjectionService.instance?.injectKeyDown(keyCode)
+            ?: Log.w("JoystickView", "KeyInjectionService not available")
+    }
+
+    private fun sendKeyUp(keyCode: Int) {
+        KeyEventLog.log("JoystickView", "sendKeyUp keyCode=$keyCode shizukuEnabled=${KeyInjectionService.shizukuEnabled}")
+        KeyInjectionService.instance?.injectKeyUp(keyCode)
             ?: Log.w("JoystickView", "KeyInjectionService not available")
     }
 
