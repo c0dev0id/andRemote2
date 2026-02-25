@@ -11,6 +11,7 @@ import android.view.View
 import android.util.Log
 import de.codevoid.andremote2.KeyEventLog
 import de.codevoid.andremote2.KeyInjectionService
+import de.codevoid.andremote2.UhidBridge
 
 class LeverView @JvmOverloads constructor(
     context: Context,
@@ -23,6 +24,7 @@ class LeverView @JvmOverloads constructor(
     private var currentKeyCode = -1
     private var startY = 0f
     private var leverY = 0f
+    private var uhidMode = false
 
     private val paintTrack = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#333333")
@@ -101,29 +103,44 @@ class LeverView @JvmOverloads constructor(
                 leverY = event.y.coerceIn(height * 0.1f, height * 0.9f)
                 invalidate()
 
-                val threshold = height * 0.15f
-                val newKeyCode = when {
-                    dy < -threshold -> keycodeUp
-                    dy > threshold -> keycodeDown
-                    else -> -1
-                }
+                if (uhidMode && UhidBridge.isRunning) {
+                    sendAnalog(dy)
+                } else {
+                    val threshold = height * 0.15f
+                    val newKeyCode = when {
+                        dy < -threshold -> keycodeUp
+                        dy > threshold -> keycodeDown
+                        else -> -1
+                    }
 
-                if (newKeyCode != currentKeyCode) {
-                    if (currentKeyCode != -1) sendKeyUp(currentKeyCode)
-                    currentKeyCode = newKeyCode
-                    if (newKeyCode != -1) sendKeyDown(newKeyCode)
+                    if (newKeyCode != currentKeyCode) {
+                        if (currentKeyCode != -1) sendKeyUp(currentKeyCode)
+                        currentKeyCode = newKeyCode
+                        if (newKeyCode != -1) sendKeyDown(newKeyCode)
+                    }
                 }
                 return true
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                if (currentKeyCode != -1) sendKeyUp(currentKeyCode)
-                currentKeyCode = -1
+                if (uhidMode && UhidBridge.isRunning) {
+                    UhidBridge.updateLever(0)
+                } else {
+                    if (currentKeyCode != -1) sendKeyUp(currentKeyCode)
+                    currentKeyCode = -1
+                }
                 leverY = height / 2f
                 invalidate()
                 return true
             }
         }
         return super.onTouchEvent(event)
+    }
+
+    private fun sendAnalog(dy: Float) {
+        val maxTravel = height * 0.4f
+        val axisZ = (dy / maxTravel * 127f).toInt().coerceIn(-127, 127).toByte()
+        KeyEventLog.log("LeverView", "analog z=$axisZ")
+        UhidBridge.updateLever(axisZ)
     }
 
     private fun sendKeyDown(keyCode: Int) {
@@ -154,5 +171,9 @@ class LeverView @JvmOverloads constructor(
     fun setKeyCodes(up: Int, down: Int) {
         keycodeUp = up
         keycodeDown = down
+    }
+
+    fun setUhidMode(enabled: Boolean) {
+        uhidMode = enabled
     }
 }

@@ -11,6 +11,7 @@ import android.view.View
 import android.util.Log
 import de.codevoid.andremote2.KeyEventLog
 import de.codevoid.andremote2.KeyInjectionService
+import de.codevoid.andremote2.UhidBridge
 
 class ButtonView @JvmOverloads constructor(
     context: Context,
@@ -19,6 +20,8 @@ class ButtonView @JvmOverloads constructor(
 
     private var keyCode = 66
     private var isPressed = false
+    private var uhidMode = false
+    private var uhidButtonIndex = 0
 
     private val paintNormal = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#555555")
@@ -79,12 +82,22 @@ class ButtonView @JvmOverloads constructor(
     }
 
     private fun sendKeyDown() {
+        if (uhidMode && UhidBridge.isRunning) {
+            KeyEventLog.log("ButtonView", "uhid buttonDown idx=$uhidButtonIndex label=$label")
+            UhidBridge.setButton(uhidButtonIndex, true)
+            return
+        }
         KeyEventLog.log("ButtonView", "sendKeyDown key=$keyCode label=$label shizukuEnabled=${KeyInjectionService.shizukuEnabled}")
         KeyInjectionService.instance?.injectKeyDown(keyCode)
             ?: Log.w("ButtonView", "KeyInjectionService not available")
     }
 
     private fun sendKeyUp() {
+        if (uhidMode && UhidBridge.isRunning) {
+            KeyEventLog.log("ButtonView", "uhid buttonUp idx=$uhidButtonIndex label=$label")
+            UhidBridge.setButton(uhidButtonIndex, false)
+            return
+        }
         KeyEventLog.log("ButtonView", "sendKeyUp key=$keyCode label=$label shizukuEnabled=${KeyInjectionService.shizukuEnabled}")
         KeyInjectionService.instance?.injectKeyUp(keyCode)
             ?: Log.w("ButtonView", "KeyInjectionService not available")
@@ -104,5 +117,10 @@ class ButtonView @JvmOverloads constructor(
 
     fun setKeyCode(code: Int) {
         keyCode = code
+    }
+
+    fun setUhidMode(enabled: Boolean, buttonIndex: Int) {
+        uhidMode = enabled
+        uhidButtonIndex = buttonIndex
     }
 }

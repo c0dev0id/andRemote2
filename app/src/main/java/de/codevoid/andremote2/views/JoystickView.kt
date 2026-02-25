@@ -11,6 +11,7 @@ import android.view.View
 import android.util.Log
 import de.codevoid.andremote2.KeyEventLog
 import de.codevoid.andremote2.KeyInjectionService
+import de.codevoid.andremote2.UhidBridge
 import kotlin.math.abs
 import kotlin.math.sqrt
 
@@ -23,6 +24,8 @@ class JoystickView @JvmOverloads constructor(
     private var keycodeDown = 20
     private var keycodeLeft = 21
     private var keycodeRight = 22
+
+    private var uhidMode = false
 
     private val paintBase = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#444444")
@@ -99,29 +102,53 @@ class JoystickView @JvmOverloads constructor(
                 knobY = centerY + dy * ratio
                 invalidate()
 
-                if (dist > baseRadius * 0.3f) {
-                    val direction = getDirection(dx, dy)
-                    if (direction != currentKeyCode) {
-                        if (currentKeyCode != -1) sendKeyUp(currentKeyCode)
-                        currentKeyCode = direction
-                        sendKeyDown(direction)
-                    }
+                if (uhidMode && UhidBridge.isRunning) {
+                    sendAnalog(dx, dy, dist)
                 } else {
-                    if (currentKeyCode != -1) sendKeyUp(currentKeyCode)
-                    currentKeyCode = -1
+                    if (dist > baseRadius * 0.3f) {
+                        val direction = getDirection(dx, dy)
+                        if (direction != currentKeyCode) {
+                            if (currentKeyCode != -1) sendKeyUp(currentKeyCode)
+                            currentKeyCode = direction
+                            sendKeyDown(direction)
+                        }
+                    } else {
+                        if (currentKeyCode != -1) sendKeyUp(currentKeyCode)
+                        currentKeyCode = -1
+                    }
                 }
                 return true
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                if (currentKeyCode != -1) sendKeyUp(currentKeyCode)
+                if (uhidMode && UhidBridge.isRunning) {
+                    UhidBridge.updateJoystick(0, 0)
+                } else {
+                    if (currentKeyCode != -1) sendKeyUp(currentKeyCode)
+                    currentKeyCode = -1
+                }
                 knobX = centerX
                 knobY = centerY
-                currentKeyCode = -1
                 invalidate()
                 return true
             }
         }
         return super.onTouchEvent(event)
+    }
+
+    private fun sendAnalog(dx: Float, dy: Float, dist: Float) {
+        val deadZone = baseRadius * 0.3f
+        if (dist <= deadZone) {
+            UhidBridge.updateJoystick(0, 0)
+            return
+        }
+        val active = (baseRadius - knobRadius) - deadZone
+        val scale = if (active > 0f) ((dist - deadZone) / active).coerceIn(0f, 1f) else 1f
+        val nx = if (dist > 0f) dx / dist else 0f
+        val ny = if (dist > 0f) dy / dist else 0f
+        val axisX = (nx * scale * 127f).toInt().coerceIn(-127, 127).toByte()
+        val axisY = (ny * scale * 127f).toInt().coerceIn(-127, 127).toByte()
+        KeyEventLog.log("JoystickView", "analog x=$axisX y=$axisY")
+        UhidBridge.updateJoystick(axisX, axisY)
     }
 
     private fun getDirection(dx: Float, dy: Float): Int {
@@ -155,5 +182,9 @@ class JoystickView @JvmOverloads constructor(
         keycodeDown = down
         keycodeLeft = left
         keycodeRight = right
+    }
+
+    fun setUhidMode(enabled: Boolean) {
+        uhidMode = enabled
     }
 }
