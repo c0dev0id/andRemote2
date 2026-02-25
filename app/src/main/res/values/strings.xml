@@ -35,4 +35,8 @@
     <string name="notification_action_stop">Stop</string>
     <string name="event_log">Event Log</string>
     <string name="clear_log">Clear Log</string>
+    <string name="input_mode">Input Mode</string>
+    <string name="input_mode_key_injection">Key Injection (Legacy)</string>
+    <string name="input_mode_uhid_gamepad">UHID Gamepad (Analog)</string>
+    <string name="uhid_mode_enabled">UHID Gamepad mode enabled. Key mappings are used as fallback.</string>
 </resources>

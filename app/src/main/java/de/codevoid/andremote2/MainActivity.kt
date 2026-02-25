@@ -17,6 +17,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.materialswitch.MaterialSwitch
 import com.google.android.material.slider.Slider
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import rikka.shizuku.Shizuku
@@ -46,6 +47,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvOpacity: TextView
     private lateinit var tvEventLog: TextView
     private lateinit var scrollEventLog: ScrollView
+    private lateinit var switchUhidMode: MaterialSwitch
 
     private lateinit var actvJoystickUp: MaterialAutoCompleteTextView
     private lateinit var actvJoystickDown: MaterialAutoCompleteTextView
@@ -91,6 +93,7 @@ class MainActivity : AppCompatActivity() {
         tvOpacity = findViewById(R.id.tvOpacity)
         tvEventLog = findViewById(R.id.tvEventLog)
         scrollEventLog = findViewById(R.id.scrollEventLog)
+        switchUhidMode = findViewById(R.id.switchUhidMode)
         actvPreset = findViewById(R.id.actvPreset)
 
         // Bind key-mapping rows via include IDs
@@ -138,6 +141,12 @@ class MainActivity : AppCompatActivity() {
         loadSettings()
 
         Shizuku.addRequestPermissionResultListener(shizukuPermissionListener)
+
+        // UHID mode toggle
+        switchUhidMode.isChecked = prefs.getBoolean("input_mode_uhid", false)
+        switchUhidMode.setOnCheckedChangeListener { _, isChecked ->
+            prefs.edit().putBoolean("input_mode_uhid", isChecked).apply()
+        }
 
         // Set Key buttons
         setKeyButtons.zip(keyActvs).forEach { (btn, actv) ->

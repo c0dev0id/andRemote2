@@ -48,6 +48,10 @@ class OverlayService : Service() {
         prefs = getSharedPreferences(MainActivity.PREFS_NAME, MODE_PRIVATE)
         createNotificationChannel()
         startForeground(1, buildNotification())
+        val uhidModeEnabled = prefs.getBoolean("input_mode_uhid", false)
+        if (uhidModeEnabled) {
+            UhidBridge.start(this)
+        }
         startService(Intent(this, KeyInjectionService::class.java))
         showOverlay()
         prefs.registerOnSharedPreferenceChangeListener(prefListener)
@@ -60,6 +64,7 @@ class OverlayService : Service() {
         if (::overlayView.isInitialized) {
             windowManager.removeView(overlayView)
         }
+        UhidBridge.stop()
         stopService(Intent(this, KeyInjectionService::class.java))
     }
 
@@ -155,6 +160,12 @@ class OverlayService : Service() {
         val buttonTop = overlayView.findViewById<de.codevoid.andremote2.views.ButtonView>(R.id.buttonTop)
         val buttonBottom = overlayView.findViewById<de.codevoid.andremote2.views.ButtonView>(R.id.buttonBottom)
         val lever = overlayView.findViewById<de.codevoid.andremote2.views.LeverView>(R.id.leverView)
+
+        val uhidModeEnabled = prefs.getBoolean("input_mode_uhid", false)
+        joystick.setUhidMode(uhidModeEnabled)
+        buttonTop.setUhidMode(uhidModeEnabled, 0)
+        buttonBottom.setUhidMode(uhidModeEnabled, 1)
+        lever.setUhidMode(uhidModeEnabled)
 
         joystick.setKeyCodes(
             prefs.getInt("keycode_joystick_up", MainActivity.DEFAULT_JOYSTICK_UP),
