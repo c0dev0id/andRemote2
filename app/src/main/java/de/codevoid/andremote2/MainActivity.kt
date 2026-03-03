@@ -291,14 +291,30 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun noFilterAdapter(items: List<String>) = object : ArrayAdapter<String>(
+        this, android.R.layout.simple_dropdown_item_1line, items
+    ) {
+        private val noopFilter = object : android.widget.Filter() {
+            override fun performFiltering(c: CharSequence?) =
+                FilterResults().apply { values = items; count = items.size }
+            override fun publishResults(c: CharSequence?, r: FilterResults?) = notifyDataSetChanged()
+        }
+        override fun getFilter() = noopFilter
+    }
+
     private fun setupKeyDropdowns() {
-        val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, KeyEventCodes.displayNames)
-        keyActvs.forEach { it.setAdapter(adapter) }
+        keyActvs.forEach { actv ->
+            actv.setAdapter(noFilterAdapter(KeyEventCodes.displayNames))
+            actv.setOnClickListener {
+                val idx = KeyEventCodes.displayNames.indexOf(actv.text.toString())
+                if (idx >= 0) actv.post { actv.setListSelection(idx) }
+            }
+        }
     }
 
     private fun setupPresetDropdown() {
         val presets = listOf(getString(R.string.preset_custom), getString(R.string.preset_dmd_remote_2))
-        val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, presets)
+        val adapter = noFilterAdapter(presets)
         actvPreset.setAdapter(adapter)
         val savedPreset = prefs.getInt(PrefKeys.PRESET, 0)
         actvPreset.setText(presets[savedPreset], false)
@@ -314,12 +330,10 @@ class MainActivity : AppCompatActivity() {
             setKeyButtons.forEach { it.isEnabled = !isDmdPreset }
             if (isDmdPreset) {
                 populateKeyMappingUi(true)
-                // Update keycode_* so OverlayService reads DMD defaults if running
-                saveKeyMappings()
+                applyPresetToRuntimePrefs(true)
             } else {
-                // Restore custom mapping when switching back to Custom
                 populateKeyMappingUi(false)
-                saveKeyMappings()
+                applyPresetToRuntimePrefs(false)
             }
         }
         // Apply initial enabled state based on saved preset
@@ -399,6 +413,21 @@ class MainActivity : AppCompatActivity() {
             .putInt(PrefKeys.CUSTOM_KEYCODE_BUTTON_BOTTOM, actvToKeyCode(actvButtonBottom))
             .putInt(PrefKeys.CUSTOM_KEYCODE_LEVER_UP, actvToKeyCode(actvLeverUp))
             .putInt(PrefKeys.CUSTOM_KEYCODE_LEVER_DOWN, actvToKeyCode(actvLeverDown))
+            .apply()
+    }
+
+    private fun applyPresetToRuntimePrefs(isDmdPreset: Boolean) {
+        fun resolve(customKey: String, default: Int) =
+            if (isDmdPreset) default else prefs.getInt(customKey, default)
+        prefs.edit()
+            .putInt(PrefKeys.KEYCODE_JOYSTICK_UP,    resolve(PrefKeys.CUSTOM_KEYCODE_JOYSTICK_UP,    KeyMappingDefaults.DEFAULT_JOYSTICK_UP))
+            .putInt(PrefKeys.KEYCODE_JOYSTICK_DOWN,  resolve(PrefKeys.CUSTOM_KEYCODE_JOYSTICK_DOWN,  KeyMappingDefaults.DEFAULT_JOYSTICK_DOWN))
+            .putInt(PrefKeys.KEYCODE_JOYSTICK_LEFT,  resolve(PrefKeys.CUSTOM_KEYCODE_JOYSTICK_LEFT,  KeyMappingDefaults.DEFAULT_JOYSTICK_LEFT))
+            .putInt(PrefKeys.KEYCODE_JOYSTICK_RIGHT, resolve(PrefKeys.CUSTOM_KEYCODE_JOYSTICK_RIGHT, KeyMappingDefaults.DEFAULT_JOYSTICK_RIGHT))
+            .putInt(PrefKeys.KEYCODE_BUTTON_TOP,     resolve(PrefKeys.CUSTOM_KEYCODE_BUTTON_TOP,     KeyMappingDefaults.DEFAULT_BUTTON_TOP))
+            .putInt(PrefKeys.KEYCODE_BUTTON_BOTTOM,  resolve(PrefKeys.CUSTOM_KEYCODE_BUTTON_BOTTOM,  KeyMappingDefaults.DEFAULT_BUTTON_BOTTOM))
+            .putInt(PrefKeys.KEYCODE_LEVER_UP,       resolve(PrefKeys.CUSTOM_KEYCODE_LEVER_UP,       KeyMappingDefaults.DEFAULT_LEVER_UP))
+            .putInt(PrefKeys.KEYCODE_LEVER_DOWN,     resolve(PrefKeys.CUSTOM_KEYCODE_LEVER_DOWN,     KeyMappingDefaults.DEFAULT_LEVER_DOWN))
             .apply()
     }
 
