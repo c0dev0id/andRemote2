@@ -116,7 +116,7 @@ object KeyEventCodes {
         KeyCodeEntry(KeyEvent.KEYCODE_SETTINGS, "KEYCODE_SETTINGS"),
         KeyCodeEntry(KeyEvent.KEYCODE_ZOOM_IN, "KEYCODE_ZOOM_IN"),
         KeyCodeEntry(KeyEvent.KEYCODE_ZOOM_OUT, "KEYCODE_ZOOM_OUT")
-    )
+    ).sortedBy { it.code }
 
     val displayNames: List<String> = keyCodes.map { "${it.code} - ${it.name}" }
 
