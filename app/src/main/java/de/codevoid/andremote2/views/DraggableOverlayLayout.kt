@@ -13,7 +13,7 @@ class DraggableOverlayLayout @JvmOverloads constructor(
 
     private val dragThreshold = 10f
     private var isDragging = false
-    private var touchFromButton = false
+    private var touchOnControl = false
     private var startRawX = 0f
     private var startRawY = 0f
     private var lastRawX = 0f
@@ -25,14 +25,14 @@ class DraggableOverlayLayout @JvmOverloads constructor(
         when (ev.action) {
             MotionEvent.ACTION_DOWN -> {
                 isDragging = false
-                touchFromButton = isTouchOnButton(ev)
+                touchOnControl = isTouchOnControl(ev)
                 startRawX = ev.rawX
                 startRawY = ev.rawY
                 lastRawX = ev.rawX
                 lastRawY = ev.rawY
             }
             MotionEvent.ACTION_MOVE -> {
-                if (!touchFromButton) return false
+                if (touchOnControl) return false
                 val dx = ev.rawX - startRawX
                 val dy = ev.rawY - startRawY
                 if (abs(dx) > dragThreshold || abs(dy) > dragThreshold) {
@@ -44,20 +44,20 @@ class DraggableOverlayLayout @JvmOverloads constructor(
         return false
     }
 
-    private fun isTouchOnButton(ev: MotionEvent): Boolean {
-        return isButtonUnder(this, ev.x.toInt(), ev.y.toInt())
+    private fun isTouchOnControl(ev: MotionEvent): Boolean {
+        return isControlUnder(this, ev.x.toInt(), ev.y.toInt())
     }
 
-    private fun isButtonUnder(group: android.view.ViewGroup, x: Int, y: Int): Boolean {
+    private fun isControlUnder(group: android.view.ViewGroup, x: Int, y: Int): Boolean {
         for (i in 0 until group.childCount) {
             val child = group.getChildAt(i)
             if (child.visibility != VISIBLE) continue
             if (x >= child.left && x <= child.right && y >= child.top && y <= child.bottom) {
-                if (child is ButtonView) return true
+                if (child is ButtonView || child is LeverView || child is JoystickView) return true
                 if (child is android.view.ViewGroup) {
                     val childX = x - child.left
                     val childY = y - child.top
-                    if (isButtonUnder(child, childX, childY)) return true
+                    if (isControlUnder(child, childX, childY)) return true
                 }
             }
         }

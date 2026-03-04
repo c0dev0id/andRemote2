@@ -4,6 +4,8 @@ import android.accessibilityservice.AccessibilityService
 import android.util.Log
 import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 class KeyInjectionService : AccessibilityService() {
 
@@ -12,6 +14,8 @@ class KeyInjectionService : AccessibilityService() {
             private set
     }
 
+    private val executor: ExecutorService = Executors.newSingleThreadExecutor()
+
     override fun onServiceConnected() {
         instance = this
     }
@@ -19,6 +23,7 @@ class KeyInjectionService : AccessibilityService() {
     override fun onDestroy() {
         super.onDestroy()
         instance = null
+        executor.shutdownNow()
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {}
@@ -34,22 +39,24 @@ class KeyInjectionService : AccessibilityService() {
                     "performGlobalAction failed for keyCode=$keyCode action=$globalAction")
             }
         } else {
-            Log.w("KeyInjectionService",
-                "No global-action mapping for keyCode=$keyCode")
+            executor.execute {
+                try {
+                    Runtime.getRuntime()
+                        .exec(arrayOf("input", "keyevent", keyCode.toString()))
+                        .waitFor()
+                } catch (e: Exception) {
+                    Log.w("KeyInjectionService",
+                        "input keyevent failed for keyCode=$keyCode", e)
+                }
+            }
         }
     }
 
     private fun keyCodeToGlobalAction(keyCode: Int): Int? {
         return when (keyCode) {
-            KeyEvent.KEYCODE_DPAD_UP      -> GLOBAL_ACTION_DPAD_UP
-            KeyEvent.KEYCODE_DPAD_DOWN    -> GLOBAL_ACTION_DPAD_DOWN
-            KeyEvent.KEYCODE_DPAD_LEFT    -> GLOBAL_ACTION_DPAD_LEFT
-            KeyEvent.KEYCODE_DPAD_RIGHT   -> GLOBAL_ACTION_DPAD_RIGHT
-            KeyEvent.KEYCODE_DPAD_CENTER  -> GLOBAL_ACTION_DPAD_CENTER
-            KeyEvent.KEYCODE_ENTER        -> GLOBAL_ACTION_DPAD_CENTER
-            KeyEvent.KEYCODE_BACK         -> GLOBAL_ACTION_BACK
-            KeyEvent.KEYCODE_HOME         -> GLOBAL_ACTION_HOME
-            KeyEvent.KEYCODE_ESCAPE       -> GLOBAL_ACTION_BACK
+            KeyEvent.KEYCODE_BACK    -> GLOBAL_ACTION_BACK
+            KeyEvent.KEYCODE_HOME    -> GLOBAL_ACTION_HOME
+            KeyEvent.KEYCODE_ESCAPE  -> GLOBAL_ACTION_BACK
             else -> null
         }
     }
