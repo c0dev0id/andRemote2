@@ -56,6 +56,7 @@ class KeyInjectionService : Service() {
     }
 
     fun injectKey(keyCode: Int) {
+        KeyEventLog.log("KeyInjectionService", "injectKey keyCode=$keyCode shizukuEnabled=$shizukuEnabled")
         if (shizukuEnabled) {
             bgHandler.post { runShizukuKeyEvent(keyCode) }
         } else {
@@ -64,6 +65,7 @@ class KeyInjectionService : Service() {
     }
 
     fun injectKeyLongPress(keyCode: Int) {
+        KeyEventLog.log("KeyInjectionService", "injectKeyLongPress keyCode=$keyCode shizukuEnabled=$shizukuEnabled")
         if (shizukuEnabled) {
             bgHandler.post { runShizukuKeyEvent(keyCode, "--longpress") }
         } else {

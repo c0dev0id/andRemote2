@@ -9,6 +9,7 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import android.util.Log
+import de.codevoid.andremote2.KeyEventLog
 import de.codevoid.andremote2.KeyInjectionService
 
 class LeverView @JvmOverloads constructor(
@@ -126,6 +127,7 @@ class LeverView @JvmOverloads constructor(
     }
 
     private fun sendKey(keyCode: Int) {
+        KeyEventLog.log("LeverView", "sendKey keyCode=$keyCode shizukuEnabled=${KeyInjectionService.shizukuEnabled}")
         KeyInjectionService.instance?.injectKey(keyCode)
             ?: Log.w("LeverView", "KeyInjectionService not available")
     }
