@@ -1,8 +1,8 @@
 package de.codevoid.andremote2
 
 import android.accessibilityservice.AccessibilityService
-import android.app.Instrumentation
 import android.util.Log
+import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
 
 class KeyInjectionService : AccessibilityService() {
@@ -11,8 +11,6 @@ class KeyInjectionService : AccessibilityService() {
         var instance: KeyInjectionService? = null
             private set
     }
-
-    private val instrumentation = Instrumentation()
 
     override fun onServiceConnected() {
         instance = this
@@ -28,13 +26,31 @@ class KeyInjectionService : AccessibilityService() {
     override fun onInterrupt() {}
 
     fun injectKey(keyCode: Int) {
-        // Must run off the main thread since sendKeyDownUpSync blocks
-        Thread {
-            try {
-                instrumentation.sendKeyDownUpSync(keyCode)
-            } catch (e: Exception) {
-                Log.w("KeyInjectionService", "injectKey failed: $e")
+        val globalAction = keyCodeToGlobalAction(keyCode)
+        if (globalAction != null) {
+            val success = performGlobalAction(globalAction)
+            if (!success) {
+                Log.w("KeyInjectionService",
+                    "performGlobalAction failed for keyCode=$keyCode action=$globalAction")
             }
-        }.start()
+        } else {
+            Log.w("KeyInjectionService",
+                "No global-action mapping for keyCode=$keyCode")
+        }
+    }
+
+    private fun keyCodeToGlobalAction(keyCode: Int): Int? {
+        return when (keyCode) {
+            KeyEvent.KEYCODE_DPAD_UP      -> GLOBAL_ACTION_DPAD_UP
+            KeyEvent.KEYCODE_DPAD_DOWN    -> GLOBAL_ACTION_DPAD_DOWN
+            KeyEvent.KEYCODE_DPAD_LEFT    -> GLOBAL_ACTION_DPAD_LEFT
+            KeyEvent.KEYCODE_DPAD_RIGHT   -> GLOBAL_ACTION_DPAD_RIGHT
+            KeyEvent.KEYCODE_DPAD_CENTER  -> GLOBAL_ACTION_DPAD_CENTER
+            KeyEvent.KEYCODE_ENTER        -> GLOBAL_ACTION_DPAD_CENTER
+            KeyEvent.KEYCODE_BACK         -> GLOBAL_ACTION_BACK
+            KeyEvent.KEYCODE_HOME         -> GLOBAL_ACTION_HOME
+            KeyEvent.KEYCODE_ESCAPE       -> GLOBAL_ACTION_BACK
+            else -> null
+        }
     }
 }
