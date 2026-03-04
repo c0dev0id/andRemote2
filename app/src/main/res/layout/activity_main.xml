@@ -168,15 +168,15 @@
             android:layout_marginBottom="8dp">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="16dp"
                 android:text="@string/joystick_up"/>
 
             <Spinner
                 android:id="@+id/spJoystickUp"
-                android:layout_width="0dp"
-                android:layout_weight="1"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
 
             <Button
@@ -197,15 +197,15 @@
             android:layout_marginBottom="8dp">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="16dp"
                 android:text="@string/joystick_down"/>
 
             <Spinner
                 android:id="@+id/spJoystickDown"
-                android:layout_width="0dp"
-                android:layout_weight="1"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
 
             <Button
@@ -226,15 +226,15 @@
             android:layout_marginBottom="8dp">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="16dp"
                 android:text="@string/joystick_left"/>
 
             <Spinner
                 android:id="@+id/spJoystickLeft"
-                android:layout_width="0dp"
-                android:layout_weight="1"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
 
             <Button
@@ -255,15 +255,15 @@
             android:layout_marginBottom="8dp">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="16dp"
                 android:text="@string/joystick_right"/>
 
             <Spinner
                 android:id="@+id/spJoystickRight"
-                android:layout_width="0dp"
-                android:layout_weight="1"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
 
             <Button
@@ -284,15 +284,15 @@
             android:layout_marginBottom="8dp">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="16dp"
                 android:text="@string/button_top"/>
 
             <Spinner
                 android:id="@+id/spButtonTop"
-                android:layout_width="0dp"
-                android:layout_weight="1"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
 
             <Button
@@ -313,15 +313,15 @@
             android:layout_marginBottom="8dp">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="16dp"
                 android:text="@string/button_bottom"/>
 
             <Spinner
                 android:id="@+id/spButtonBottom"
-                android:layout_width="0dp"
-                android:layout_weight="1"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
 
             <Button
@@ -342,15 +342,15 @@
             android:layout_marginBottom="8dp">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="16dp"
                 android:text="@string/lever_up"/>
 
             <Spinner
                 android:id="@+id/spLeverUp"
-                android:layout_width="0dp"
-                android:layout_weight="1"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
 
             <Button
@@ -371,15 +371,15 @@
             android:layout_marginBottom="16dp">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="16dp"
                 android:text="@string/lever_down"/>
 
             <Spinner
                 android:id="@+id/spLeverDown"
-                android:layout_width="0dp"
-                android:layout_weight="1"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
 
             <Button

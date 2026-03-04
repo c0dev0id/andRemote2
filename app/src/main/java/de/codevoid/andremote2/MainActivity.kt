@@ -245,7 +245,16 @@ class MainActivity : AppCompatActivity() {
     private fun setupSpinners() {
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, KeyEventCodes.displayNames)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        keySpinners.forEach { it.adapter = adapter }
+
+        val paint = android.graphics.Paint()
+        paint.textSize = resources.displayMetrics.scaledDensity * 14f
+        val widestPx = KeyEventCodes.displayNames.maxOfOrNull { paint.measureText(it) }?.toInt() ?: 0
+        val dropDownWidth = widestPx + (32 * resources.displayMetrics.density).toInt()
+
+        keySpinners.forEach {
+            it.adapter = adapter
+            it.setDropDownWidth(dropDownWidth)
+        }
     }
 
     private fun setupPresetSpinner() {
