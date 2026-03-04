@@ -38,6 +38,9 @@ class OverlayService : Service() {
         if (key == "overlay_size" || key == "overlay_opacity") {
             mainHandler.post { applyScaleAndAlpha() }
         }
+        if (key != null && (key.startsWith("keycode_") || key == "preset")) {
+            mainHandler.post { setupControls() }
+        }
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
