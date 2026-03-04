@@ -5,15 +5,15 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:background="@color/overlay_bg"
-    android:padding="16dp">
+    android:padding="21dp">
 
     <!-- Joystick on top -->
     <de.codevoid.andremote2.views.JoystickView
         android:id="@+id/joystickView"
-        android:layout_width="150dp"
-        android:layout_height="150dp"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
         android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="8dp"/>
+        android:layout_marginBottom="11dp"/>
 
     <!-- Bottom row: Lever | Buttons -->
     <LinearLayout
@@ -26,9 +26,9 @@
         <!-- Lever on the left -->
         <de.codevoid.andremote2.views.LeverView
             android:id="@+id/leverView"
-            android:layout_width="50dp"
-            android:layout_height="130dp"
-            android:layout_marginEnd="8dp"/>
+            android:layout_width="66dp"
+            android:layout_height="173dp"
+            android:layout_marginEnd="11dp"/>
 
         <!-- Buttons stacked on right -->
         <LinearLayout
@@ -39,14 +39,14 @@
 
             <de.codevoid.andremote2.views.ButtonView
                 android:id="@+id/buttonTop"
-                android:layout_width="70dp"
-                android:layout_height="55dp"
-                android:layout_marginBottom="8dp"/>
+                android:layout_width="93dp"
+                android:layout_height="73dp"
+                android:layout_marginBottom="11dp"/>
 
             <de.codevoid.andremote2.views.ButtonView
                 android:id="@+id/buttonBottom"
-                android:layout_width="70dp"
-                android:layout_height="55dp"/>
+                android:layout_width="93dp"
+                android:layout_height="73dp"/>
 
         </LinearLayout>
     </LinearLayout>
