@@ -22,6 +22,9 @@ class OverlayService : Service() {
     private lateinit var prefs: SharedPreferences
     private lateinit var overlayParams: WindowManager.LayoutParams
 
+    private var baseWidth = 0
+    private var baseHeight = 0
+
     private val mainHandler = Handler(Looper.getMainLooper())
 
     private val prefListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
@@ -87,18 +90,18 @@ class OverlayService : Service() {
 
         overlayView = LayoutInflater.from(this).inflate(R.layout.overlay_remote, null)
 
-        // Measure at natural size to calculate scaled window dimensions
-        overlayView.measure(
-            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
-            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
-        )
+        // Compute base natural dimensions from the overlay's design dp values:
+        // 200dp content + 21dp padding each side = 242dp wide; 384dp content + 42dp padding = 426dp tall
+        val density = resources.displayMetrics.density
+        baseWidth = (242 * density + 0.5f).toInt()
+        baseHeight = (426 * density + 0.5f).toInt()
 
         val size = prefs.getInt("overlay_size", 75).coerceIn(10, 200)
         val scale = size / 100f
 
         overlayParams = WindowManager.LayoutParams(
-            (overlayView.measuredWidth * scale).toInt(),
-            (overlayView.measuredHeight * scale).toInt(),
+            (baseWidth * scale).toInt(),
+            (baseHeight * scale).toInt(),
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                 WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
@@ -110,8 +113,6 @@ class OverlayService : Service() {
             y = 200
         }
 
-        overlayView.pivotX = 0f
-        overlayView.pivotY = 0f
         applyScaleAndAlpha()
 
         setupControls()
@@ -132,17 +133,9 @@ class OverlayService : Service() {
         val scale = size / 100f
 
         overlayView.alpha = opacity / 100f
-        overlayView.scaleX = scale
-        overlayView.scaleY = scale
 
-        // Resize the window to match the scaled view dimensions
-        // so there's no invisible area extending beyond the visible content
-        overlayView.measure(
-            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
-            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
-        )
-        overlayParams.width = (overlayView.measuredWidth * scale).toInt()
-        overlayParams.height = (overlayView.measuredHeight * scale).toInt()
+        overlayParams.width = (baseWidth * scale).toInt()
+        overlayParams.height = (baseHeight * scale).toInt()
 
         if (::overlayView.isInitialized && ::overlayParams.isInitialized &&
             ::windowManager.isInitialized && overlayView.isAttachedToWindow) {

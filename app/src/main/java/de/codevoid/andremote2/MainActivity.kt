@@ -292,6 +292,7 @@ class MainActivity : AppCompatActivity() {
                 actvButtonBottom.setText(KeyEventCodes.displayNames[KeyEventCodes.indexOfCode(DEFAULT_BUTTON_BOTTOM)], false)
                 actvLeverUp.setText(KeyEventCodes.displayNames[KeyEventCodes.indexOfCode(DEFAULT_LEVER_UP)], false)
                 actvLeverDown.setText(KeyEventCodes.displayNames[KeyEventCodes.indexOfCode(DEFAULT_LEVER_DOWN)], false)
+                saveKeyMappings()
             }
         }
         // Apply initial enabled state based on saved preset
@@ -327,14 +328,18 @@ class MainActivity : AppCompatActivity() {
         tvSize.text = "$size%"
         tvOpacity.text = "$opacity%"
 
-        actvJoystickUp.setText(KeyEventCodes.displayNames[KeyEventCodes.indexOfCode(prefs.getInt("keycode_joystick_up", DEFAULT_JOYSTICK_UP))], false)
-        actvJoystickDown.setText(KeyEventCodes.displayNames[KeyEventCodes.indexOfCode(prefs.getInt("keycode_joystick_down", DEFAULT_JOYSTICK_DOWN))], false)
-        actvJoystickLeft.setText(KeyEventCodes.displayNames[KeyEventCodes.indexOfCode(prefs.getInt("keycode_joystick_left", DEFAULT_JOYSTICK_LEFT))], false)
-        actvJoystickRight.setText(KeyEventCodes.displayNames[KeyEventCodes.indexOfCode(prefs.getInt("keycode_joystick_right", DEFAULT_JOYSTICK_RIGHT))], false)
-        actvButtonTop.setText(KeyEventCodes.displayNames[KeyEventCodes.indexOfCode(prefs.getInt("keycode_button_top", DEFAULT_BUTTON_TOP))], false)
-        actvButtonBottom.setText(KeyEventCodes.displayNames[KeyEventCodes.indexOfCode(prefs.getInt("keycode_button_bottom", DEFAULT_BUTTON_BOTTOM))], false)
-        actvLeverUp.setText(KeyEventCodes.displayNames[KeyEventCodes.indexOfCode(prefs.getInt("keycode_lever_up", DEFAULT_LEVER_UP))], false)
-        actvLeverDown.setText(KeyEventCodes.displayNames[KeyEventCodes.indexOfCode(prefs.getInt("keycode_lever_down", DEFAULT_LEVER_DOWN))], false)
+        val isDmdPreset = prefs.getInt("preset", 0) == PRESET_DMD_REMOTE_2
+        fun keyCode(prefKey: String, default: Int) =
+            if (isDmdPreset) default else prefs.getInt(prefKey, default)
+
+        actvJoystickUp.setText(KeyEventCodes.displayNames[KeyEventCodes.indexOfCode(keyCode("keycode_joystick_up", DEFAULT_JOYSTICK_UP))], false)
+        actvJoystickDown.setText(KeyEventCodes.displayNames[KeyEventCodes.indexOfCode(keyCode("keycode_joystick_down", DEFAULT_JOYSTICK_DOWN))], false)
+        actvJoystickLeft.setText(KeyEventCodes.displayNames[KeyEventCodes.indexOfCode(keyCode("keycode_joystick_left", DEFAULT_JOYSTICK_LEFT))], false)
+        actvJoystickRight.setText(KeyEventCodes.displayNames[KeyEventCodes.indexOfCode(keyCode("keycode_joystick_right", DEFAULT_JOYSTICK_RIGHT))], false)
+        actvButtonTop.setText(KeyEventCodes.displayNames[KeyEventCodes.indexOfCode(keyCode("keycode_button_top", DEFAULT_BUTTON_TOP))], false)
+        actvButtonBottom.setText(KeyEventCodes.displayNames[KeyEventCodes.indexOfCode(keyCode("keycode_button_bottom", DEFAULT_BUTTON_BOTTOM))], false)
+        actvLeverUp.setText(KeyEventCodes.displayNames[KeyEventCodes.indexOfCode(keyCode("keycode_lever_up", DEFAULT_LEVER_UP))], false)
+        actvLeverDown.setText(KeyEventCodes.displayNames[KeyEventCodes.indexOfCode(keyCode("keycode_lever_down", DEFAULT_LEVER_DOWN))], false)
     }
 
     private fun saveKeyMappings() {
