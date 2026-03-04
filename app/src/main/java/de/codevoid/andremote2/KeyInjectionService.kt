@@ -5,29 +5,31 @@ import android.content.Intent
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.IBinder
+import android.os.SystemClock
 import android.util.Log
-import rikka.shizuku.Shizuku
-import java.lang.reflect.Method
-import java.util.concurrent.TimeUnit
+import android.view.InputDevice
+import android.view.KeyEvent
+import rikka.shizuku.ShizukuBinderWrapper
 
 class KeyInjectionService : Service() {
 
     companion object {
         private const val TAG = "KeyInjectionService"
-        private const val SHIZUKU_PROCESS_TIMEOUT_MS = 2000L
         var instance: KeyInjectionService? = null
             private set
         @Volatile var shizukuEnabled = false
 
-        private val shizukuNewProcess: Method? by lazy {
+        private val inputManager: Any? by lazy {
             try {
-                Shizuku::class.java.getDeclaredMethod(
-                    "newProcess",
-                    Array<String>::class.java,
-                    Array<String>::class.java,
-                    String::class.java
-                ).also { it.isAccessible = true }
+                val serviceManagerClass = Class.forName("android.os.ServiceManager")
+                val getServiceMethod = serviceManagerClass.getMethod("getService", String::class.java)
+                val binder = getServiceMethod.invoke(null, "input") as? IBinder ?: return@lazy null
+                val wrappedBinder = ShizukuBinderWrapper(binder)
+                val stubClass = Class.forName("android.hardware.input.IInputManager\$Stub")
+                val asInterfaceMethod = stubClass.getMethod("asInterface", IBinder::class.java)
+                asInterfaceMethod.invoke(null, wrappedBinder)
             } catch (e: Exception) {
+                Log.w(TAG, "Failed to initialize IInputManager binder", e)
                 null
             }
         }
@@ -58,7 +60,10 @@ class KeyInjectionService : Service() {
     fun injectKey(keyCode: Int) {
         KeyEventLog.log("KeyInjectionService", "injectKey keyCode=$keyCode shizukuEnabled=$shizukuEnabled")
         if (shizukuEnabled) {
-            bgHandler.post { runShizukuKeyEvent(keyCode) }
+            bgHandler.post {
+                injectInputEvent(keyCode, KeyEvent.ACTION_DOWN)
+                injectInputEvent(keyCode, KeyEvent.ACTION_UP)
+            }
         } else {
             Log.w(TAG, "injectKey: Shizuku not enabled, key $keyCode dropped")
         }
@@ -67,7 +72,11 @@ class KeyInjectionService : Service() {
     fun injectKeyLongPress(keyCode: Int) {
         KeyEventLog.log("KeyInjectionService", "injectKeyLongPress keyCode=$keyCode shizukuEnabled=$shizukuEnabled")
         if (shizukuEnabled) {
-            bgHandler.post { runShizukuKeyEvent(keyCode, "--longpress") }
+            bgHandler.post {
+                injectInputEvent(keyCode, KeyEvent.ACTION_DOWN)
+                SystemClock.sleep(500)
+                injectInputEvent(keyCode, KeyEvent.ACTION_UP)
+            }
         } else {
             Log.w(TAG, "injectKeyLongPress: Shizuku not enabled, key $keyCode dropped")
         }
@@ -76,7 +85,7 @@ class KeyInjectionService : Service() {
     fun injectKeyDown(keyCode: Int) {
         KeyEventLog.log("KeyInjectionService", "injectKeyDown keyCode=$keyCode shizukuEnabled=$shizukuEnabled")
         if (shizukuEnabled) {
-            bgHandler.post { runShizukuInputCommand("input", "keyevent", "--down", keyCode.toString()) }
+            bgHandler.post { injectInputEvent(keyCode, KeyEvent.ACTION_DOWN) }
         } else {
             Log.w(TAG, "injectKeyDown: Shizuku not enabled, key $keyCode dropped")
         }
@@ -85,33 +94,34 @@ class KeyInjectionService : Service() {
     fun injectKeyUp(keyCode: Int) {
         KeyEventLog.log("KeyInjectionService", "injectKeyUp keyCode=$keyCode shizukuEnabled=$shizukuEnabled")
         if (shizukuEnabled) {
-            bgHandler.post { runShizukuInputCommand("input", "keyevent", "--up", keyCode.toString()) }
+            bgHandler.post { injectInputEvent(keyCode, KeyEvent.ACTION_UP) }
         } else {
             Log.w(TAG, "injectKeyUp: Shizuku not enabled, key $keyCode dropped")
         }
     }
 
-    private fun runShizukuKeyEvent(keyCode: Int, action: String? = null) {
-        val args = if (action != null) {
-            arrayOf("input", "keyevent", action, keyCode.toString())
+    private fun injectInputEvent(keyCode: Int, action: Int) {
+        val manager = inputManager
+        if (manager != null) {
+            try {
+                val now = SystemClock.uptimeMillis()
+                val keyEvent = KeyEvent(
+                    now, now, action, keyCode,
+                    0, 0, -1, 0,
+                    KeyEvent.FLAG_FROM_SYSTEM,
+                    InputDevice.SOURCE_KEYBOARD
+                )
+                val injectMethod = manager.javaClass.getMethod(
+                    "injectInputEvent",
+                    android.view.InputEvent::class.java,
+                    Int::class.javaPrimitiveType
+                )
+                injectMethod.invoke(manager, keyEvent, 0)
+            } catch (e: Exception) {
+                Log.e(TAG, "injectInputEvent via binder failed for keyCode=$keyCode action=$action", e)
+            }
         } else {
-            arrayOf("input", "keyevent", keyCode.toString())
-        }
-        runShizukuInputCommand(*args)
-    }
-
-    private fun runShizukuInputCommand(vararg args: String) {
-        try {
-            val method = shizukuNewProcess ?: return
-            val process = method.invoke(
-                null,
-                arrayOf(*args),
-                null as Array<String>?,
-                null as String?
-            ) as Process
-            process.waitFor(SHIZUKU_PROCESS_TIMEOUT_MS, TimeUnit.MILLISECONDS)
-        } catch (e: Exception) {
-            Log.e(TAG, "Shizuku command failed: ${args.joinToString(" ")}", e)
+            Log.w(TAG, "IInputManager not available, key $keyCode action=$action dropped")
         }
     }
 
