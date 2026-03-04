@@ -1,11 +1,12 @@
 package de.codevoid.andremote2.views
 
 import android.content.Context
-import android.content.Intent
 import android.graphics.*
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import android.app.Instrumentation
+import java.util.concurrent.Executors
 import kotlin.math.abs
 import kotlin.math.sqrt
 
@@ -18,6 +19,9 @@ class JoystickView @JvmOverloads constructor(
     private var keycodeDown = 20
     private var keycodeLeft = 21
     private var keycodeRight = 22
+
+    private val instrumentation = Instrumentation()
+    private val executor = Executors.newSingleThreadExecutor()
 
     private val paintBase = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#444444")
@@ -125,11 +129,13 @@ class JoystickView @JvmOverloads constructor(
     }
 
     private fun sendKeyEvent(keyCode: Int) {
-        val intent = Intent("de.codevoid.andremote2.KEY_EVENT").apply {
-            putExtra("keycode", keyCode)
-            setPackage(context.packageName)
+        executor.execute {
+            try {
+                instrumentation.sendKeyDownUpSync(keyCode)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
-        context.sendBroadcast(intent)
     }
 
     fun setKeyCodes(up: Int, down: Int, left: Int, right: Int) {
