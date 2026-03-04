@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">andRemote2</string>
+    <string name="start_overlay">Start Overlay</string>
+    <string name="stop_overlay">Stop Overlay</string>
+    <string name="mappings_saved">Key mappings saved</string>
+    <string name="overlay_size">Overlay Size</string>
+    <string name="overlay_opacity">Overlay Opacity</string>
+    <string name="key_mappings">Key Mappings</string>
+    <string name="joystick_up">Joystick Up</string>
+    <string name="joystick_down">Joystick Down</string>
+    <string name="joystick_left">Joystick Left</string>
+    <string name="joystick_right">Joystick Right</string>
+    <string name="button_top">Button Top</string>
+    <string name="button_bottom">Button Bottom</string>
+    <string name="lever_up">Lever Up</string>
+    <string name="lever_down">Lever Down</string>
+</resources>
