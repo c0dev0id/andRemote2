@@ -86,6 +86,18 @@ class ButtonView @JvmOverloads constructor(
         }
     }
 
+    fun isInsideShape(localX: Float, localY: Float): Boolean {
+        val cornerRadius = height / 4f
+        val left = 4f
+        val right = width - 4f
+        val top = 4f
+        val bottom = height - 4f
+        if (localX < left || localX > right || localY < top || localY > bottom) return false
+        val dx = maxOf(left + cornerRadius - localX, 0f, localX - (right - cornerRadius))
+        val dy = maxOf(top + cornerRadius - localY, 0f, localY - (bottom - cornerRadius))
+        return dx * dx + dy * dy <= cornerRadius * cornerRadius
+    }
+
     fun setKeyCode(code: Int) {
         keyCode = code
     }

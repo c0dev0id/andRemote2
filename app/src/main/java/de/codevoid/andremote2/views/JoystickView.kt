@@ -152,6 +152,12 @@ class JoystickView @JvmOverloads constructor(
         }
     }
 
+    fun isInsideShape(localX: Float, localY: Float): Boolean {
+        val dx = localX - centerX
+        val dy = localY - centerY
+        return dx * dx + dy * dy <= baseRadius * baseRadius
+    }
+
     fun setKeyCodes(up: Int, down: Int, left: Int, right: Int) {
         keycodeUp = up
         keycodeDown = down

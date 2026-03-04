@@ -146,6 +146,19 @@ class LeverView @JvmOverloads constructor(
         }
     }
 
+    fun isInsideShape(localX: Float, localY: Float): Boolean {
+        val trackWidth = width * 0.4f
+        val left = (width - trackWidth) / 2f - 8f
+        val right = (width + trackWidth) / 2f + 8f
+        val top = 8f
+        val bottom = height - 8f
+        val cornerR = trackWidth / 2f
+        if (localX < left || localX > right || localY < top || localY > bottom) return false
+        val dx = maxOf(left + cornerR - localX, 0f, localX - (right - cornerR))
+        val dy = maxOf(top + cornerR - localY, 0f, localY - (bottom - cornerR))
+        return dx * dx + dy * dy <= cornerR * cornerR
+    }
+
     fun setKeyCodes(up: Int, down: Int) {
         keycodeUp = up
         keycodeDown = down
