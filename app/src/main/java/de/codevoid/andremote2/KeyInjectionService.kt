@@ -15,7 +15,7 @@ class KeyInjectionService : Service() {
 
     companion object {
         private const val TAG = "KeyInjectionService"
-        var instance: KeyInjectionService? = null
+        @Volatile var instance: KeyInjectionService? = null
             private set
         @Volatile var shizukuEnabled = false
 
@@ -66,19 +66,6 @@ class KeyInjectionService : Service() {
             }
         } else {
             Log.w(TAG, "injectKey: Shizuku not enabled, key $keyCode dropped")
-        }
-    }
-
-    fun injectKeyLongPress(keyCode: Int) {
-        KeyEventLog.log("KeyInjectionService", "injectKeyLongPress keyCode=$keyCode shizukuEnabled=$shizukuEnabled")
-        if (shizukuEnabled) {
-            bgHandler.post {
-                injectInputEvent(keyCode, KeyEvent.ACTION_DOWN)
-                SystemClock.sleep(500)
-                injectInputEvent(keyCode, KeyEvent.ACTION_UP)
-            }
-        } else {
-            Log.w(TAG, "injectKeyLongPress: Shizuku not enabled, key $keyCode dropped")
         }
     }
 

@@ -2,15 +2,16 @@ package de.codevoid.andremote2.views
 
 import android.content.Context
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import android.util.Log
+import androidx.core.content.ContextCompat
 import de.codevoid.andremote2.KeyEventLog
 import de.codevoid.andremote2.KeyInjectionService
+import de.codevoid.andremote2.R
 
 class LeverView @JvmOverloads constructor(
     context: Context,
@@ -25,20 +26,20 @@ class LeverView @JvmOverloads constructor(
     private var leverY = 0f
 
     private val paintTrack = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#333333")
+        color = ContextCompat.getColor(context, R.color.control_track)
         style = Paint.Style.FILL
     }
     private val paintLever = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#777777")
+        color = ContextCompat.getColor(context, R.color.control_lever)
         style = Paint.Style.FILL
     }
     private val paintBorder = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#AAAAAA")
+        color = ContextCompat.getColor(context, R.color.control_border)
         style = Paint.Style.STROKE
         strokeWidth = 4f
     }
     private val paintArrow = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#CCCCCC")
+        color = ContextCompat.getColor(context, R.color.control_arrow)
         style = Paint.Style.FILL
     }
 

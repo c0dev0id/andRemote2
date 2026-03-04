@@ -25,16 +25,7 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         private const val SHIZUKU_PERMISSION_REQUEST_CODE = 100
-        const val PREFS_NAME = "andremote2"
         private const val PRESET_DMD_REMOTE_2 = 1
-        const val DEFAULT_JOYSTICK_UP = 19
-        const val DEFAULT_JOYSTICK_DOWN = 20
-        const val DEFAULT_JOYSTICK_LEFT = 21
-        const val DEFAULT_JOYSTICK_RIGHT = 22
-        const val DEFAULT_BUTTON_TOP = 66
-        const val DEFAULT_BUTTON_BOTTOM = 111
-        const val DEFAULT_LEVER_UP = 136
-        const val DEFAULT_LEVER_DOWN = 137
     }
 
     private lateinit var prefs: SharedPreferences
@@ -78,7 +69,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+        prefs = getSharedPreferences(KeyMappingDefaults.PREFS_NAME, MODE_PRIVATE)
 
         val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
@@ -147,13 +138,13 @@ class MainActivity : AppCompatActivity() {
         sliderSize.addOnChangeListener { _, value, fromUser ->
             val size = value.toInt()
             tvSize.text = "$size%"
-            if (fromUser) saveIntPref("overlay_size", size)
+            if (fromUser) saveIntPref(PrefKeys.OVERLAY_SIZE, size)
         }
 
         sliderOpacity.addOnChangeListener { _, value, fromUser ->
             val opacity = value.toInt()
             tvOpacity.text = "$opacity%"
-            if (fromUser) saveIntPref("overlay_opacity", opacity)
+            if (fromUser) saveIntPref(PrefKeys.OVERLAY_OPACITY, opacity)
         }
 
         btnToggleOverlay.setOnClickListener {
@@ -309,16 +300,16 @@ class MainActivity : AppCompatActivity() {
         val presets = listOf(getString(R.string.preset_custom), getString(R.string.preset_dmd_remote_2))
         val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, presets)
         actvPreset.setAdapter(adapter)
-        val savedPreset = prefs.getInt("preset", 0)
+        val savedPreset = prefs.getInt(PrefKeys.PRESET, 0)
         actvPreset.setText(presets[savedPreset], false)
         actvPreset.setOnItemClickListener { _, _, position, _ ->
             val isDmdPreset = position == PRESET_DMD_REMOTE_2
-            val currentPreset = prefs.getInt("preset", 0)
+            val currentPreset = prefs.getInt(PrefKeys.PRESET, 0)
             if (isDmdPreset && currentPreset != PRESET_DMD_REMOTE_2) {
                 // Preserve custom mapping before switching away from Custom preset
                 saveCustomPresetMappings()
             }
-            saveIntPref("preset", position)
+            saveIntPref(PrefKeys.PRESET, position)
             keyActvs.forEach { it.isEnabled = !isDmdPreset }
             setKeyButtons.forEach { it.isEnabled = !isDmdPreset }
             if (isDmdPreset) {
@@ -344,7 +335,7 @@ class MainActivity : AppCompatActivity() {
             .create()
         dialog.setOnKeyListener { _, keyCode, event ->
             if (event.action == KeyEvent.ACTION_DOWN) {
-                val idx = KeyEventCodes.entries.indexOfFirst { it.code == keyCode }
+                val idx = KeyEventCodes.keyCodes.indexOfFirst { it.code == keyCode }
                 if (idx >= 0) {
                     actv.setText(KeyEventCodes.displayNames[idx], false)
                     dialog.dismiss()
@@ -357,14 +348,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loadSettings() {
-        val size = prefs.getInt("overlay_size", 75)
-        val opacity = prefs.getInt("overlay_opacity", 80)
+        val size = prefs.getInt(PrefKeys.OVERLAY_SIZE, 75)
+        val opacity = prefs.getInt(PrefKeys.OVERLAY_OPACITY, 80)
         sliderSize.value = size.toFloat()
         sliderOpacity.value = opacity.toFloat()
         tvSize.text = "$size%"
         tvOpacity.text = "$opacity%"
 
-        val isDmdPreset = prefs.getInt("preset", 0) == PRESET_DMD_REMOTE_2
+        val isDmdPreset = prefs.getInt(PrefKeys.PRESET, 0) == PRESET_DMD_REMOTE_2
         populateKeyMappingUi(isDmdPreset)
     }
 
@@ -372,42 +363,42 @@ class MainActivity : AppCompatActivity() {
         fun keyName(code: Int) = KeyEventCodes.displayNames[KeyEventCodes.indexOfCode(code)]
         fun resolveCode(key: String, default: Int) =
             if (isDmdPreset) default else prefs.getInt(key, default)
-        actvJoystickUp.setText(keyName(resolveCode("custom_keycode_joystick_up", DEFAULT_JOYSTICK_UP)), false)
-        actvJoystickDown.setText(keyName(resolveCode("custom_keycode_joystick_down", DEFAULT_JOYSTICK_DOWN)), false)
-        actvJoystickLeft.setText(keyName(resolveCode("custom_keycode_joystick_left", DEFAULT_JOYSTICK_LEFT)), false)
-        actvJoystickRight.setText(keyName(resolveCode("custom_keycode_joystick_right", DEFAULT_JOYSTICK_RIGHT)), false)
-        actvButtonTop.setText(keyName(resolveCode("custom_keycode_button_top", DEFAULT_BUTTON_TOP)), false)
-        actvButtonBottom.setText(keyName(resolveCode("custom_keycode_button_bottom", DEFAULT_BUTTON_BOTTOM)), false)
-        actvLeverUp.setText(keyName(resolveCode("custom_keycode_lever_up", DEFAULT_LEVER_UP)), false)
-        actvLeverDown.setText(keyName(resolveCode("custom_keycode_lever_down", DEFAULT_LEVER_DOWN)), false)
+        actvJoystickUp.setText(keyName(resolveCode(PrefKeys.CUSTOM_KEYCODE_JOYSTICK_UP, KeyMappingDefaults.DEFAULT_JOYSTICK_UP)), false)
+        actvJoystickDown.setText(keyName(resolveCode(PrefKeys.CUSTOM_KEYCODE_JOYSTICK_DOWN, KeyMappingDefaults.DEFAULT_JOYSTICK_DOWN)), false)
+        actvJoystickLeft.setText(keyName(resolveCode(PrefKeys.CUSTOM_KEYCODE_JOYSTICK_LEFT, KeyMappingDefaults.DEFAULT_JOYSTICK_LEFT)), false)
+        actvJoystickRight.setText(keyName(resolveCode(PrefKeys.CUSTOM_KEYCODE_JOYSTICK_RIGHT, KeyMappingDefaults.DEFAULT_JOYSTICK_RIGHT)), false)
+        actvButtonTop.setText(keyName(resolveCode(PrefKeys.CUSTOM_KEYCODE_BUTTON_TOP, KeyMappingDefaults.DEFAULT_BUTTON_TOP)), false)
+        actvButtonBottom.setText(keyName(resolveCode(PrefKeys.CUSTOM_KEYCODE_BUTTON_BOTTOM, KeyMappingDefaults.DEFAULT_BUTTON_BOTTOM)), false)
+        actvLeverUp.setText(keyName(resolveCode(PrefKeys.CUSTOM_KEYCODE_LEVER_UP, KeyMappingDefaults.DEFAULT_LEVER_UP)), false)
+        actvLeverDown.setText(keyName(resolveCode(PrefKeys.CUSTOM_KEYCODE_LEVER_DOWN, KeyMappingDefaults.DEFAULT_LEVER_DOWN)), false)
     }
 
     private fun saveKeyMappings() {
         prefs.edit()
-            .putInt("keycode_joystick_up", actvToKeyCode(actvJoystickUp))
-            .putInt("keycode_joystick_down", actvToKeyCode(actvJoystickDown))
-            .putInt("keycode_joystick_left", actvToKeyCode(actvJoystickLeft))
-            .putInt("keycode_joystick_right", actvToKeyCode(actvJoystickRight))
-            .putInt("keycode_button_top", actvToKeyCode(actvButtonTop))
-            .putInt("keycode_button_bottom", actvToKeyCode(actvButtonBottom))
-            .putInt("keycode_lever_up", actvToKeyCode(actvLeverUp))
-            .putInt("keycode_lever_down", actvToKeyCode(actvLeverDown))
+            .putInt(PrefKeys.KEYCODE_JOYSTICK_UP, actvToKeyCode(actvJoystickUp))
+            .putInt(PrefKeys.KEYCODE_JOYSTICK_DOWN, actvToKeyCode(actvJoystickDown))
+            .putInt(PrefKeys.KEYCODE_JOYSTICK_LEFT, actvToKeyCode(actvJoystickLeft))
+            .putInt(PrefKeys.KEYCODE_JOYSTICK_RIGHT, actvToKeyCode(actvJoystickRight))
+            .putInt(PrefKeys.KEYCODE_BUTTON_TOP, actvToKeyCode(actvButtonTop))
+            .putInt(PrefKeys.KEYCODE_BUTTON_BOTTOM, actvToKeyCode(actvButtonBottom))
+            .putInt(PrefKeys.KEYCODE_LEVER_UP, actvToKeyCode(actvLeverUp))
+            .putInt(PrefKeys.KEYCODE_LEVER_DOWN, actvToKeyCode(actvLeverDown))
             .apply()
-        if (prefs.getInt("preset", 0) != PRESET_DMD_REMOTE_2) {
+        if (prefs.getInt(PrefKeys.PRESET, 0) != PRESET_DMD_REMOTE_2) {
             saveCustomPresetMappings()
         }
     }
 
     private fun saveCustomPresetMappings() {
         prefs.edit()
-            .putInt("custom_keycode_joystick_up", actvToKeyCode(actvJoystickUp))
-            .putInt("custom_keycode_joystick_down", actvToKeyCode(actvJoystickDown))
-            .putInt("custom_keycode_joystick_left", actvToKeyCode(actvJoystickLeft))
-            .putInt("custom_keycode_joystick_right", actvToKeyCode(actvJoystickRight))
-            .putInt("custom_keycode_button_top", actvToKeyCode(actvButtonTop))
-            .putInt("custom_keycode_button_bottom", actvToKeyCode(actvButtonBottom))
-            .putInt("custom_keycode_lever_up", actvToKeyCode(actvLeverUp))
-            .putInt("custom_keycode_lever_down", actvToKeyCode(actvLeverDown))
+            .putInt(PrefKeys.CUSTOM_KEYCODE_JOYSTICK_UP, actvToKeyCode(actvJoystickUp))
+            .putInt(PrefKeys.CUSTOM_KEYCODE_JOYSTICK_DOWN, actvToKeyCode(actvJoystickDown))
+            .putInt(PrefKeys.CUSTOM_KEYCODE_JOYSTICK_LEFT, actvToKeyCode(actvJoystickLeft))
+            .putInt(PrefKeys.CUSTOM_KEYCODE_JOYSTICK_RIGHT, actvToKeyCode(actvJoystickRight))
+            .putInt(PrefKeys.CUSTOM_KEYCODE_BUTTON_TOP, actvToKeyCode(actvButtonTop))
+            .putInt(PrefKeys.CUSTOM_KEYCODE_BUTTON_BOTTOM, actvToKeyCode(actvButtonBottom))
+            .putInt(PrefKeys.CUSTOM_KEYCODE_LEVER_UP, actvToKeyCode(actvLeverUp))
+            .putInt(PrefKeys.CUSTOM_KEYCODE_LEVER_DOWN, actvToKeyCode(actvLeverDown))
             .apply()
     }
 
