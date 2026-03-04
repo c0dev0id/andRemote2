@@ -56,6 +56,15 @@
             android:text="@string/start_overlay"
             android:layout_marginBottom="24dp"/>
 
+        <!-- Grant Permission via Shizuku -->
+        <Button
+            android:id="@+id/btnGrantShizuku"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/grant_via_shizuku"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_marginBottom="24dp"/>
+
         <!-- Overlay Size -->
         <TextView
             android:layout_width="match_parent"
