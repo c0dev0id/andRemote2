@@ -12,9 +12,6 @@ import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import rikka.shizuku.Shizuku
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import java.lang.reflect.InvocationTargetException
 
 class MainActivity : AppCompatActivity() {
 
@@ -52,7 +49,7 @@ class MainActivity : AppCompatActivity() {
         Shizuku.OnRequestPermissionResultListener { requestCode, grantResult ->
             if (requestCode == SHIZUKU_PERMISSION_REQUEST_CODE) {
                 if (grantResult == PackageManager.PERMISSION_GRANTED) {
-                    grantInjectEventsViaShizuku()
+                    onShizukuPermissionGranted()
                 } else {
                     Toast.makeText(this, R.string.shizuku_permission_denied, Toast.LENGTH_LONG).show()
                 }
@@ -149,6 +146,7 @@ class MainActivity : AppCompatActivity() {
             getString(R.string.stop_overlay)
         else
             getString(R.string.start_overlay)
+        KeyInjectionService.shizukuEnabled = isShizukuAuthorized()
         updateShizukuButtonVisibility()
     }
 
@@ -158,7 +156,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateShizukuButtonVisibility() {
-        if (hasInjectEventsPermission()) {
+        if (hasInjectEventsPermission() || isShizukuAuthorized()) {
             btnGrantShizuku.visibility = android.view.View.GONE
         } else {
             btnGrantShizuku.visibility = android.view.View.VISIBLE
@@ -177,6 +175,22 @@ class MainActivity : AppCompatActivity() {
         } catch (_: PackageManager.NameNotFoundException) {
             false
         }
+    }
+
+    private fun isShizukuAuthorized(): Boolean {
+        if (!isShizukuInstalled()) return false
+        return try {
+            Shizuku.pingBinder() && !Shizuku.isPreV11() &&
+                Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    private fun onShizukuPermissionGranted() {
+        KeyInjectionService.shizukuEnabled = true
+        Toast.makeText(this, R.string.shizuku_grant_success, Toast.LENGTH_LONG).show()
+        updateShizukuButtonVisibility()
     }
 
     private fun onGrantShizukuClicked() {
@@ -209,51 +223,13 @@ class MainActivity : AppCompatActivity() {
 
         try {
             if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
-                grantInjectEventsViaShizuku()
+                onShizukuPermissionGranted()
             } else {
                 Shizuku.requestPermission(SHIZUKU_PERMISSION_REQUEST_CODE)
             }
         } catch (e: RuntimeException) {
             Toast.makeText(this, getString(R.string.shizuku_grant_failed, e.message ?: e.javaClass.simpleName), Toast.LENGTH_LONG).show()
         }
-    }
-
-    private fun grantInjectEventsViaShizuku() {
-        Thread {
-            try {
-                val method = Shizuku::class.java.getDeclaredMethod(
-                    "newProcess",
-                    Array<String>::class.java,
-                    Array<String>::class.java,
-                    String::class.java
-                )
-                method.isAccessible = true
-                val process = method.invoke(
-                    null,
-                    arrayOf("pm", "grant", packageName, "android.permission.INJECT_EVENTS"),
-                    null as Array<String>?,
-                    null as String?
-                ) as Process
-                val exitCode = process.waitFor()
-                val errorOutput = BufferedReader(InputStreamReader(process.errorStream)).use { it.readText().trim() }
-
-                runOnUiThread {
-                    if (exitCode == 0) {
-                        Toast.makeText(this, R.string.shizuku_grant_success, Toast.LENGTH_LONG).show()
-                        updateShizukuButtonVisibility()
-                    } else {
-                        val msg = if (errorOutput.isNotEmpty()) errorOutput else "exit code $exitCode"
-                        Toast.makeText(this, getString(R.string.shizuku_grant_failed, msg), Toast.LENGTH_LONG).show()
-                    }
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Shizuku grant failed", e)
-                val cause = (e as? InvocationTargetException)?.targetException ?: e
-                runOnUiThread {
-                    Toast.makeText(this, getString(R.string.shizuku_grant_failed, cause.message ?: cause.javaClass.simpleName), Toast.LENGTH_LONG).show()
-                }
-            }
-        }.start()
     }
 
     private fun setupSpinners() {

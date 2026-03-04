@@ -25,11 +25,11 @@
     <string name="inject_permission_message">This app needs the INJECT_EVENTS permission to send key events to other apps.\n\nConnect your device via USB and run:\n\n%1$s\n\nThis only needs to be done once.</string>
     <string name="copy_command">Copy Command</string>
     <string name="command_copied">ADB command copied to clipboard</string>
-    <string name="grant_via_shizuku">Grant Permission via Shizuku</string>
+    <string name="grant_via_shizuku">Enable Shizuku Key Injection</string>
     <string name="shizuku_not_running">Shizuku is not running. Please start Shizuku first.</string>
     <string name="shizuku_permission_denied">Shizuku permission was denied. Please allow when prompted.</string>
-    <string name="shizuku_grant_success">INJECT_EVENTS permission granted successfully!</string>
-    <string name="shizuku_grant_failed">Failed to grant permission via Shizuku: %1$s</string>
+    <string name="shizuku_grant_success">Shizuku key injection enabled successfully</string>
+    <string name="shizuku_grant_failed">Failed to enable Shizuku: %1$s</string>
     <string name="shizuku_not_installed">Shizuku is not installed. Install it from the Play Store or shizuku.rikka.app</string>
     <string name="inject_permission_already_granted">INJECT_EVENTS permission is already granted.</string>
 </resources>
