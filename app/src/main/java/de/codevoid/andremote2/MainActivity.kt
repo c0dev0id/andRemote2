@@ -30,14 +30,14 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvSize: TextView
     private lateinit var tvOpacity: TextView
 
-    private lateinit var etJoystickUp: EditText
-    private lateinit var etJoystickDown: EditText
-    private lateinit var etJoystickLeft: EditText
-    private lateinit var etJoystickRight: EditText
-    private lateinit var etButtonTop: EditText
-    private lateinit var etButtonBottom: EditText
-    private lateinit var etLeverUp: EditText
-    private lateinit var etLeverDown: EditText
+    private lateinit var spJoystickUp: Spinner
+    private lateinit var spJoystickDown: Spinner
+    private lateinit var spJoystickLeft: Spinner
+    private lateinit var spJoystickRight: Spinner
+    private lateinit var spButtonTop: Spinner
+    private lateinit var spButtonBottom: Spinner
+    private lateinit var spLeverUp: Spinner
+    private lateinit var spLeverDown: Spinner
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,15 +51,16 @@ class MainActivity : AppCompatActivity() {
         tvSize = findViewById(R.id.tvSize)
         tvOpacity = findViewById(R.id.tvOpacity)
 
-        etJoystickUp = findViewById(R.id.etJoystickUp)
-        etJoystickDown = findViewById(R.id.etJoystickDown)
-        etJoystickLeft = findViewById(R.id.etJoystickLeft)
-        etJoystickRight = findViewById(R.id.etJoystickRight)
-        etButtonTop = findViewById(R.id.etButtonTop)
-        etButtonBottom = findViewById(R.id.etButtonBottom)
-        etLeverUp = findViewById(R.id.etLeverUp)
-        etLeverDown = findViewById(R.id.etLeverDown)
+        spJoystickUp = findViewById(R.id.spJoystickUp)
+        spJoystickDown = findViewById(R.id.spJoystickDown)
+        spJoystickLeft = findViewById(R.id.spJoystickLeft)
+        spJoystickRight = findViewById(R.id.spJoystickRight)
+        spButtonTop = findViewById(R.id.spButtonTop)
+        spButtonBottom = findViewById(R.id.spButtonBottom)
+        spLeverUp = findViewById(R.id.spLeverUp)
+        spLeverDown = findViewById(R.id.spLeverDown)
 
+        setupSpinners()
         loadSettings()
 
         seekBarSize.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -123,6 +124,15 @@ class MainActivity : AppCompatActivity() {
             getString(R.string.start_overlay)
     }
 
+    private fun setupSpinners() {
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, KeyEventCodes.displayNames)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        listOf(spJoystickUp, spJoystickDown, spJoystickLeft, spJoystickRight,
+            spButtonTop, spButtonBottom, spLeverUp, spLeverDown).forEach {
+            it.adapter = adapter
+        }
+    }
+
     private fun loadSettings() {
         val size = prefs.getInt("overlay_size", 100)
         val opacity = prefs.getInt("overlay_opacity", 80)
@@ -131,25 +141,25 @@ class MainActivity : AppCompatActivity() {
         tvSize.text = "$size%"
         tvOpacity.text = "$opacity%"
 
-        etJoystickUp.setText(prefs.getInt("keycode_joystick_up", DEFAULT_JOYSTICK_UP).toString())
-        etJoystickDown.setText(prefs.getInt("keycode_joystick_down", DEFAULT_JOYSTICK_DOWN).toString())
-        etJoystickLeft.setText(prefs.getInt("keycode_joystick_left", DEFAULT_JOYSTICK_LEFT).toString())
-        etJoystickRight.setText(prefs.getInt("keycode_joystick_right", DEFAULT_JOYSTICK_RIGHT).toString())
-        etButtonTop.setText(prefs.getInt("keycode_button_top", DEFAULT_BUTTON_TOP).toString())
-        etButtonBottom.setText(prefs.getInt("keycode_button_bottom", DEFAULT_BUTTON_BOTTOM).toString())
-        etLeverUp.setText(prefs.getInt("keycode_lever_up", DEFAULT_LEVER_UP).toString())
-        etLeverDown.setText(prefs.getInt("keycode_lever_down", DEFAULT_LEVER_DOWN).toString())
+        spJoystickUp.setSelection(KeyEventCodes.indexOfCode(prefs.getInt("keycode_joystick_up", DEFAULT_JOYSTICK_UP)))
+        spJoystickDown.setSelection(KeyEventCodes.indexOfCode(prefs.getInt("keycode_joystick_down", DEFAULT_JOYSTICK_DOWN)))
+        spJoystickLeft.setSelection(KeyEventCodes.indexOfCode(prefs.getInt("keycode_joystick_left", DEFAULT_JOYSTICK_LEFT)))
+        spJoystickRight.setSelection(KeyEventCodes.indexOfCode(prefs.getInt("keycode_joystick_right", DEFAULT_JOYSTICK_RIGHT)))
+        spButtonTop.setSelection(KeyEventCodes.indexOfCode(prefs.getInt("keycode_button_top", DEFAULT_BUTTON_TOP)))
+        spButtonBottom.setSelection(KeyEventCodes.indexOfCode(prefs.getInt("keycode_button_bottom", DEFAULT_BUTTON_BOTTOM)))
+        spLeverUp.setSelection(KeyEventCodes.indexOfCode(prefs.getInt("keycode_lever_up", DEFAULT_LEVER_UP)))
+        spLeverDown.setSelection(KeyEventCodes.indexOfCode(prefs.getInt("keycode_lever_down", DEFAULT_LEVER_DOWN)))
     }
 
     private fun saveKeyMappings() {
-        saveIntPref("keycode_joystick_up", etJoystickUp.text.toString().toIntOrNull() ?: DEFAULT_JOYSTICK_UP)
-        saveIntPref("keycode_joystick_down", etJoystickDown.text.toString().toIntOrNull() ?: DEFAULT_JOYSTICK_DOWN)
-        saveIntPref("keycode_joystick_left", etJoystickLeft.text.toString().toIntOrNull() ?: DEFAULT_JOYSTICK_LEFT)
-        saveIntPref("keycode_joystick_right", etJoystickRight.text.toString().toIntOrNull() ?: DEFAULT_JOYSTICK_RIGHT)
-        saveIntPref("keycode_button_top", etButtonTop.text.toString().toIntOrNull() ?: DEFAULT_BUTTON_TOP)
-        saveIntPref("keycode_button_bottom", etButtonBottom.text.toString().toIntOrNull() ?: DEFAULT_BUTTON_BOTTOM)
-        saveIntPref("keycode_lever_up", etLeverUp.text.toString().toIntOrNull() ?: DEFAULT_LEVER_UP)
-        saveIntPref("keycode_lever_down", etLeverDown.text.toString().toIntOrNull() ?: DEFAULT_LEVER_DOWN)
+        saveIntPref("keycode_joystick_up", KeyEventCodes.codeAtIndex(spJoystickUp.selectedItemPosition))
+        saveIntPref("keycode_joystick_down", KeyEventCodes.codeAtIndex(spJoystickDown.selectedItemPosition))
+        saveIntPref("keycode_joystick_left", KeyEventCodes.codeAtIndex(spJoystickLeft.selectedItemPosition))
+        saveIntPref("keycode_joystick_right", KeyEventCodes.codeAtIndex(spJoystickRight.selectedItemPosition))
+        saveIntPref("keycode_button_top", KeyEventCodes.codeAtIndex(spButtonTop.selectedItemPosition))
+        saveIntPref("keycode_button_bottom", KeyEventCodes.codeAtIndex(spButtonBottom.selectedItemPosition))
+        saveIntPref("keycode_lever_up", KeyEventCodes.codeAtIndex(spLeverUp.selectedItemPosition))
+        saveIntPref("keycode_lever_down", KeyEventCodes.codeAtIndex(spLeverDown.selectedItemPosition))
     }
 
     private fun saveIntPref(key: String, value: Int) {
