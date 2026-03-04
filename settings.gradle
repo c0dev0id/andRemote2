@@ -1,2 +1,3 @@
 rootProject.name = "andRemote2"
 include ':app'
+include ':keytester'
