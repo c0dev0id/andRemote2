@@ -27,6 +27,7 @@ class OverlayService : Service() {
         prefs = getSharedPreferences("andremote2", MODE_PRIVATE)
         createNotificationChannel()
         startForeground(1, buildNotification())
+        startService(Intent(this, KeyInjectionService::class.java))
         showOverlay()
     }
 
@@ -36,6 +37,7 @@ class OverlayService : Service() {
         if (::overlayView.isInitialized) {
             windowManager.removeView(overlayView)
         }
+        stopService(Intent(this, KeyInjectionService::class.java))
     }
 
     private fun createNotificationChannel() {

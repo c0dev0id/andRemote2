@@ -1,19 +1,16 @@
 package de.codevoid.andremote2
 
-import android.accessibilityservice.AccessibilityService
-import android.app.Instrumentation
-import android.content.pm.PackageManager
+import android.app.Service
+import android.content.Intent
 import android.os.Handler
 import android.os.HandlerThread
-import android.os.SystemClock
+import android.os.IBinder
 import android.util.Log
-import android.view.KeyEvent
-import android.view.accessibility.AccessibilityEvent
 import rikka.shizuku.Shizuku
 import java.lang.reflect.Method
 import java.util.concurrent.TimeUnit
 
-class KeyInjectionService : AccessibilityService() {
+class KeyInjectionService : Service() {
 
     companion object {
         private const val TAG = "KeyInjectionService"
@@ -37,16 +34,20 @@ class KeyInjectionService : AccessibilityService() {
         }
     }
 
-    private val instrumentation = Instrumentation()
     private lateinit var handlerThread: HandlerThread
     private lateinit var bgHandler: Handler
     private val shizukuRepeatRunnables = mutableMapOf<Int, Runnable>()
 
-    override fun onServiceConnected() {
+    override fun onCreate() {
+        super.onCreate()
         instance = this
         handlerThread = HandlerThread("KeyInjector").apply { start() }
         bgHandler = Handler(handlerThread.looper)
     }
+
+    override fun onBind(intent: Intent?): IBinder? = null
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int = START_STICKY
 
     override fun onDestroy() {
         super.onDestroy()
@@ -56,39 +57,28 @@ class KeyInjectionService : AccessibilityService() {
         }
     }
 
-    override fun onAccessibilityEvent(event: AccessibilityEvent?) {}
-
-    override fun onInterrupt() {}
-
     fun injectKey(keyCode: Int) {
-        if (hasInjectEventsPermission()) {
-            bgHandler.post {
-                sendKeySync(KeyEvent.ACTION_DOWN, keyCode)
-                sendKeySync(KeyEvent.ACTION_UP, keyCode)
-            }
-        } else if (shizukuEnabled) {
+        if (shizukuEnabled) {
             bgHandler.post { runShizukuKeyEvent(keyCode) }
+        } else {
+            Log.w(TAG, "injectKey: Shizuku not enabled, key $keyCode dropped")
         }
     }
 
     fun injectKeyDown(keyCode: Int) {
-        if (hasInjectEventsPermission()) {
-            bgHandler.post { sendKeySync(KeyEvent.ACTION_DOWN, keyCode) }
-        } else if (shizukuEnabled) {
+        if (shizukuEnabled) {
             bgHandler.post { startShizukuKeyRepeat(keyCode) }
+        } else {
+            Log.w(TAG, "injectKeyDown: Shizuku not enabled, key $keyCode dropped")
         }
     }
 
     fun injectKeyUp(keyCode: Int) {
-        if (hasInjectEventsPermission()) {
-            bgHandler.post { sendKeySync(KeyEvent.ACTION_UP, keyCode) }
-        } else if (shizukuEnabled) {
+        if (shizukuEnabled) {
             bgHandler.post { stopShizukuKeyRepeat(keyCode) }
+        } else {
+            Log.w(TAG, "injectKeyUp: Shizuku not enabled, key $keyCode dropped")
         }
-    }
-
-    private fun hasInjectEventsPermission(): Boolean {
-        return checkSelfPermission("android.permission.INJECT_EVENTS") == PackageManager.PERMISSION_GRANTED
     }
 
     private fun startShizukuKeyRepeat(keyCode: Int) {
@@ -125,14 +115,4 @@ class KeyInjectionService : AccessibilityService() {
         }
     }
 
-    private fun sendKeySync(action: Int, keyCode: Int) {
-        val now = SystemClock.uptimeMillis()
-        val event = KeyEvent(now, now, action, keyCode, 0)
-        try {
-            instrumentation.sendKeySync(event)
-        } catch (e: SecurityException) {
-            Log.e(TAG, "INJECT_EVENTS permission not granted. " +
-                    "Run: adb shell pm grant $packageName android.permission.INJECT_EVENTS", e)
-        }
-    }
 }
