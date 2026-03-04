@@ -17,7 +17,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
-import com.google.android.material.materialswitch.MaterialSwitch
 import com.google.android.material.slider.Slider
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import rikka.shizuku.Shizuku
@@ -47,7 +46,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvOpacity: TextView
     private lateinit var tvEventLog: TextView
     private lateinit var scrollEventLog: ScrollView
-    private lateinit var switchButtonHoldMode: MaterialSwitch
 
     private lateinit var actvJoystickUp: MaterialAutoCompleteTextView
     private lateinit var actvJoystickDown: MaterialAutoCompleteTextView
@@ -93,7 +91,6 @@ class MainActivity : AppCompatActivity() {
         tvOpacity = findViewById(R.id.tvOpacity)
         tvEventLog = findViewById(R.id.tvEventLog)
         scrollEventLog = findViewById(R.id.scrollEventLog)
-        switchButtonHoldMode = findViewById(R.id.switchButtonHoldMode)
         actvPreset = findViewById(R.id.actvPreset)
 
         // Bind key-mapping rows via include IDs
@@ -157,10 +154,6 @@ class MainActivity : AppCompatActivity() {
             val opacity = value.toInt()
             tvOpacity.text = "$opacity%"
             if (fromUser) saveIntPref("overlay_opacity", opacity)
-        }
-
-        switchButtonHoldMode.setOnCheckedChangeListener { _, isChecked ->
-            prefs.edit().putBoolean("button_hold_mode", isChecked).apply()
         }
 
         btnToggleOverlay.setOnClickListener {
@@ -370,8 +363,6 @@ class MainActivity : AppCompatActivity() {
         sliderOpacity.value = opacity.toFloat()
         tvSize.text = "$size%"
         tvOpacity.text = "$opacity%"
-
-        switchButtonHoldMode.isChecked = prefs.getBoolean("button_hold_mode", false)
 
         val isDmdPreset = prefs.getInt("preset", 0) == PRESET_DMD_REMOTE_2
         populateKeyMappingUi(isDmdPreset)

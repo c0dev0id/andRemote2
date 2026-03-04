@@ -38,9 +38,6 @@ class OverlayService : Service() {
         if (key == "overlay_size" || key == "overlay_opacity") {
             mainHandler.post { applyScaleAndAlpha() }
         }
-        if (key == "button_hold_mode") {
-            mainHandler.post { setupControls() }
-        }
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
@@ -170,10 +167,6 @@ class OverlayService : Service() {
 
         buttonBottom.label = ""
         buttonBottom.setKeyCode(prefs.getInt("keycode_button_bottom", MainActivity.DEFAULT_BUTTON_BOTTOM))
-
-        val holdMode = prefs.getBoolean("button_hold_mode", false)
-        buttonTop.holdMode = holdMode
-        buttonBottom.holdMode = holdMode
 
         lever.setKeyCodes(
             prefs.getInt("keycode_lever_up", MainActivity.DEFAULT_LEVER_UP),
