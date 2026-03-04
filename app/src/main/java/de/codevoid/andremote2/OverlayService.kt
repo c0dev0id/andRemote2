@@ -156,10 +156,7 @@ class OverlayService : Service() {
             prefs.getInt("keycode_joystick_right", 22)
         )
 
-        buttonTop.label = "TOP"
         buttonTop.setKeyCode(prefs.getInt("keycode_button_top", 66))
-
-        buttonBottom.label = "BTM"
         buttonBottom.setKeyCode(prefs.getInt("keycode_button_bottom", 111))
 
         lever.setKeyCodes(
