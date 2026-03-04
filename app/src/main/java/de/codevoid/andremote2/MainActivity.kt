@@ -6,11 +6,14 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
-import android.util.Log
 import android.view.KeyEvent
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.appbar.MaterialToolbar
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.slider.Slider
+import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import rikka.shizuku.Shizuku
 
 class MainActivity : AppCompatActivity() {
@@ -30,33 +33,28 @@ class MainActivity : AppCompatActivity() {
     }
 
     private lateinit var prefs: SharedPreferences
-    private lateinit var btnToggleOverlay: Button
-    private lateinit var btnGrantShizuku: Button
-    private lateinit var seekBarSize: SeekBar
-    private lateinit var seekBarOpacity: SeekBar
+    private lateinit var btnToggleOverlay: MaterialButton
+    private lateinit var btnGrantShizuku: MaterialButton
+    private lateinit var sliderSize: Slider
+    private lateinit var sliderOpacity: Slider
     private lateinit var tvSize: TextView
     private lateinit var tvOpacity: TextView
 
-    private lateinit var spJoystickUp: Spinner
-    private lateinit var spJoystickDown: Spinner
-    private lateinit var spJoystickLeft: Spinner
-    private lateinit var spJoystickRight: Spinner
-    private lateinit var spButtonTop: Spinner
-    private lateinit var spButtonBottom: Spinner
-    private lateinit var spLeverUp: Spinner
-    private lateinit var spLeverDown: Spinner
-    private lateinit var spPreset: Spinner
+    private lateinit var actvJoystickUp: MaterialAutoCompleteTextView
+    private lateinit var actvJoystickDown: MaterialAutoCompleteTextView
+    private lateinit var actvJoystickLeft: MaterialAutoCompleteTextView
+    private lateinit var actvJoystickRight: MaterialAutoCompleteTextView
+    private lateinit var actvButtonTop: MaterialAutoCompleteTextView
+    private lateinit var actvButtonBottom: MaterialAutoCompleteTextView
+    private lateinit var actvLeverUp: MaterialAutoCompleteTextView
+    private lateinit var actvLeverDown: MaterialAutoCompleteTextView
+    private lateinit var actvPreset: MaterialAutoCompleteTextView
 
-    private val keySpinners: List<Spinner> by lazy {
-        listOf(spJoystickUp, spJoystickDown, spJoystickLeft, spJoystickRight,
-            spButtonTop, spButtonBottom, spLeverUp, spLeverDown)
+    private val keyActvs: List<MaterialAutoCompleteTextView> by lazy {
+        listOf(actvJoystickUp, actvJoystickDown, actvJoystickLeft, actvJoystickRight,
+            actvButtonTop, actvButtonBottom, actvLeverUp, actvLeverDown)
     }
-    private val setKeyButtonIds = listOf(
-        R.id.btnSetJoystickUp, R.id.btnSetJoystickDown,
-        R.id.btnSetJoystickLeft, R.id.btnSetJoystickRight,
-        R.id.btnSetButtonTop, R.id.btnSetButtonBottom,
-        R.id.btnSetLeverUp, R.id.btnSetLeverDown
-    )
+    private lateinit var setKeyButtons: List<MaterialButton>
 
     private val shizukuPermissionListener =
         Shizuku.OnRequestPermissionResultListener { requestCode, grantResult ->
@@ -75,54 +73,89 @@ class MainActivity : AppCompatActivity() {
 
         prefs = getSharedPreferences("andremote2", MODE_PRIVATE)
 
+        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
+        setSupportActionBar(toolbar)
+        toolbar.setOnMenuItemClickListener { item ->
+            if (item.itemId == R.id.action_coffee) {
+                try {
+                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://buymeacoffee.com/codevoid")))
+                } catch (_: android.content.ActivityNotFoundException) {
+                    Toast.makeText(this, R.string.no_browser_app, Toast.LENGTH_SHORT).show()
+                }
+                true
+            } else false
+        }
+
         btnToggleOverlay = findViewById(R.id.btnToggleOverlay)
         btnGrantShizuku = findViewById(R.id.btnGrantShizuku)
-        seekBarSize = findViewById(R.id.seekBarSize)
-        seekBarOpacity = findViewById(R.id.seekBarOpacity)
+        sliderSize = findViewById(R.id.sliderSize)
+        sliderOpacity = findViewById(R.id.sliderOpacity)
         tvSize = findViewById(R.id.tvSize)
         tvOpacity = findViewById(R.id.tvOpacity)
+        actvPreset = findViewById(R.id.actvPreset)
 
-        spJoystickUp = findViewById(R.id.spJoystickUp)
-        spJoystickDown = findViewById(R.id.spJoystickDown)
-        spJoystickLeft = findViewById(R.id.spJoystickLeft)
-        spJoystickRight = findViewById(R.id.spJoystickRight)
-        spButtonTop = findViewById(R.id.spButtonTop)
-        spButtonBottom = findViewById(R.id.spButtonBottom)
-        spLeverUp = findViewById(R.id.spLeverUp)
-        spLeverDown = findViewById(R.id.spLeverDown)
-        spPreset = findViewById(R.id.spPreset)
+        // Bind key-mapping rows via include IDs
+        val rowJoystickUp = findViewById<android.view.View>(R.id.rowJoystickUp)
+        val rowJoystickDown = findViewById<android.view.View>(R.id.rowJoystickDown)
+        val rowJoystickLeft = findViewById<android.view.View>(R.id.rowJoystickLeft)
+        val rowJoystickRight = findViewById<android.view.View>(R.id.rowJoystickRight)
+        val rowButtonTop = findViewById<android.view.View>(R.id.rowButtonTop)
+        val rowButtonBottom = findViewById<android.view.View>(R.id.rowButtonBottom)
+        val rowLeverUp = findViewById<android.view.View>(R.id.rowLeverUp)
+        val rowLeverDown = findViewById<android.view.View>(R.id.rowLeverDown)
 
-        setupPresetSpinner()
-        setupSpinners()
+        actvJoystickUp = rowJoystickUp.findViewById(R.id.actvKey)
+        actvJoystickDown = rowJoystickDown.findViewById(R.id.actvKey)
+        actvJoystickLeft = rowJoystickLeft.findViewById(R.id.actvKey)
+        actvJoystickRight = rowJoystickRight.findViewById(R.id.actvKey)
+        actvButtonTop = rowButtonTop.findViewById(R.id.actvKey)
+        actvButtonBottom = rowButtonBottom.findViewById(R.id.actvKey)
+        actvLeverUp = rowLeverUp.findViewById(R.id.actvKey)
+        actvLeverDown = rowLeverDown.findViewById(R.id.actvKey)
+
+        // Set row labels
+        rowJoystickUp.findViewById<TextView>(R.id.tvLabel).setText(R.string.joystick_up)
+        rowJoystickDown.findViewById<TextView>(R.id.tvLabel).setText(R.string.joystick_down)
+        rowJoystickLeft.findViewById<TextView>(R.id.tvLabel).setText(R.string.joystick_left)
+        rowJoystickRight.findViewById<TextView>(R.id.tvLabel).setText(R.string.joystick_right)
+        rowButtonTop.findViewById<TextView>(R.id.tvLabel).setText(R.string.button_top)
+        rowButtonBottom.findViewById<TextView>(R.id.tvLabel).setText(R.string.button_bottom)
+        rowLeverUp.findViewById<TextView>(R.id.tvLabel).setText(R.string.lever_up)
+        rowLeverDown.findViewById<TextView>(R.id.tvLabel).setText(R.string.lever_down)
+
+        setKeyButtons = listOf(
+            rowJoystickUp.findViewById(R.id.btnSetKey),
+            rowJoystickDown.findViewById(R.id.btnSetKey),
+            rowJoystickLeft.findViewById(R.id.btnSetKey),
+            rowJoystickRight.findViewById(R.id.btnSetKey),
+            rowButtonTop.findViewById(R.id.btnSetKey),
+            rowButtonBottom.findViewById(R.id.btnSetKey),
+            rowLeverUp.findViewById(R.id.btnSetKey),
+            rowLeverDown.findViewById(R.id.btnSetKey)
+        )
+
+        setupPresetDropdown()
+        setupKeyDropdowns()
         loadSettings()
 
         Shizuku.addRequestPermissionResultListener(shizukuPermissionListener)
 
         // Set Key buttons
-        val setKeyMappings = setKeyButtonIds.zip(keySpinners)
-        for ((btnId, spinner) in setKeyMappings) {
-            findViewById<Button>(btnId).setOnClickListener { showSetKeyDialog(spinner) }
+        setKeyButtons.zip(keyActvs).forEach { (btn, actv) ->
+            btn.setOnClickListener { showSetKeyDialog(actv) }
         }
 
-        seekBarSize.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                val size = progress + 25
-                tvSize.text = "$size%"
-                if (fromUser) saveIntPref("overlay_size", size)
-            }
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
-        })
+        sliderSize.addOnChangeListener { _, value, fromUser ->
+            val size = value.toInt()
+            tvSize.text = "$size%"
+            if (fromUser) saveIntPref("overlay_size", size)
+        }
 
-        seekBarOpacity.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                val opacity = progress + 20
-                tvOpacity.text = "$opacity%"
-                if (fromUser) saveIntPref("overlay_opacity", opacity)
-            }
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
-        })
+        sliderOpacity.addOnChangeListener { _, value, fromUser ->
+            val opacity = value.toInt()
+            tvOpacity.text = "$opacity%"
+            if (fromUser) saveIntPref("overlay_opacity", opacity)
+        }
 
         btnToggleOverlay.setOnClickListener {
             if (!Settings.canDrawOverlays(this)) {
@@ -147,17 +180,9 @@ class MainActivity : AppCompatActivity() {
             onGrantShizukuClicked()
         }
 
-        findViewById<Button>(R.id.btnSaveMappings).setOnClickListener {
+        findViewById<MaterialButton>(R.id.btnSaveMappings).setOnClickListener {
             saveKeyMappings()
             Toast.makeText(this, R.string.mappings_saved, Toast.LENGTH_SHORT).show()
-        }
-
-        findViewById<TextView>(R.id.btnCoffee).setOnClickListener {
-            try {
-                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://buymeacoffee.com/codevoid")))
-            } catch (_: android.content.ActivityNotFoundException) {
-                Toast.makeText(this, "No browser app found", Toast.LENGTH_SHORT).show()
-            }
         }
     }
 
@@ -242,47 +267,40 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupSpinners() {
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, KeyEventCodes.displayNames)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-
-        val paint = android.graphics.Paint()
-        paint.textSize = resources.displayMetrics.scaledDensity * 14f
-        val widestPx = KeyEventCodes.displayNames.maxOfOrNull { paint.measureText(it) }?.toInt() ?: 0
-        val dropDownWidth = widestPx + (32 * resources.displayMetrics.density).toInt()
-
-        keySpinners.forEach {
-            it.adapter = adapter
-            it.setDropDownWidth(dropDownWidth)
-        }
+    private fun setupKeyDropdowns() {
+        val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, KeyEventCodes.displayNames)
+        keyActvs.forEach { it.setAdapter(adapter) }
     }
 
-    private fun setupPresetSpinner() {
+    private fun setupPresetDropdown() {
         val presets = listOf(getString(R.string.preset_custom), getString(R.string.preset_dmd_remote_2))
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, presets)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spPreset.adapter = adapter
-        spPreset.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: android.view.View?, position: Int, id: Long) {
-                val isDmdPreset = position == PRESET_DMD_REMOTE_2
-                keySpinners.forEach { it.isEnabled = !isDmdPreset }
-                setKeyButtonIds.forEach { findViewById<Button>(it).isEnabled = !isDmdPreset }
-                if (isDmdPreset) {
-                    spJoystickUp.setSelection(KeyEventCodes.indexOfCode(DEFAULT_JOYSTICK_UP))
-                    spJoystickDown.setSelection(KeyEventCodes.indexOfCode(DEFAULT_JOYSTICK_DOWN))
-                    spJoystickLeft.setSelection(KeyEventCodes.indexOfCode(DEFAULT_JOYSTICK_LEFT))
-                    spJoystickRight.setSelection(KeyEventCodes.indexOfCode(DEFAULT_JOYSTICK_RIGHT))
-                    spButtonTop.setSelection(KeyEventCodes.indexOfCode(DEFAULT_BUTTON_TOP))
-                    spButtonBottom.setSelection(KeyEventCodes.indexOfCode(DEFAULT_BUTTON_BOTTOM))
-                    spLeverUp.setSelection(KeyEventCodes.indexOfCode(DEFAULT_LEVER_UP))
-                    spLeverDown.setSelection(KeyEventCodes.indexOfCode(DEFAULT_LEVER_DOWN))
-                }
+        val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, presets)
+        actvPreset.setAdapter(adapter)
+        val savedPreset = prefs.getInt("preset", 0)
+        actvPreset.setText(presets[savedPreset], false)
+        actvPreset.setOnItemClickListener { _, _, position, _ ->
+            saveIntPref("preset", position)
+            val isDmdPreset = position == PRESET_DMD_REMOTE_2
+            keyActvs.forEach { it.isEnabled = !isDmdPreset }
+            setKeyButtons.forEach { it.isEnabled = !isDmdPreset }
+            if (isDmdPreset) {
+                actvJoystickUp.setText(KeyEventCodes.displayNames[KeyEventCodes.indexOfCode(DEFAULT_JOYSTICK_UP)], false)
+                actvJoystickDown.setText(KeyEventCodes.displayNames[KeyEventCodes.indexOfCode(DEFAULT_JOYSTICK_DOWN)], false)
+                actvJoystickLeft.setText(KeyEventCodes.displayNames[KeyEventCodes.indexOfCode(DEFAULT_JOYSTICK_LEFT)], false)
+                actvJoystickRight.setText(KeyEventCodes.displayNames[KeyEventCodes.indexOfCode(DEFAULT_JOYSTICK_RIGHT)], false)
+                actvButtonTop.setText(KeyEventCodes.displayNames[KeyEventCodes.indexOfCode(DEFAULT_BUTTON_TOP)], false)
+                actvButtonBottom.setText(KeyEventCodes.displayNames[KeyEventCodes.indexOfCode(DEFAULT_BUTTON_BOTTOM)], false)
+                actvLeverUp.setText(KeyEventCodes.displayNames[KeyEventCodes.indexOfCode(DEFAULT_LEVER_UP)], false)
+                actvLeverDown.setText(KeyEventCodes.displayNames[KeyEventCodes.indexOfCode(DEFAULT_LEVER_DOWN)], false)
             }
-            override fun onNothingSelected(parent: AdapterView<*>) {}
         }
+        // Apply initial enabled state based on saved preset
+        val isDmdPreset = savedPreset == PRESET_DMD_REMOTE_2
+        keyActvs.forEach { it.isEnabled = !isDmdPreset }
+        setKeyButtons.forEach { it.isEnabled = !isDmdPreset }
     }
 
-    private fun showSetKeyDialog(spinner: Spinner) {
+    private fun showSetKeyDialog(actv: MaterialAutoCompleteTextView) {
         val dialog = AlertDialog.Builder(this)
             .setMessage(R.string.press_key_to_configure)
             .setNegativeButton(android.R.string.cancel, null)
@@ -291,7 +309,7 @@ class MainActivity : AppCompatActivity() {
             if (event.action == KeyEvent.ACTION_DOWN) {
                 val idx = KeyEventCodes.entries.indexOfFirst { it.code == keyCode }
                 if (idx >= 0) {
-                    spinner.setSelection(idx)
+                    actv.setText(KeyEventCodes.displayNames[idx], false)
                     dialog.dismiss()
                     return@setOnKeyListener true
                 }
@@ -304,30 +322,35 @@ class MainActivity : AppCompatActivity() {
     private fun loadSettings() {
         val size = prefs.getInt("overlay_size", 75)
         val opacity = prefs.getInt("overlay_opacity", 80)
-        seekBarSize.progress = size - 25
-        seekBarOpacity.progress = opacity - 20
+        sliderSize.value = size.toFloat()
+        sliderOpacity.value = opacity.toFloat()
         tvSize.text = "$size%"
         tvOpacity.text = "$opacity%"
 
-        spJoystickUp.setSelection(KeyEventCodes.indexOfCode(prefs.getInt("keycode_joystick_up", DEFAULT_JOYSTICK_UP)))
-        spJoystickDown.setSelection(KeyEventCodes.indexOfCode(prefs.getInt("keycode_joystick_down", DEFAULT_JOYSTICK_DOWN)))
-        spJoystickLeft.setSelection(KeyEventCodes.indexOfCode(prefs.getInt("keycode_joystick_left", DEFAULT_JOYSTICK_LEFT)))
-        spJoystickRight.setSelection(KeyEventCodes.indexOfCode(prefs.getInt("keycode_joystick_right", DEFAULT_JOYSTICK_RIGHT)))
-        spButtonTop.setSelection(KeyEventCodes.indexOfCode(prefs.getInt("keycode_button_top", DEFAULT_BUTTON_TOP)))
-        spButtonBottom.setSelection(KeyEventCodes.indexOfCode(prefs.getInt("keycode_button_bottom", DEFAULT_BUTTON_BOTTOM)))
-        spLeverUp.setSelection(KeyEventCodes.indexOfCode(prefs.getInt("keycode_lever_up", DEFAULT_LEVER_UP)))
-        spLeverDown.setSelection(KeyEventCodes.indexOfCode(prefs.getInt("keycode_lever_down", DEFAULT_LEVER_DOWN)))
+        actvJoystickUp.setText(KeyEventCodes.displayNames[KeyEventCodes.indexOfCode(prefs.getInt("keycode_joystick_up", DEFAULT_JOYSTICK_UP))], false)
+        actvJoystickDown.setText(KeyEventCodes.displayNames[KeyEventCodes.indexOfCode(prefs.getInt("keycode_joystick_down", DEFAULT_JOYSTICK_DOWN))], false)
+        actvJoystickLeft.setText(KeyEventCodes.displayNames[KeyEventCodes.indexOfCode(prefs.getInt("keycode_joystick_left", DEFAULT_JOYSTICK_LEFT))], false)
+        actvJoystickRight.setText(KeyEventCodes.displayNames[KeyEventCodes.indexOfCode(prefs.getInt("keycode_joystick_right", DEFAULT_JOYSTICK_RIGHT))], false)
+        actvButtonTop.setText(KeyEventCodes.displayNames[KeyEventCodes.indexOfCode(prefs.getInt("keycode_button_top", DEFAULT_BUTTON_TOP))], false)
+        actvButtonBottom.setText(KeyEventCodes.displayNames[KeyEventCodes.indexOfCode(prefs.getInt("keycode_button_bottom", DEFAULT_BUTTON_BOTTOM))], false)
+        actvLeverUp.setText(KeyEventCodes.displayNames[KeyEventCodes.indexOfCode(prefs.getInt("keycode_lever_up", DEFAULT_LEVER_UP))], false)
+        actvLeverDown.setText(KeyEventCodes.displayNames[KeyEventCodes.indexOfCode(prefs.getInt("keycode_lever_down", DEFAULT_LEVER_DOWN))], false)
     }
 
     private fun saveKeyMappings() {
-        saveIntPref("keycode_joystick_up", KeyEventCodes.codeAtIndex(spJoystickUp.selectedItemPosition))
-        saveIntPref("keycode_joystick_down", KeyEventCodes.codeAtIndex(spJoystickDown.selectedItemPosition))
-        saveIntPref("keycode_joystick_left", KeyEventCodes.codeAtIndex(spJoystickLeft.selectedItemPosition))
-        saveIntPref("keycode_joystick_right", KeyEventCodes.codeAtIndex(spJoystickRight.selectedItemPosition))
-        saveIntPref("keycode_button_top", KeyEventCodes.codeAtIndex(spButtonTop.selectedItemPosition))
-        saveIntPref("keycode_button_bottom", KeyEventCodes.codeAtIndex(spButtonBottom.selectedItemPosition))
-        saveIntPref("keycode_lever_up", KeyEventCodes.codeAtIndex(spLeverUp.selectedItemPosition))
-        saveIntPref("keycode_lever_down", KeyEventCodes.codeAtIndex(spLeverDown.selectedItemPosition))
+        saveIntPref("keycode_joystick_up", actvToKeyCode(actvJoystickUp))
+        saveIntPref("keycode_joystick_down", actvToKeyCode(actvJoystickDown))
+        saveIntPref("keycode_joystick_left", actvToKeyCode(actvJoystickLeft))
+        saveIntPref("keycode_joystick_right", actvToKeyCode(actvJoystickRight))
+        saveIntPref("keycode_button_top", actvToKeyCode(actvButtonTop))
+        saveIntPref("keycode_button_bottom", actvToKeyCode(actvButtonBottom))
+        saveIntPref("keycode_lever_up", actvToKeyCode(actvLeverUp))
+        saveIntPref("keycode_lever_down", actvToKeyCode(actvLeverDown))
+    }
+
+    private fun actvToKeyCode(actv: MaterialAutoCompleteTextView): Int {
+        val idx = KeyEventCodes.displayNames.indexOf(actv.text.toString())
+        return if (idx >= 0) KeyEventCodes.codeAtIndex(idx) else KeyEvent.KEYCODE_UNKNOWN
     }
 
     private fun saveIntPref(key: String, value: Int) {
