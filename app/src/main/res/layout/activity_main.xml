@@ -14,8 +14,7 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             app:title="@string/app_name"
-            app:subtitle="DMD Remote 2 Emulator"
-            app:menu="@menu/main_menu"/>
+            app:subtitle="DMD Remote 2 Emulator"/>
 
     </com.google.android.material.appbar.AppBarLayout>
 
