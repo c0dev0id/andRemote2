@@ -3,9 +3,11 @@ package de.codevoid.andremote2
 import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
@@ -172,7 +174,47 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun requestAccessibilityPermission() {
-        Toast.makeText(this, R.string.enable_accessibility_service, Toast.LENGTH_LONG).show()
-        startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !isInstalledFromTrustedSource()) {
+            AlertDialog.Builder(this)
+                .setTitle(R.string.restricted_settings_title)
+                .setMessage(R.string.restricted_settings_message)
+                .setPositiveButton(R.string.open_app_info) { _, _ ->
+                    openAppInfo()
+                }
+                .setNeutralButton(R.string.open_accessibility_settings) { _, _ ->
+                    startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+                }
+                .setNegativeButton(android.R.string.cancel, null)
+                .show()
+        } else {
+            Toast.makeText(this, R.string.enable_accessibility_service, Toast.LENGTH_LONG).show()
+            startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+        }
+    }
+
+    private fun isInstalledFromTrustedSource(): Boolean {
+        val trustedInstallers = setOf(
+            "com.android.vending",
+            "com.amazon.venezia",
+            "com.huawei.appmarket",
+            "com.sec.android.app.samsungapps"
+        )
+        return try {
+            val installer = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                packageManager.getInstallSourceInfo(packageName).installingPackageName
+            } else {
+                @Suppress("DEPRECATION")
+                packageManager.getInstallerPackageName(packageName)
+            }
+            installer in trustedInstallers
+        } catch (_: Exception) {
+            false
+        }
+    }
+
+    private fun openAppInfo() {
+        startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+            data = Uri.parse("package:$packageName")
+        })
     }
 }
