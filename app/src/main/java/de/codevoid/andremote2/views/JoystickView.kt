@@ -4,6 +4,8 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Path
+import android.os.Handler
+import android.os.Looper
 import android.os.SystemClock
 import android.util.AttributeSet
 import android.view.MotionEvent
@@ -51,6 +53,14 @@ class JoystickView @JvmOverloads constructor(
     private var knobY = 0f
     private var currentKeyCode = -1
     private var pressDownTime = 0L
+
+    private val longPressHandler = Handler(Looper.getMainLooper())
+    private val longPressRunnable = Runnable {
+        if (currentKeyCode != -1) {
+            KeyInjectionService.instance?.injectKeyLongPress(currentKeyCode, pressDownTime)
+                ?: Log.w("JoystickView", "KeyInjectionService not available for long press")
+        }
+    }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         centerX = w / 2f
@@ -138,9 +148,12 @@ class JoystickView @JvmOverloads constructor(
         pressDownTime = SystemClock.uptimeMillis()
         KeyInjectionService.instance?.injectKeyDown(keyCode, pressDownTime)
             ?: Log.w("JoystickView", "KeyInjectionService not available")
+        longPressHandler.removeCallbacks(longPressRunnable)
+        longPressHandler.postDelayed(longPressRunnable, 500)
     }
 
     private fun sendKeyUp(keyCode: Int) {
+        longPressHandler.removeCallbacks(longPressRunnable)
         KeyInjectionService.instance?.injectKeyUp(keyCode, pressDownTime)
             ?: Log.w("JoystickView", "KeyInjectionService not available")
     }
