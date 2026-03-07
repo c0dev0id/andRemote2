@@ -5,6 +5,7 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Path
 import android.util.AttributeSet
+import android.os.SystemClock
 import android.view.MotionEvent
 import android.view.View
 import android.util.Log
@@ -22,6 +23,7 @@ class LeverView @JvmOverloads constructor(
     private var keycodeDown = 137
 
     private var currentKeyCode = -1
+    private var pressDownTime = 0L
     private var startY = 0f
     private var leverY = 0f
 
@@ -129,13 +131,14 @@ class LeverView @JvmOverloads constructor(
 
     private fun sendKeyDown(keyCode: Int) {
         KeyEventLog.log("LeverView", "sendKeyDown keyCode=$keyCode shizukuEnabled=${KeyInjectionService.shizukuEnabled}")
-        KeyInjectionService.instance?.injectKeyDown(keyCode)
+        pressDownTime = SystemClock.uptimeMillis()
+        KeyInjectionService.instance?.injectKeyDown(keyCode, pressDownTime)
             ?: Log.w("LeverView", "KeyInjectionService not available")
     }
 
     private fun sendKeyUp(keyCode: Int) {
         KeyEventLog.log("LeverView", "sendKeyUp keyCode=$keyCode shizukuEnabled=${KeyInjectionService.shizukuEnabled}")
-        KeyInjectionService.instance?.injectKeyUp(keyCode)
+        KeyInjectionService.instance?.injectKeyUp(keyCode, pressDownTime)
             ?: Log.w("LeverView", "KeyInjectionService not available")
     }
 

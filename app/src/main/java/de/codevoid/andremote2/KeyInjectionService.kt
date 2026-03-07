@@ -60,53 +60,60 @@ class KeyInjectionService : Service() {
     fun injectKey(keyCode: Int) {
         KeyEventLog.log("KeyInjectionService", "injectKey keyCode=$keyCode shizukuEnabled=$shizukuEnabled")
         if (shizukuEnabled) {
+            val downTime = SystemClock.uptimeMillis()
             bgHandler.post {
-                injectInputEvent(keyCode, KeyEvent.ACTION_DOWN)
-                injectInputEvent(keyCode, KeyEvent.ACTION_UP)
+                injectInputEvent(keyCode, KeyEvent.ACTION_DOWN, downTime)
+                injectInputEvent(keyCode, KeyEvent.ACTION_UP, downTime)
             }
         } else {
             Log.w(TAG, "injectKey: Shizuku not enabled, key $keyCode dropped")
         }
     }
 
-    fun injectKeyDown(keyCode: Int) {
+    fun injectKeyDown(keyCode: Int, downTime: Long) {
         KeyEventLog.log("KeyInjectionService", "injectKeyDown keyCode=$keyCode shizukuEnabled=$shizukuEnabled")
         if (shizukuEnabled) {
-            bgHandler.post { injectInputEvent(keyCode, KeyEvent.ACTION_DOWN) }
+            bgHandler.post { injectInputEvent(keyCode, KeyEvent.ACTION_DOWN, downTime) }
         } else {
             Log.w(TAG, "injectKeyDown: Shizuku not enabled, key $keyCode dropped")
         }
     }
 
-    fun injectKeyUp(keyCode: Int) {
+    fun injectKeyUp(keyCode: Int, downTime: Long) {
         KeyEventLog.log("KeyInjectionService", "injectKeyUp keyCode=$keyCode shizukuEnabled=$shizukuEnabled")
         if (shizukuEnabled) {
-            bgHandler.post { injectInputEvent(keyCode, KeyEvent.ACTION_UP) }
+            bgHandler.post { injectInputEvent(keyCode, KeyEvent.ACTION_UP, downTime) }
         } else {
             Log.w(TAG, "injectKeyUp: Shizuku not enabled, key $keyCode dropped")
         }
     }
 
-    fun injectKeyLongPress(keyCode: Int) {
+    fun injectKeyLongPress(keyCode: Int, downTime: Long) {
         KeyEventLog.log("KeyInjectionService", "injectKeyLongPress keyCode=$keyCode shizukuEnabled=$shizukuEnabled")
         if (shizukuEnabled) {
             bgHandler.post {
-                injectInputEvent(keyCode, KeyEvent.ACTION_DOWN,
-                    KeyEvent.FLAG_FROM_SYSTEM or KeyEvent.FLAG_LONG_PRESS)
+                injectInputEvent(keyCode, KeyEvent.ACTION_DOWN, downTime,
+                    KeyEvent.FLAG_FROM_SYSTEM or KeyEvent.FLAG_LONG_PRESS, repeatCount = 1)
             }
         } else {
             Log.w(TAG, "injectKeyLongPress: Shizuku not enabled, key $keyCode dropped")
         }
     }
 
-    private fun injectInputEvent(keyCode: Int, action: Int, flags: Int = KeyEvent.FLAG_FROM_SYSTEM) {
+    private fun injectInputEvent(
+        keyCode: Int,
+        action: Int,
+        downTime: Long,
+        flags: Int = KeyEvent.FLAG_FROM_SYSTEM,
+        repeatCount: Int = 0
+    ) {
         val manager = inputManager
         if (manager != null) {
             try {
                 val now = SystemClock.uptimeMillis()
                 val keyEvent = KeyEvent(
-                    now, now, action, keyCode,
-                    0, 0, -1, 0,
+                    downTime, now, action, keyCode,
+                    repeatCount, 0, -1, 0,
                     flags,
                     InputDevice.SOURCE_KEYBOARD
                 )

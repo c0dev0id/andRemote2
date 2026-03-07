@@ -5,6 +5,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
+import android.os.SystemClock
 import android.view.MotionEvent
 import android.view.View
 import android.util.Log
@@ -20,10 +21,11 @@ class ButtonView @JvmOverloads constructor(
 
     private var keyCode = 66
     private var isPressed = false
+    private var pressDownTime = 0L
 
     private val longPressRunnable = Runnable {
         KeyEventLog.log("ButtonView", "longPress key=$keyCode label=$label")
-        KeyInjectionService.instance?.injectKeyLongPress(keyCode)
+        KeyInjectionService.instance?.injectKeyLongPress(keyCode, pressDownTime)
             ?: Log.w("ButtonView", "KeyInjectionService not available for long press")
     }
 
@@ -65,6 +67,7 @@ class ButtonView @JvmOverloads constructor(
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
                 isPressed = true
+                pressDownTime = SystemClock.uptimeMillis()
                 sendKeyDown()
                 postDelayed(longPressRunnable, 500)
                 invalidate()
@@ -90,13 +93,13 @@ class ButtonView @JvmOverloads constructor(
 
     private fun sendKeyDown() {
         KeyEventLog.log("ButtonView", "sendKeyDown key=$keyCode label=$label shizukuEnabled=${KeyInjectionService.shizukuEnabled}")
-        KeyInjectionService.instance?.injectKeyDown(keyCode)
+        KeyInjectionService.instance?.injectKeyDown(keyCode, pressDownTime)
             ?: Log.w("ButtonView", "KeyInjectionService not available")
     }
 
     private fun sendKeyUp() {
         KeyEventLog.log("ButtonView", "sendKeyUp key=$keyCode label=$label shizukuEnabled=${KeyInjectionService.shizukuEnabled}")
-        KeyInjectionService.instance?.injectKeyUp(keyCode)
+        KeyInjectionService.instance?.injectKeyUp(keyCode, pressDownTime)
             ?: Log.w("ButtonView", "KeyInjectionService not available")
     }
 
