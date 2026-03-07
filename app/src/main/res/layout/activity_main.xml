@@ -1,329 +1,246 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.google.android.material.appbar.AppBarLayout
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent">
 
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar"
+        <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            app:title="@string/app_name"
-            app:subtitle="DMD Remote 2 Emulator"/>
+            android:layout_height="wrap_content">
 
-    </com.google.android.material.appbar.AppBarLayout>
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                app:title="@string/app_name"
+                app:subtitle="DMD Remote 2 Emulator"/>
 
-    <androidx.core.widget.NestedScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        </com.google.android.material.appbar.AppBarLayout>
 
-        <LinearLayout
+        <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-            <!-- Toggle Overlay Button -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnToggleOverlay"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/start_overlay"
-                android:layout_marginBottom="8dp"/>
+                android:orientation="vertical"
+                android:padding="16dp">
 
-            <!-- Grant Permission via Shizuku -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnGrantShizuku"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/grant_via_shizuku"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_marginBottom="16dp"/>
-
-            <!-- Overlay Settings Card -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp">
-
-                <LinearLayout
+                <!-- Toggle Overlay Button -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnToggleOverlay"
+                    style="@style/Widget.AndRemote2.Button.Orange"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
+                    android:text="@string/start_overlay"
+                    android:layout_marginBottom="8dp"/>
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/overlay_settings"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:layout_marginBottom="8dp"/>
+                <!-- Grant Permission via Shizuku -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnGrantShizuku"
+                    style="@style/Widget.AndRemote2.Button.Outlined"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/grant_via_shizuku"
+                    android:layout_marginBottom="16dp"/>
 
-                    <com.google.android.material.divider.MaterialDivider
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="12dp"/>
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/overlay_size"
-                        android:textStyle="bold"
-                        android:layout_marginBottom="4dp"/>
+                <!-- Overlay Settings Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:layout_marginBottom="8dp">
-
-                        <com.google.android.material.slider.Slider
-                            android:id="@+id/sliderSize"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:valueFrom="25"
-                            android:valueTo="100"
-                            android:stepSize="1"
-                            app:labelBehavior="gone"
-                            android:value="75"/>
+                        android:orientation="vertical"
+                        android:padding="16dp">
 
                         <TextView
-                            android:id="@+id/tvSize"
-                            android:layout_width="60dp"
-                            android:layout_height="wrap_content"
-                            android:text="75%"
-                            android:textAlignment="center"
-                            android:layout_marginStart="8dp"/>
-
-                    </LinearLayout>
-
-                    <com.google.android.material.divider.MaterialDivider
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="12dp"/>
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/overlay_opacity"
-                        android:textStyle="bold"
-                        android:layout_marginBottom="4dp"/>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical">
-
-                        <com.google.android.material.slider.Slider
-                            android:id="@+id/sliderOpacity"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:valueFrom="20"
-                            android:valueTo="100"
-                            android:stepSize="1"
-                            app:labelBehavior="gone"
-                            android:value="80"/>
-
-                        <TextView
-                            android:id="@+id/tvOpacity"
-                            android:layout_width="60dp"
-                            android:layout_height="wrap_content"
-                            android:text="80%"
-                            android:textAlignment="center"
-                            android:layout_marginStart="8dp"/>
-
-                    </LinearLayout>
-
-                </LinearLayout>
-
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Key Mappings Card -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/key_mappings"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:layout_marginBottom="12dp"/>
-
-                    <!-- Preset -->
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="@string/preset"
-                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                        android:layout_marginBottom="12dp">
-
-                        <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                            android:id="@+id/actvPreset"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="none"/>
-
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <com.google.android.material.divider.MaterialDivider
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"/>
-
-                    <!-- Joystick Controls -->
-                    <include android:id="@+id/rowJoystickUp" layout="@layout/item_key_mapping"/>
-
-                    <com.google.android.material.divider.MaterialDivider
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"/>
-
-                    <include android:id="@+id/rowJoystickDown" layout="@layout/item_key_mapping"/>
-
-                    <com.google.android.material.divider.MaterialDivider
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"/>
-
-                    <include android:id="@+id/rowJoystickLeft" layout="@layout/item_key_mapping"/>
-
-                    <com.google.android.material.divider.MaterialDivider
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"/>
-
-                    <include android:id="@+id/rowJoystickRight" layout="@layout/item_key_mapping"/>
-
-                    <com.google.android.material.divider.MaterialDivider
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"/>
-
-                    <!-- Button Controls -->
-                    <include android:id="@+id/rowButtonTop" layout="@layout/item_key_mapping"/>
-
-                    <com.google.android.material.divider.MaterialDivider
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"/>
-
-                    <include android:id="@+id/rowButtonBottom" layout="@layout/item_key_mapping"/>
-
-                    <com.google.android.material.divider.MaterialDivider
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"/>
-
-                    <!-- Lever Controls -->
-                    <include android:id="@+id/rowLeverUp" layout="@layout/item_key_mapping"/>
-
-                    <com.google.android.material.divider.MaterialDivider
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"/>
-
-                    <include android:id="@+id/rowLeverDown" layout="@layout/item_key_mapping"/>
-
-                    <com.google.android.material.divider.MaterialDivider
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"/>
-
-                    <!-- Save Mappings Button -->
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnSaveMappings"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/save_key_mappings"
-                        style="@style/Widget.Material3.Button.TonalButton"
-                        android:layout_marginTop="12dp"/>
-
-                </LinearLayout>
-
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Event Log Card -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:layout_marginBottom="8dp">
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="@string/event_log"
+                            android:text="@string/overlay_settings"
                             android:textSize="16sp"
-                            android:textStyle="bold"/>
+                            android:textStyle="bold"
+                            android:layout_marginBottom="8dp"/>
 
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btnClearLog"
-                            android:layout_width="wrap_content"
+                        <com.google.android.material.divider.MaterialDivider
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="@string/clear_log"
-                            style="@style/Widget.Material3.Button.TextButton"/>
+                            android:layout_marginBottom="12dp"/>
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/overlay_size"
+                            android:textStyle="bold"
+                            android:layout_marginBottom="4dp"/>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:layout_marginBottom="8dp">
+
+                            <com.google.android.material.slider.Slider
+                                android:id="@+id/sliderSize"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:valueFrom="25"
+                                android:valueTo="100"
+                                android:stepSize="1"
+                                app:labelBehavior="gone"
+                                android:value="75"/>
+
+                            <TextView
+                                android:id="@+id/tvSize"
+                                android:layout_width="60dp"
+                                android:layout_height="wrap_content"
+                                android:text="75%"
+                                android:textAlignment="center"
+                                android:layout_marginStart="8dp"/>
+
+                        </LinearLayout>
+
+                        <com.google.android.material.divider.MaterialDivider
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="12dp"/>
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/overlay_opacity"
+                            android:textStyle="bold"
+                            android:layout_marginBottom="4dp"/>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
+
+                            <com.google.android.material.slider.Slider
+                                android:id="@+id/sliderOpacity"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:valueFrom="20"
+                                android:valueTo="100"
+                                android:stepSize="1"
+                                app:labelBehavior="gone"
+                                android:value="80"/>
+
+                            <TextView
+                                android:id="@+id/tvOpacity"
+                                android:layout_width="60dp"
+                                android:layout_height="wrap_content"
+                                android:text="80%"
+                                android:textAlignment="center"
+                                android:layout_marginStart="8dp"/>
+
+                        </LinearLayout>
 
                     </LinearLayout>
 
-                    <com.google.android.material.divider.MaterialDivider
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Key Mappings Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp">
+
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"/>
-
-                    <ScrollView
-                        android:id="@+id/scrollEventLog"
-                        android:layout_width="match_parent"
-                        android:layout_height="200dp">
+                        android:orientation="vertical"
+                        android:padding="16dp">
 
                         <TextView
-                            android:id="@+id/tvEventLog"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:fontFamily="monospace"
-                            android:textSize="10sp"
-                            android:padding="4dp"/>
+                            android:text="@string/key_mappings"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:layout_marginBottom="12dp"/>
 
-                    </ScrollView>
+                        <!-- Preset Toggle -->
+                        <com.google.android.material.button.MaterialButtonToggleGroup
+                            android:id="@+id/togglePreset"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            app:singleSelection="true"
+                            app:selectionRequired="true"
+                            android:layout_marginBottom="12dp">
 
-                </LinearLayout>
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnPresetDmd"
+                                style="@style/Widget.Material3.Button.OutlinedButton"
+                                android:layout_width="0dp"
+                                android:layout_weight="1"
+                                android:layout_height="wrap_content"
+                                android:text="@string/preset_dmd_remote_2"/>
 
-            </com.google.android.material.card.MaterialCardView>
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnPresetCustom"
+                                style="@style/Widget.Material3.Button.OutlinedButton"
+                                android:layout_width="0dp"
+                                android:layout_weight="1"
+                                android:layout_height="wrap_content"
+                                android:text="@string/preset_custom"/>
 
-        </LinearLayout>
+                        </com.google.android.material.button.MaterialButtonToggleGroup>
 
-    </androidx.core.widget.NestedScrollView>
+                        <com.google.android.material.divider.MaterialDivider
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="8dp"/>
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+                        <!-- Key assignment table (populated dynamically) -->
+                        <LinearLayout
+                            android:id="@+id/remoteKeyTable"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:layout_marginBottom="12dp"/>
+
+                        <com.google.android.material.divider.MaterialDivider
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="12dp"/>
+
+                        <!-- Key Mapping Wizard Button -->
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnMapRemote"
+                            style="@style/Widget.AndRemote2.Button.Dark"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/btn_map_remote"/>
+
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+            </LinearLayout>
+
+        </androidx.core.widget.NestedScrollView>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+    <!-- Full-screen wizard overlay (initially hidden) -->
+    <include
+        android:id="@+id/wizardPanel"
+        layout="@layout/panel_key_wizard"
+        android:visibility="gone"/>
+
+</FrameLayout>
