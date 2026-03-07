@@ -87,7 +87,19 @@ class KeyInjectionService : Service() {
         }
     }
 
-    private fun injectInputEvent(keyCode: Int, action: Int) {
+    fun injectKeyLongPress(keyCode: Int) {
+        KeyEventLog.log("KeyInjectionService", "injectKeyLongPress keyCode=$keyCode shizukuEnabled=$shizukuEnabled")
+        if (shizukuEnabled) {
+            bgHandler.post {
+                injectInputEvent(keyCode, KeyEvent.ACTION_DOWN,
+                    KeyEvent.FLAG_FROM_SYSTEM or KeyEvent.FLAG_LONG_PRESS)
+            }
+        } else {
+            Log.w(TAG, "injectKeyLongPress: Shizuku not enabled, key $keyCode dropped")
+        }
+    }
+
+    private fun injectInputEvent(keyCode: Int, action: Int, flags: Int = KeyEvent.FLAG_FROM_SYSTEM) {
         val manager = inputManager
         if (manager != null) {
             try {
@@ -95,7 +107,7 @@ class KeyInjectionService : Service() {
                 val keyEvent = KeyEvent(
                     now, now, action, keyCode,
                     0, 0, -1, 0,
-                    KeyEvent.FLAG_FROM_SYSTEM,
+                    flags,
                     InputDevice.SOURCE_KEYBOARD
                 )
                 val injectMethod = manager.javaClass.getMethod(

@@ -21,6 +21,12 @@ class ButtonView @JvmOverloads constructor(
     private var keyCode = 66
     private var isPressed = false
 
+    private val longPressRunnable = Runnable {
+        KeyEventLog.log("ButtonView", "longPress key=$keyCode label=$label")
+        KeyInjectionService.instance?.injectKeyLongPress(keyCode)
+            ?: Log.w("ButtonView", "KeyInjectionService not available for long press")
+    }
+
     private val paintNormal = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = ContextCompat.getColor(context, R.color.control_button_normal)
         style = Paint.Style.FILL
@@ -60,17 +66,20 @@ class ButtonView @JvmOverloads constructor(
             MotionEvent.ACTION_DOWN -> {
                 isPressed = true
                 sendKeyDown()
+                postDelayed(longPressRunnable, 500)
                 invalidate()
                 return true
             }
             MotionEvent.ACTION_UP -> {
                 isPressed = false
+                removeCallbacks(longPressRunnable)
                 invalidate()
                 sendKeyUp()
                 return true
             }
             MotionEvent.ACTION_CANCEL -> {
                 isPressed = false
+                removeCallbacks(longPressRunnable)
                 sendKeyUp()
                 invalidate()
                 return true
