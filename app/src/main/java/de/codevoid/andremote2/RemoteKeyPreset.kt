@@ -50,9 +50,9 @@ data class RemoteKeyPreset(
                 KeyEvent.KEYCODE_DPAD_LEFT,   // 2: Joystick Left
                 KeyEvent.KEYCODE_DPAD_RIGHT,  // 3: Joystick Right
                 KeyEvent.KEYCODE_ENTER,       // 4: Button Top
-                KeyEvent.KEYCODE_MENU,        // 5: Button Bottom
-                KeyEvent.KEYCODE_PROG_RED,    // 6: Lever Up
-                KeyEvent.KEYCODE_PROG_GREEN   // 7: Lever Down
+                KeyEvent.KEYCODE_ESCAPE,      // 5: Button Bottom
+                KeyEvent.KEYCODE_F6,          // 6: Lever Up
+                KeyEvent.KEYCODE_F7           // 7: Lever Down
             )
         )
 
