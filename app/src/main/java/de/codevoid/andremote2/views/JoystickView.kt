@@ -4,13 +4,12 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Path
-import android.util.AttributeSet
 import android.os.SystemClock
+import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import android.util.Log
 import androidx.core.content.ContextCompat
-import de.codevoid.andremote2.KeyEventLog
 import de.codevoid.andremote2.KeyInjectionService
 import de.codevoid.andremote2.R
 import kotlin.math.abs
@@ -136,14 +135,12 @@ class JoystickView @JvmOverloads constructor(
     }
 
     private fun sendKeyDown(keyCode: Int) {
-        KeyEventLog.log("JoystickView", "sendKeyDown keyCode=$keyCode shizukuEnabled=${KeyInjectionService.shizukuEnabled}")
         pressDownTime = SystemClock.uptimeMillis()
         KeyInjectionService.instance?.injectKeyDown(keyCode, pressDownTime)
             ?: Log.w("JoystickView", "KeyInjectionService not available")
     }
 
     private fun sendKeyUp(keyCode: Int) {
-        KeyEventLog.log("JoystickView", "sendKeyUp keyCode=$keyCode shizukuEnabled=${KeyInjectionService.shizukuEnabled}")
         KeyInjectionService.instance?.injectKeyUp(keyCode, pressDownTime)
             ?: Log.w("JoystickView", "KeyInjectionService not available")
     }

@@ -40,7 +40,7 @@ class OverlayService : Service() {
         if (key == PrefKeys.OVERLAY_SIZE || key == PrefKeys.OVERLAY_OPACITY) {
             mainHandler.post { applyScaleAndAlpha() }
         }
-        if (key != null && (key.startsWith(PrefKeys.KEYCODE_PREFIX) || key == PrefKeys.PRESET)) {
+        if (key == RemotePresetManager.KEY_CUSTOM_PRESET || key == RemotePresetManager.KEY_USE_CUSTOM) {
             mainHandler.post { setupControls() }
         }
     }
@@ -50,7 +50,7 @@ class OverlayService : Service() {
     override fun onCreate() {
         super.onCreate()
         isRunning = true
-        prefs = getSharedPreferences(KeyMappingDefaults.PREFS_NAME, MODE_PRIVATE)
+        prefs = getSharedPreferences("andremote2", MODE_PRIVATE)
         createNotificationChannel()
         startForeground(1, buildNotification())
         startService(Intent(this, KeyInjectionService::class.java))
@@ -102,8 +102,6 @@ class OverlayService : Service() {
 
         overlayView = LayoutInflater.from(this).inflate(R.layout.overlay_remote, null)
 
-        // Compute base natural dimensions from the overlay's design dp values:
-        // 200dp content + 21dp padding each side = 242dp wide; 384dp content + 42dp padding = 426dp tall
         val density = resources.displayMetrics.density
         baseWidth = (BASE_WIDTH_DP * density + 0.5f).toInt()
         baseHeight = (BASE_HEIGHT_DP * density + 0.5f).toInt()
@@ -126,7 +124,6 @@ class OverlayService : Service() {
         }
 
         applyScaleAndAlpha()
-
         setupControls()
 
         val root = overlayView.findViewById<de.codevoid.andremote2.views.DraggableOverlayLayout>(R.id.overlayRoot)
@@ -160,27 +157,21 @@ class OverlayService : Service() {
     }
 
     private fun setupControls() {
+        val preset = RemotePresetManager(prefs).getActivePreset()
         val joystick = overlayView.findViewById<de.codevoid.andremote2.views.JoystickView>(R.id.joystickView)
         val buttonTop = overlayView.findViewById<de.codevoid.andremote2.views.ButtonView>(R.id.buttonTop)
         val buttonBottom = overlayView.findViewById<de.codevoid.andremote2.views.ButtonView>(R.id.buttonBottom)
         val lever = overlayView.findViewById<de.codevoid.andremote2.views.LeverView>(R.id.leverView)
 
         joystick.setKeyCodes(
-            prefs.getInt(PrefKeys.KEYCODE_JOYSTICK_UP, KeyMappingDefaults.DEFAULT_JOYSTICK_UP),
-            prefs.getInt(PrefKeys.KEYCODE_JOYSTICK_DOWN, KeyMappingDefaults.DEFAULT_JOYSTICK_DOWN),
-            prefs.getInt(PrefKeys.KEYCODE_JOYSTICK_LEFT, KeyMappingDefaults.DEFAULT_JOYSTICK_LEFT),
-            prefs.getInt(PrefKeys.KEYCODE_JOYSTICK_RIGHT, KeyMappingDefaults.DEFAULT_JOYSTICK_RIGHT)
+            preset.keycodes[0], preset.keycodes[1],
+            preset.keycodes[2], preset.keycodes[3]
         )
         buttonTop.label = ""
-        buttonTop.setKeyCode(prefs.getInt(PrefKeys.KEYCODE_BUTTON_TOP, KeyMappingDefaults.DEFAULT_BUTTON_TOP))
-
+        buttonTop.setKeyCode(preset.keycodes[4])
         buttonBottom.label = ""
-        buttonBottom.setKeyCode(prefs.getInt(PrefKeys.KEYCODE_BUTTON_BOTTOM, KeyMappingDefaults.DEFAULT_BUTTON_BOTTOM))
-
-        lever.setKeyCodes(
-            prefs.getInt(PrefKeys.KEYCODE_LEVER_UP, KeyMappingDefaults.DEFAULT_LEVER_UP),
-            prefs.getInt(PrefKeys.KEYCODE_LEVER_DOWN, KeyMappingDefaults.DEFAULT_LEVER_DOWN)
-        )
+        buttonBottom.setKeyCode(preset.keycodes[5])
+        lever.setKeyCodes(preset.keycodes[6], preset.keycodes[7])
     }
 
 }

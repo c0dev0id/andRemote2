@@ -4,13 +4,12 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.util.AttributeSet
 import android.os.SystemClock
+import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import android.util.Log
 import androidx.core.content.ContextCompat
-import de.codevoid.andremote2.KeyEventLog
 import de.codevoid.andremote2.KeyInjectionService
 import de.codevoid.andremote2.R
 
@@ -24,7 +23,6 @@ class ButtonView @JvmOverloads constructor(
     private var pressDownTime = 0L
 
     private val longPressRunnable = Runnable {
-        KeyEventLog.log("ButtonView", "longPress key=$keyCode label=$label")
         KeyInjectionService.instance?.injectKeyLongPress(keyCode, pressDownTime)
             ?: Log.w("ButtonView", "KeyInjectionService not available for long press")
     }
@@ -92,13 +90,11 @@ class ButtonView @JvmOverloads constructor(
     }
 
     private fun sendKeyDown() {
-        KeyEventLog.log("ButtonView", "sendKeyDown key=$keyCode label=$label shizukuEnabled=${KeyInjectionService.shizukuEnabled}")
         KeyInjectionService.instance?.injectKeyDown(keyCode, pressDownTime)
             ?: Log.w("ButtonView", "KeyInjectionService not available")
     }
 
     private fun sendKeyUp() {
-        KeyEventLog.log("ButtonView", "sendKeyUp key=$keyCode label=$label shizukuEnabled=${KeyInjectionService.shizukuEnabled}")
         KeyInjectionService.instance?.injectKeyUp(keyCode, pressDownTime)
             ?: Log.w("ButtonView", "KeyInjectionService not available")
     }

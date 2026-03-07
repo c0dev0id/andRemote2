@@ -58,7 +58,6 @@ class KeyInjectionService : Service() {
     }
 
     fun injectKey(keyCode: Int) {
-        KeyEventLog.log("KeyInjectionService", "injectKey keyCode=$keyCode shizukuEnabled=$shizukuEnabled")
         if (shizukuEnabled) {
             val downTime = SystemClock.uptimeMillis()
             bgHandler.post {
@@ -71,7 +70,6 @@ class KeyInjectionService : Service() {
     }
 
     fun injectKeyDown(keyCode: Int, downTime: Long) {
-        KeyEventLog.log("KeyInjectionService", "injectKeyDown keyCode=$keyCode shizukuEnabled=$shizukuEnabled")
         if (shizukuEnabled) {
             bgHandler.post { injectInputEvent(keyCode, KeyEvent.ACTION_DOWN, downTime) }
         } else {
@@ -80,7 +78,6 @@ class KeyInjectionService : Service() {
     }
 
     fun injectKeyUp(keyCode: Int, downTime: Long) {
-        KeyEventLog.log("KeyInjectionService", "injectKeyUp keyCode=$keyCode shizukuEnabled=$shizukuEnabled")
         if (shizukuEnabled) {
             bgHandler.post { injectInputEvent(keyCode, KeyEvent.ACTION_UP, downTime) }
         } else {
@@ -89,7 +86,6 @@ class KeyInjectionService : Service() {
     }
 
     fun injectKeyLongPress(keyCode: Int, downTime: Long) {
-        KeyEventLog.log("KeyInjectionService", "injectKeyLongPress keyCode=$keyCode shizukuEnabled=$shizukuEnabled")
         if (shizukuEnabled) {
             bgHandler.post {
                 injectInputEvent(keyCode, KeyEvent.ACTION_DOWN, downTime,

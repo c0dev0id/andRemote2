@@ -1,13 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
-    <color name="overlay_bg">#CC1A1A2E</color>
+    <color name="colorPrimary">#F57C00</color>
+    <color name="colorPrimaryDark">#E65100</color>
+    <color name="colorAccent">#F57C00</color>
+    <color name="button_active">#F57C00</color>
+    <color name="button_inactive">#444444</color>
+
+    <color name="surface_dark">#2B2B2B</color>
+    <color name="surface_card">#3C3C3C</color>
+    <color name="bottom_bar_bg">#1A1A1A</color>
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#B0B0B0</color>
+    <color name="text_tertiary">#808080</color>
+    <color name="destructive">#D32F2F</color>
+    <color name="overlay_bg">#CC000000</color>
+
+    <!-- Overlay control colors -->
     <color name="control_base">#444444</color>
     <color name="control_knob">#888888</color>
     <color name="control_border">#AAAAAA</color>

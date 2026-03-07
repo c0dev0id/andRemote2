@@ -6,53 +6,57 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
+import android.view.Gravity
 import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.ArrayAdapter
-import android.widget.ScrollView
+import android.view.View
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.slider.Slider
-import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import rikka.shizuku.Shizuku
 
 class MainActivity : AppCompatActivity() {
 
     companion object {
         private const val SHIZUKU_PERMISSION_REQUEST_CODE = 100
-        private const val PRESET_DMD_REMOTE_2 = 1
     }
 
     private lateinit var prefs: SharedPreferences
+    private lateinit var presetManager: RemotePresetManager
+    private lateinit var activePreset: RemoteKeyPreset
+
     private lateinit var btnToggleOverlay: MaterialButton
     private lateinit var btnGrantShizuku: MaterialButton
     private lateinit var sliderSize: Slider
     private lateinit var sliderOpacity: Slider
     private lateinit var tvSize: TextView
     private lateinit var tvOpacity: TextView
-    private lateinit var tvEventLog: TextView
-    private lateinit var scrollEventLog: ScrollView
 
-    private lateinit var actvJoystickUp: MaterialAutoCompleteTextView
-    private lateinit var actvJoystickDown: MaterialAutoCompleteTextView
-    private lateinit var actvJoystickLeft: MaterialAutoCompleteTextView
-    private lateinit var actvJoystickRight: MaterialAutoCompleteTextView
-    private lateinit var actvButtonTop: MaterialAutoCompleteTextView
-    private lateinit var actvButtonBottom: MaterialAutoCompleteTextView
-    private lateinit var actvLeverUp: MaterialAutoCompleteTextView
-    private lateinit var actvLeverDown: MaterialAutoCompleteTextView
-    private lateinit var actvPreset: MaterialAutoCompleteTextView
+    // Key mapping UI
+    private lateinit var togglePreset: MaterialButtonToggleGroup
+    private lateinit var btnMapRemote: MaterialButton
+    private lateinit var remoteKeyTable: LinearLayout
 
-    private val keyActvs: List<MaterialAutoCompleteTextView> by lazy {
-        listOf(actvJoystickUp, actvJoystickDown, actvJoystickLeft, actvJoystickRight,
-            actvButtonTop, actvButtonBottom, actvLeverUp, actvLeverDown)
-    }
-    private lateinit var setKeyButtons: List<MaterialButton>
+    // Wizard
+    private lateinit var wizardPanel: View
+    private var wizardVisible = false
+    private lateinit var wizardCapturePresetName: TextView
+    private lateinit var wizardCaptureProgress: TextView
+    private lateinit var wizardCaptureAction: TextView
+    private lateinit var wizardCaptureCurrent: TextView
+    private lateinit var wizardSkipButton: MaterialButton
+
+    private var isCapturingKey = false
+    private var captureTargetPreset: RemoteKeyPreset? = null
+    private var captureActionIndex = 0
+    private var captureKeycodes = IntArray(RemoteKeyPreset.ACTION_COUNT)
 
     private val shizukuPermissionListener =
         Shizuku.OnRequestPermissionResultListener { requestCode, grantResult ->
@@ -69,7 +73,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        prefs = getSharedPreferences(KeyMappingDefaults.PREFS_NAME, MODE_PRIVATE)
+        prefs = getSharedPreferences("andremote2", MODE_PRIVATE)
+        presetManager = RemotePresetManager(prefs)
+        activePreset = presetManager.getActivePreset()
 
         val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
@@ -80,71 +86,35 @@ class MainActivity : AppCompatActivity() {
         sliderOpacity = findViewById(R.id.sliderOpacity)
         tvSize = findViewById(R.id.tvSize)
         tvOpacity = findViewById(R.id.tvOpacity)
-        tvEventLog = findViewById(R.id.tvEventLog)
-        scrollEventLog = findViewById(R.id.scrollEventLog)
-        actvPreset = findViewById(R.id.actvPreset)
+        togglePreset = findViewById(R.id.togglePreset)
+        btnMapRemote = findViewById(R.id.btnMapRemote)
+        remoteKeyTable = findViewById(R.id.remoteKeyTable)
 
-        // Bind key-mapping rows via include IDs
-        val rowJoystickUp = findViewById<android.view.View>(R.id.rowJoystickUp)
-        val rowJoystickDown = findViewById<android.view.View>(R.id.rowJoystickDown)
-        val rowJoystickLeft = findViewById<android.view.View>(R.id.rowJoystickLeft)
-        val rowJoystickRight = findViewById<android.view.View>(R.id.rowJoystickRight)
-        val rowButtonTop = findViewById<android.view.View>(R.id.rowButtonTop)
-        val rowButtonBottom = findViewById<android.view.View>(R.id.rowButtonBottom)
-        val rowLeverUp = findViewById<android.view.View>(R.id.rowLeverUp)
-        val rowLeverDown = findViewById<android.view.View>(R.id.rowLeverDown)
+        wizardPanel = findViewById(R.id.wizardPanel)
+        wizardCapturePresetName = wizardPanel.findViewById(R.id.wizard_capture_preset_name)
+        wizardCaptureProgress = wizardPanel.findViewById(R.id.wizard_capture_progress)
+        wizardCaptureAction = wizardPanel.findViewById(R.id.wizard_capture_action)
+        wizardCaptureCurrent = wizardPanel.findViewById(R.id.wizard_capture_current)
+        wizardSkipButton = wizardPanel.findViewById(R.id.btn_wizard_skip)
 
-        actvJoystickUp = rowJoystickUp.findViewById(R.id.actvKey)
-        actvJoystickDown = rowJoystickDown.findViewById(R.id.actvKey)
-        actvJoystickLeft = rowJoystickLeft.findViewById(R.id.actvKey)
-        actvJoystickRight = rowJoystickRight.findViewById(R.id.actvKey)
-        actvButtonTop = rowButtonTop.findViewById(R.id.actvKey)
-        actvButtonBottom = rowButtonBottom.findViewById(R.id.actvKey)
-        actvLeverUp = rowLeverUp.findViewById(R.id.actvKey)
-        actvLeverDown = rowLeverDown.findViewById(R.id.actvKey)
-
-        // Set row labels
-        rowJoystickUp.findViewById<TextView>(R.id.tvLabel).setText(R.string.joystick_up)
-        rowJoystickDown.findViewById<TextView>(R.id.tvLabel).setText(R.string.joystick_down)
-        rowJoystickLeft.findViewById<TextView>(R.id.tvLabel).setText(R.string.joystick_left)
-        rowJoystickRight.findViewById<TextView>(R.id.tvLabel).setText(R.string.joystick_right)
-        rowButtonTop.findViewById<TextView>(R.id.tvLabel).setText(R.string.button_top)
-        rowButtonBottom.findViewById<TextView>(R.id.tvLabel).setText(R.string.button_bottom)
-        rowLeverUp.findViewById<TextView>(R.id.tvLabel).setText(R.string.lever_up)
-        rowLeverDown.findViewById<TextView>(R.id.tvLabel).setText(R.string.lever_down)
-
-        setKeyButtons = listOf(
-            rowJoystickUp.findViewById(R.id.btnSetKey),
-            rowJoystickDown.findViewById(R.id.btnSetKey),
-            rowJoystickLeft.findViewById(R.id.btnSetKey),
-            rowJoystickRight.findViewById(R.id.btnSetKey),
-            rowButtonTop.findViewById(R.id.btnSetKey),
-            rowButtonBottom.findViewById(R.id.btnSetKey),
-            rowLeverUp.findViewById(R.id.btnSetKey),
-            rowLeverDown.findViewById(R.id.btnSetKey)
-        )
-
-        setupPresetDropdown()
-        setupKeyDropdowns()
+        setupPresetToggle()
         loadSettings()
+        updateKeyAssignmentTable()
 
         Shizuku.addRequestPermissionResultListener(shizukuPermissionListener)
 
-        // Set Key buttons
-        setKeyButtons.zip(keyActvs).forEach { (btn, actv) ->
-            btn.setOnClickListener { showSetKeyDialog(actv) }
-        }
+        wizardSkipButton.setOnClickListener { skipCurrentAction() }
 
         sliderSize.addOnChangeListener { _, value, fromUser ->
             val size = value.toInt()
             tvSize.text = "$size%"
-            if (fromUser) saveIntPref(PrefKeys.OVERLAY_SIZE, size)
+            if (fromUser) prefs.edit().putInt(PrefKeys.OVERLAY_SIZE, size).apply()
         }
 
         sliderOpacity.addOnChangeListener { _, value, fromUser ->
             val opacity = value.toInt()
             tvOpacity.text = "$opacity%"
-            if (fromUser) saveIntPref(PrefKeys.OVERLAY_OPACITY, opacity)
+            if (fromUser) prefs.edit().putInt(PrefKeys.OVERLAY_OPACITY, opacity).apply()
         }
 
         btnToggleOverlay.setOnClickListener {
@@ -156,7 +126,6 @@ class MainActivity : AppCompatActivity() {
                 onGrantShizukuClicked()
                 return@setOnClickListener
             }
-            saveKeyMappings()
             if (OverlayService.isRunning) {
                 stopService(Intent(this, OverlayService::class.java))
                 btnToggleOverlay.text = getString(R.string.start_overlay)
@@ -170,13 +139,8 @@ class MainActivity : AppCompatActivity() {
             onGrantShizukuClicked()
         }
 
-        findViewById<MaterialButton>(R.id.btnSaveMappings).setOnClickListener {
-            saveKeyMappings()
-            Toast.makeText(this, R.string.mappings_saved, Toast.LENGTH_SHORT).show()
-        }
-
-        findViewById<MaterialButton>(R.id.btnClearLog).setOnClickListener {
-            KeyEventLog.clear()
+        btnMapRemote.setOnClickListener {
+            startRemoteCapture()
         }
     }
 
@@ -188,13 +152,6 @@ class MainActivity : AppCompatActivity() {
             getString(R.string.start_overlay)
         KeyInjectionService.shizukuEnabled = isShizukuAuthorized()
         updateShizukuButtonVisibility()
-        KeyEventLog.setOnNewEntryListener { updateEventLogView() }
-        updateEventLogView()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        KeyEventLog.setOnNewEntryListener(null)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -219,18 +176,166 @@ class MainActivity : AppCompatActivity() {
         Shizuku.removeRequestPermissionResultListener(shizukuPermissionListener)
     }
 
-    private fun updateShizukuButtonVisibility() {
-        if (isShizukuAuthorized()) {
-            btnGrantShizuku.visibility = android.view.View.GONE
-        } else {
-            btnGrantShizuku.visibility = android.view.View.VISIBLE
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        if (isCapturingKey && event.action == KeyEvent.ACTION_DOWN) {
+            if (event.keyCode == KeyEvent.KEYCODE_BACK) {
+                cancelCaptureSession()
+            } else {
+                recordCapturedKey(event.keyCode)
+            }
+            return true
+        }
+        return super.dispatchKeyEvent(event)
+    }
+
+    private fun setupPresetToggle() {
+        val useCustom = presetManager.isCustomActive()
+        togglePreset.check(if (useCustom) R.id.btnPresetCustom else R.id.btnPresetDmd)
+        btnMapRemote.isEnabled = useCustom
+
+        togglePreset.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (isChecked) {
+                val custom = checkedId == R.id.btnPresetCustom
+                presetManager.setCustomActive(custom)
+                activePreset = presetManager.getActivePreset()
+                btnMapRemote.isEnabled = custom
+                updateKeyAssignmentTable()
+            }
         }
     }
 
-    private fun updateEventLogView() {
-        val text = KeyEventLog.getEntries().joinToString("\n")
-        tvEventLog.text = text
-        scrollEventLog.post { scrollEventLog.fullScroll(ScrollView.FOCUS_DOWN) }
+    private fun loadSettings() {
+        val size = prefs.getInt(PrefKeys.OVERLAY_SIZE, 75)
+        val opacity = prefs.getInt(PrefKeys.OVERLAY_OPACITY, 80)
+        sliderSize.value = size.toFloat()
+        sliderOpacity.value = opacity.toFloat()
+        tvSize.text = "$size%"
+        tvOpacity.text = "$opacity%"
+    }
+
+    private fun updateKeyAssignmentTable() {
+        remoteKeyTable.removeAllViews()
+        val colorLabel = ContextCompat.getColor(this, R.color.text_secondary)
+        val colorValue = ContextCompat.getColor(this, R.color.text_primary)
+        for (actionIdx in RemoteKeyPreset.WIZARD_ORDER) {
+            val row = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).also { it.topMargin = dpToPx(2) }
+            }
+            val actionView = TextView(this).apply {
+                text = RemoteKeyPreset.ACTION_NAMES[actionIdx]
+                setTextColor(colorLabel)
+                textSize = 13f
+                layoutParams = LinearLayout.LayoutParams(0,
+                    LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+            }
+            val keyView = TextView(this).apply {
+                text = keyDisplayName(activePreset.keycodes[actionIdx])
+                setTextColor(colorValue)
+                textSize = 13f
+                gravity = Gravity.END
+                layoutParams = LinearLayout.LayoutParams(0,
+                    LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+            }
+            row.addView(actionView)
+            row.addView(keyView)
+            remoteKeyTable.addView(row)
+        }
+    }
+
+    private fun keyDisplayName(keycode: Int): String =
+        if (keycode == KeyEvent.KEYCODE_UNKNOWN) "—"
+        else KeyEvent.keyCodeToString(keycode).removePrefix("KEYCODE_")
+
+    private fun dpToPx(dp: Int): Int =
+        (dp * resources.displayMetrics.density + 0.5f).toInt()
+
+    // --- Wizard ---
+
+    private fun startRemoteCapture() {
+        val template = presetManager.getCustomPreset()
+        captureTargetPreset = template
+        captureActionIndex = 0
+        captureKeycodes = template.keycodes.copyOf()
+        isCapturingKey = true
+
+        wizardPanel.visibility = View.VISIBLE
+        wizardVisible = true
+        updateCaptureScreen()
+    }
+
+    private fun updateCaptureScreen() {
+        val target = captureTargetPreset ?: return
+        val actionIdx = RemoteKeyPreset.WIZARD_ORDER[captureActionIndex]
+        wizardCapturePresetName.text = target.name
+        wizardCaptureProgress.text = getString(
+            R.string.wizard_action_of,
+            captureActionIndex + 1,
+            RemoteKeyPreset.ACTION_COUNT
+        )
+        wizardCaptureAction.text = RemoteKeyPreset.ACTION_NAMES[actionIdx]
+        wizardCaptureCurrent.text = getString(
+            R.string.wizard_current_key,
+            keyDisplayName(captureKeycodes[actionIdx])
+        )
+    }
+
+    private fun recordCapturedKey(keycode: Int) {
+        captureKeycodes[RemoteKeyPreset.WIZARD_ORDER[captureActionIndex]] = keycode
+        captureActionIndex++
+        if (captureActionIndex >= RemoteKeyPreset.ACTION_COUNT) {
+            finishCapture()
+        } else {
+            updateCaptureScreen()
+        }
+    }
+
+    private fun skipCurrentAction() {
+        captureActionIndex++
+        if (captureActionIndex >= RemoteKeyPreset.ACTION_COUNT) {
+            finishCapture()
+        } else {
+            updateCaptureScreen()
+        }
+    }
+
+    private fun finishCapture() {
+        val saved = RemoteKeyPreset("Custom", captureKeycodes.copyOf())
+        presetManager.saveCustomPreset(saved)
+        presetManager.setCustomActive(true)
+        activePreset = saved
+        isCapturingKey = false
+        captureTargetPreset = null
+        Toast.makeText(this, getString(R.string.wizard_mapping_saved), Toast.LENGTH_SHORT).show()
+        closeWizard()
+    }
+
+    private fun cancelCaptureSession() {
+        isCapturingKey = false
+        captureTargetPreset = null
+        closeWizard()
+    }
+
+    private fun closeWizard() {
+        wizardPanel.visibility = View.GONE
+        wizardVisible = false
+        isCapturingKey = false
+        captureTargetPreset = null
+        // Sync toggle to reflect possibly-changed active preset
+        val useCustom = presetManager.isCustomActive()
+        togglePreset.check(if (useCustom) R.id.btnPresetCustom else R.id.btnPresetDmd)
+        btnMapRemote.isEnabled = useCustom
+        activePreset = presetManager.getActivePreset()
+        updateKeyAssignmentTable()
+    }
+
+    // --- Shizuku helpers ---
+
+    private fun updateShizukuButtonVisibility() {
+        btnGrantShizuku.visibility = if (isShizukuAuthorized()) View.GONE else View.VISIBLE
     }
 
     private fun isShizukuInstalled(): Boolean {
@@ -263,7 +368,6 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, R.string.shizuku_not_installed, Toast.LENGTH_LONG).show()
             return
         }
-
         try {
             if (!Shizuku.pingBinder()) {
                 Toast.makeText(this, R.string.shizuku_not_running, Toast.LENGTH_LONG).show()
@@ -273,13 +377,10 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, R.string.shizuku_not_running, Toast.LENGTH_LONG).show()
             return
         }
-
         if (Shizuku.isPreV11()) {
-            // Shizuku pre-v11 not supported
             Toast.makeText(this, R.string.shizuku_not_running, Toast.LENGTH_LONG).show()
             return
         }
-
         try {
             if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
                 onShizukuPermissionGranted()
@@ -289,155 +390,6 @@ class MainActivity : AppCompatActivity() {
         } catch (e: RuntimeException) {
             Toast.makeText(this, getString(R.string.shizuku_grant_failed, e.message ?: e.javaClass.simpleName), Toast.LENGTH_LONG).show()
         }
-    }
-
-    private fun noFilterAdapter(items: List<String>) = object : ArrayAdapter<String>(
-        this, android.R.layout.simple_dropdown_item_1line, items
-    ) {
-        private val noopFilter = object : android.widget.Filter() {
-            override fun performFiltering(c: CharSequence?) =
-                FilterResults().apply { values = items; count = items.size }
-            override fun publishResults(c: CharSequence?, r: FilterResults?) = notifyDataSetChanged()
-        }
-        override fun getFilter() = noopFilter
-    }
-
-    private fun setupKeyDropdowns() {
-        keyActvs.forEach { actv ->
-            actv.setAdapter(noFilterAdapter(KeyEventCodes.displayNames))
-            actv.setOnClickListener {
-                val idx = KeyEventCodes.displayNames.indexOf(actv.text.toString())
-                if (idx >= 0) actv.post { actv.setListSelection(idx) }
-            }
-        }
-    }
-
-    private fun setupPresetDropdown() {
-        val presets = listOf(getString(R.string.preset_custom), getString(R.string.preset_dmd_remote_2))
-        val adapter = noFilterAdapter(presets)
-        actvPreset.setAdapter(adapter)
-        val savedPreset = prefs.getInt(PrefKeys.PRESET, 0)
-        actvPreset.setText(presets[savedPreset], false)
-        actvPreset.setOnItemClickListener { _, _, position, _ ->
-            val isDmdPreset = position == PRESET_DMD_REMOTE_2
-            val currentPreset = prefs.getInt(PrefKeys.PRESET, 0)
-            if (isDmdPreset && currentPreset != PRESET_DMD_REMOTE_2) {
-                // Preserve custom mapping before switching away from Custom preset
-                saveCustomPresetMappings()
-            }
-            saveIntPref(PrefKeys.PRESET, position)
-            keyActvs.forEach { it.isEnabled = !isDmdPreset }
-            setKeyButtons.forEach { it.isEnabled = !isDmdPreset }
-            if (isDmdPreset) {
-                populateKeyMappingUi(true)
-                applyPresetToRuntimePrefs(true)
-            } else {
-                populateKeyMappingUi(false)
-                applyPresetToRuntimePrefs(false)
-            }
-        }
-        // Apply initial enabled state based on saved preset
-        val isDmdPreset = savedPreset == PRESET_DMD_REMOTE_2
-        keyActvs.forEach { it.isEnabled = !isDmdPreset }
-        setKeyButtons.forEach { it.isEnabled = !isDmdPreset }
-    }
-
-    private fun showSetKeyDialog(actv: MaterialAutoCompleteTextView) {
-        val dialog = AlertDialog.Builder(this)
-            .setMessage(R.string.press_key_to_configure)
-            .setNegativeButton(android.R.string.cancel, null)
-            .create()
-        dialog.setOnKeyListener { _, keyCode, event ->
-            if (event.action == KeyEvent.ACTION_DOWN) {
-                val idx = KeyEventCodes.keyCodes.indexOfFirst { it.code == keyCode }
-                if (idx >= 0) {
-                    actv.setText(KeyEventCodes.displayNames[idx], false)
-                    dialog.dismiss()
-                    return@setOnKeyListener true
-                }
-            }
-            false
-        }
-        dialog.show()
-    }
-
-    private fun loadSettings() {
-        val size = prefs.getInt(PrefKeys.OVERLAY_SIZE, 75)
-        val opacity = prefs.getInt(PrefKeys.OVERLAY_OPACITY, 80)
-        sliderSize.value = size.toFloat()
-        sliderOpacity.value = opacity.toFloat()
-        tvSize.text = "$size%"
-        tvOpacity.text = "$opacity%"
-
-        val isDmdPreset = prefs.getInt(PrefKeys.PRESET, 0) == PRESET_DMD_REMOTE_2
-        populateKeyMappingUi(isDmdPreset)
-    }
-
-    private fun populateKeyMappingUi(isDmdPreset: Boolean) {
-        fun keyName(code: Int) = KeyEventCodes.displayNames[KeyEventCodes.indexOfCode(code)]
-        fun resolveCode(key: String, default: Int) =
-            if (isDmdPreset) default else prefs.getInt(key, default)
-        actvJoystickUp.setText(keyName(resolveCode(PrefKeys.CUSTOM_KEYCODE_JOYSTICK_UP, KeyMappingDefaults.DEFAULT_JOYSTICK_UP)), false)
-        actvJoystickDown.setText(keyName(resolveCode(PrefKeys.CUSTOM_KEYCODE_JOYSTICK_DOWN, KeyMappingDefaults.DEFAULT_JOYSTICK_DOWN)), false)
-        actvJoystickLeft.setText(keyName(resolveCode(PrefKeys.CUSTOM_KEYCODE_JOYSTICK_LEFT, KeyMappingDefaults.DEFAULT_JOYSTICK_LEFT)), false)
-        actvJoystickRight.setText(keyName(resolveCode(PrefKeys.CUSTOM_KEYCODE_JOYSTICK_RIGHT, KeyMappingDefaults.DEFAULT_JOYSTICK_RIGHT)), false)
-        actvButtonTop.setText(keyName(resolveCode(PrefKeys.CUSTOM_KEYCODE_BUTTON_TOP, KeyMappingDefaults.DEFAULT_BUTTON_TOP)), false)
-        actvButtonBottom.setText(keyName(resolveCode(PrefKeys.CUSTOM_KEYCODE_BUTTON_BOTTOM, KeyMappingDefaults.DEFAULT_BUTTON_BOTTOM)), false)
-        actvLeverUp.setText(keyName(resolveCode(PrefKeys.CUSTOM_KEYCODE_LEVER_UP, KeyMappingDefaults.DEFAULT_LEVER_UP)), false)
-        actvLeverDown.setText(keyName(resolveCode(PrefKeys.CUSTOM_KEYCODE_LEVER_DOWN, KeyMappingDefaults.DEFAULT_LEVER_DOWN)), false)
-    }
-
-    private fun saveKeyMappings() {
-        prefs.edit()
-            .putInt(PrefKeys.KEYCODE_JOYSTICK_UP, actvToKeyCode(actvJoystickUp))
-            .putInt(PrefKeys.KEYCODE_JOYSTICK_DOWN, actvToKeyCode(actvJoystickDown))
-            .putInt(PrefKeys.KEYCODE_JOYSTICK_LEFT, actvToKeyCode(actvJoystickLeft))
-            .putInt(PrefKeys.KEYCODE_JOYSTICK_RIGHT, actvToKeyCode(actvJoystickRight))
-            .putInt(PrefKeys.KEYCODE_BUTTON_TOP, actvToKeyCode(actvButtonTop))
-            .putInt(PrefKeys.KEYCODE_BUTTON_BOTTOM, actvToKeyCode(actvButtonBottom))
-            .putInt(PrefKeys.KEYCODE_LEVER_UP, actvToKeyCode(actvLeverUp))
-            .putInt(PrefKeys.KEYCODE_LEVER_DOWN, actvToKeyCode(actvLeverDown))
-            .apply()
-        if (prefs.getInt(PrefKeys.PRESET, 0) != PRESET_DMD_REMOTE_2) {
-            saveCustomPresetMappings()
-        }
-    }
-
-    private fun saveCustomPresetMappings() {
-        prefs.edit()
-            .putInt(PrefKeys.CUSTOM_KEYCODE_JOYSTICK_UP, actvToKeyCode(actvJoystickUp))
-            .putInt(PrefKeys.CUSTOM_KEYCODE_JOYSTICK_DOWN, actvToKeyCode(actvJoystickDown))
-            .putInt(PrefKeys.CUSTOM_KEYCODE_JOYSTICK_LEFT, actvToKeyCode(actvJoystickLeft))
-            .putInt(PrefKeys.CUSTOM_KEYCODE_JOYSTICK_RIGHT, actvToKeyCode(actvJoystickRight))
-            .putInt(PrefKeys.CUSTOM_KEYCODE_BUTTON_TOP, actvToKeyCode(actvButtonTop))
-            .putInt(PrefKeys.CUSTOM_KEYCODE_BUTTON_BOTTOM, actvToKeyCode(actvButtonBottom))
-            .putInt(PrefKeys.CUSTOM_KEYCODE_LEVER_UP, actvToKeyCode(actvLeverUp))
-            .putInt(PrefKeys.CUSTOM_KEYCODE_LEVER_DOWN, actvToKeyCode(actvLeverDown))
-            .apply()
-    }
-
-    private fun applyPresetToRuntimePrefs(isDmdPreset: Boolean) {
-        fun resolve(customKey: String, default: Int) =
-            if (isDmdPreset) default else prefs.getInt(customKey, default)
-        prefs.edit()
-            .putInt(PrefKeys.KEYCODE_JOYSTICK_UP,    resolve(PrefKeys.CUSTOM_KEYCODE_JOYSTICK_UP,    KeyMappingDefaults.DEFAULT_JOYSTICK_UP))
-            .putInt(PrefKeys.KEYCODE_JOYSTICK_DOWN,  resolve(PrefKeys.CUSTOM_KEYCODE_JOYSTICK_DOWN,  KeyMappingDefaults.DEFAULT_JOYSTICK_DOWN))
-            .putInt(PrefKeys.KEYCODE_JOYSTICK_LEFT,  resolve(PrefKeys.CUSTOM_KEYCODE_JOYSTICK_LEFT,  KeyMappingDefaults.DEFAULT_JOYSTICK_LEFT))
-            .putInt(PrefKeys.KEYCODE_JOYSTICK_RIGHT, resolve(PrefKeys.CUSTOM_KEYCODE_JOYSTICK_RIGHT, KeyMappingDefaults.DEFAULT_JOYSTICK_RIGHT))
-            .putInt(PrefKeys.KEYCODE_BUTTON_TOP,     resolve(PrefKeys.CUSTOM_KEYCODE_BUTTON_TOP,     KeyMappingDefaults.DEFAULT_BUTTON_TOP))
-            .putInt(PrefKeys.KEYCODE_BUTTON_BOTTOM,  resolve(PrefKeys.CUSTOM_KEYCODE_BUTTON_BOTTOM,  KeyMappingDefaults.DEFAULT_BUTTON_BOTTOM))
-            .putInt(PrefKeys.KEYCODE_LEVER_UP,       resolve(PrefKeys.CUSTOM_KEYCODE_LEVER_UP,       KeyMappingDefaults.DEFAULT_LEVER_UP))
-            .putInt(PrefKeys.KEYCODE_LEVER_DOWN,     resolve(PrefKeys.CUSTOM_KEYCODE_LEVER_DOWN,     KeyMappingDefaults.DEFAULT_LEVER_DOWN))
-            .apply()
-    }
-
-    private fun actvToKeyCode(actv: MaterialAutoCompleteTextView): Int {
-        val idx = KeyEventCodes.displayNames.indexOf(actv.text.toString())
-        return if (idx >= 0) KeyEventCodes.codeAtIndex(idx) else KeyEvent.KEYCODE_UNKNOWN
-    }
-
-    private fun saveIntPref(key: String, value: Int) {
-        prefs.edit().putInt(key, value).apply()
     }
 
     private fun requestOverlayPermission() {
