@@ -5,6 +5,7 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Path
 import android.util.AttributeSet
+import android.os.SystemClock
 import android.view.MotionEvent
 import android.view.View
 import android.util.Log
@@ -50,6 +51,7 @@ class JoystickView @JvmOverloads constructor(
     private var knobX = 0f
     private var knobY = 0f
     private var currentKeyCode = -1
+    private var pressDownTime = 0L
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         centerX = w / 2f
@@ -135,13 +137,14 @@ class JoystickView @JvmOverloads constructor(
 
     private fun sendKeyDown(keyCode: Int) {
         KeyEventLog.log("JoystickView", "sendKeyDown keyCode=$keyCode shizukuEnabled=${KeyInjectionService.shizukuEnabled}")
-        KeyInjectionService.instance?.injectKeyDown(keyCode)
+        pressDownTime = SystemClock.uptimeMillis()
+        KeyInjectionService.instance?.injectKeyDown(keyCode, pressDownTime)
             ?: Log.w("JoystickView", "KeyInjectionService not available")
     }
 
     private fun sendKeyUp(keyCode: Int) {
         KeyEventLog.log("JoystickView", "sendKeyUp keyCode=$keyCode shizukuEnabled=${KeyInjectionService.shizukuEnabled}")
-        KeyInjectionService.instance?.injectKeyUp(keyCode)
+        KeyInjectionService.instance?.injectKeyUp(keyCode, pressDownTime)
             ?: Log.w("JoystickView", "KeyInjectionService not available")
     }
 
