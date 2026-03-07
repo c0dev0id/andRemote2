@@ -4,6 +4,8 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Path
+import android.os.Handler
+import android.os.Looper
 import android.os.SystemClock
 import android.util.AttributeSet
 import android.view.MotionEvent
@@ -25,6 +27,14 @@ class LeverView @JvmOverloads constructor(
     private var pressDownTime = 0L
     private var startY = 0f
     private var leverY = 0f
+
+    private val longPressHandler = Handler(Looper.getMainLooper())
+    private val longPressRunnable = Runnable {
+        if (currentKeyCode != -1) {
+            KeyInjectionService.instance?.injectKeyLongPress(currentKeyCode, pressDownTime)
+                ?: Log.w("LeverView", "KeyInjectionService not available for long press")
+        }
+    }
 
     private val paintTrack = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = ContextCompat.getColor(context, R.color.control_track)
@@ -132,9 +142,12 @@ class LeverView @JvmOverloads constructor(
         pressDownTime = SystemClock.uptimeMillis()
         KeyInjectionService.instance?.injectKeyDown(keyCode, pressDownTime)
             ?: Log.w("LeverView", "KeyInjectionService not available")
+        longPressHandler.removeCallbacks(longPressRunnable)
+        longPressHandler.postDelayed(longPressRunnable, 500)
     }
 
     private fun sendKeyUp(keyCode: Int) {
+        longPressHandler.removeCallbacks(longPressRunnable)
         KeyInjectionService.instance?.injectKeyUp(keyCode, pressDownTime)
             ?: Log.w("LeverView", "KeyInjectionService not available")
     }

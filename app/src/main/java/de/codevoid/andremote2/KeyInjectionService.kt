@@ -111,7 +111,7 @@ class KeyInjectionService : Service() {
                     downTime, now, action, keyCode,
                     repeatCount, 0, -1, 0,
                     flags,
-                    InputDevice.SOURCE_KEYBOARD
+                    InputDevice.SOURCE_GAMEPAD
                 )
                 val injectMethod = manager.javaClass.getMethod(
                     "injectInputEvent",
