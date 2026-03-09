@@ -40,9 +40,6 @@ class OverlayService : Service() {
         if (key == PrefKeys.OVERLAY_SIZE || key == PrefKeys.OVERLAY_OPACITY) {
             mainHandler.post { applyScaleAndAlpha() }
         }
-        if (key == RemotePresetManager.KEY_CUSTOM_PRESET || key == RemotePresetManager.KEY_USE_CUSTOM) {
-            mainHandler.post { setupControls() }
-        }
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
@@ -53,7 +50,6 @@ class OverlayService : Service() {
         prefs = getSharedPreferences("andremote2", MODE_PRIVATE)
         createNotificationChannel()
         startForeground(1, buildNotification())
-        startService(Intent(this, KeyInjectionService::class.java))
         showOverlay()
         prefs.registerOnSharedPreferenceChangeListener(prefListener)
     }
@@ -65,7 +61,6 @@ class OverlayService : Service() {
         if (::overlayView.isInitialized) {
             windowManager.removeView(overlayView)
         }
-        stopService(Intent(this, KeyInjectionService::class.java))
     }
 
     private fun createNotificationChannel() {
@@ -124,7 +119,10 @@ class OverlayService : Service() {
         }
 
         applyScaleAndAlpha()
-        setupControls()
+
+        // Set bottom button to keycode 111 (ROUND BUTTON 2 per protocol)
+        val buttonBottom = overlayView.findViewById<de.codevoid.andremote2.views.ButtonView>(R.id.buttonBottom)
+        buttonBottom.setKeyCode(111)
 
         val root = overlayView.findViewById<de.codevoid.andremote2.views.DraggableOverlayLayout>(R.id.overlayRoot)
         root.onDrag = { dx, dy ->
@@ -154,24 +152,6 @@ class OverlayService : Service() {
             ::windowManager.isInitialized && overlayView.isAttachedToWindow) {
             windowManager.updateViewLayout(overlayView, overlayParams)
         }
-    }
-
-    private fun setupControls() {
-        val preset = RemotePresetManager(prefs).getActivePreset()
-        val joystick = overlayView.findViewById<de.codevoid.andremote2.views.JoystickView>(R.id.joystickView)
-        val buttonTop = overlayView.findViewById<de.codevoid.andremote2.views.ButtonView>(R.id.buttonTop)
-        val buttonBottom = overlayView.findViewById<de.codevoid.andremote2.views.ButtonView>(R.id.buttonBottom)
-        val lever = overlayView.findViewById<de.codevoid.andremote2.views.LeverView>(R.id.leverView)
-
-        joystick.setKeyCodes(
-            preset.keycodes[0], preset.keycodes[1],
-            preset.keycodes[2], preset.keycodes[3]
-        )
-        buttonTop.label = ""
-        buttonTop.setKeyCode(preset.keycodes[4])
-        buttonBottom.label = ""
-        buttonBottom.setKeyCode(preset.keycodes[5])
-        lever.setKeyCodes(preset.keycodes[6], preset.keycodes[7])
     }
 
 }

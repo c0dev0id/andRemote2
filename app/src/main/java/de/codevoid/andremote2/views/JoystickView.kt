@@ -4,16 +4,12 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Path
-import android.os.Handler
-import android.os.Looper
-import android.os.SystemClock
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import android.util.Log
 import androidx.core.content.ContextCompat
-import de.codevoid.andremote2.KeyInjectionService
 import de.codevoid.andremote2.R
+import de.codevoid.andremote2.RemoteControl
 import kotlin.math.abs
 import kotlin.math.sqrt
 
@@ -52,15 +48,6 @@ class JoystickView @JvmOverloads constructor(
     private var knobX = 0f
     private var knobY = 0f
     private var currentKeyCode = -1
-    private var pressDownTime = 0L
-
-    private val longPressHandler = Handler(Looper.getMainLooper())
-    private val longPressRunnable = Runnable {
-        if (currentKeyCode != -1) {
-            KeyInjectionService.instance?.injectKeyLongPress(currentKeyCode, pressDownTime)
-                ?: Log.w("JoystickView", "KeyInjectionService not available for long press")
-        }
-    }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         centerX = w / 2f
@@ -114,18 +101,18 @@ class JoystickView @JvmOverloads constructor(
                 if (dist > baseRadius * 0.3f) {
                     val direction = getDirection(dx, dy)
                     if (direction != currentKeyCode) {
-                        if (currentKeyCode != -1) sendKeyUp(currentKeyCode)
+                        if (currentKeyCode != -1) RemoteControl.sendRelease(context, currentKeyCode)
                         currentKeyCode = direction
-                        sendKeyDown(direction)
+                        RemoteControl.sendPress(context, direction)
                     }
                 } else {
-                    if (currentKeyCode != -1) sendKeyUp(currentKeyCode)
+                    if (currentKeyCode != -1) RemoteControl.sendRelease(context, currentKeyCode)
                     currentKeyCode = -1
                 }
                 return true
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                if (currentKeyCode != -1) sendKeyUp(currentKeyCode)
+                if (currentKeyCode != -1) RemoteControl.sendRelease(context, currentKeyCode)
                 knobX = centerX
                 knobY = centerY
                 currentKeyCode = -1
@@ -142,20 +129,6 @@ class JoystickView @JvmOverloads constructor(
         } else {
             if (dy > 0) keycodeDown else keycodeUp
         }
-    }
-
-    private fun sendKeyDown(keyCode: Int) {
-        pressDownTime = SystemClock.uptimeMillis()
-        KeyInjectionService.instance?.injectKeyDown(keyCode, pressDownTime)
-            ?: Log.w("JoystickView", "KeyInjectionService not available")
-        longPressHandler.removeCallbacks(longPressRunnable)
-        longPressHandler.postDelayed(longPressRunnable, 500)
-    }
-
-    private fun sendKeyUp(keyCode: Int) {
-        longPressHandler.removeCallbacks(longPressRunnable)
-        KeyInjectionService.instance?.injectKeyUp(keyCode, pressDownTime)
-            ?: Log.w("JoystickView", "KeyInjectionService not available")
     }
 
     fun isInsideShape(localX: Float, localY: Float): Boolean {

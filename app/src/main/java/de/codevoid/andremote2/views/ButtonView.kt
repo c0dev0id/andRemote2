@@ -4,14 +4,12 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.os.SystemClock
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import android.util.Log
 import androidx.core.content.ContextCompat
-import de.codevoid.andremote2.KeyInjectionService
 import de.codevoid.andremote2.R
+import de.codevoid.andremote2.RemoteControl
 
 class ButtonView @JvmOverloads constructor(
     context: Context,
@@ -20,12 +18,6 @@ class ButtonView @JvmOverloads constructor(
 
     private var keyCode = 66
     private var isPressed = false
-    private var pressDownTime = 0L
-
-    private val longPressRunnable = Runnable {
-        KeyInjectionService.instance?.injectKeyLongPress(keyCode, pressDownTime)
-            ?: Log.w("ButtonView", "KeyInjectionService not available for long press")
-    }
 
     private val paintNormal = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = ContextCompat.getColor(context, R.color.control_button_normal)
@@ -65,38 +57,18 @@ class ButtonView @JvmOverloads constructor(
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
                 isPressed = true
-                pressDownTime = SystemClock.uptimeMillis()
-                sendKeyDown()
-                postDelayed(longPressRunnable, 500)
+                RemoteControl.sendPress(context, keyCode)
                 invalidate()
                 return true
             }
-            MotionEvent.ACTION_UP -> {
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 isPressed = false
-                removeCallbacks(longPressRunnable)
-                invalidate()
-                sendKeyUp()
-                return true
-            }
-            MotionEvent.ACTION_CANCEL -> {
-                isPressed = false
-                removeCallbacks(longPressRunnable)
-                sendKeyUp()
+                RemoteControl.sendRelease(context, keyCode)
                 invalidate()
                 return true
             }
         }
         return super.onTouchEvent(event)
-    }
-
-    private fun sendKeyDown() {
-        KeyInjectionService.instance?.injectKeyDown(keyCode, pressDownTime)
-            ?: Log.w("ButtonView", "KeyInjectionService not available")
-    }
-
-    private fun sendKeyUp() {
-        KeyInjectionService.instance?.injectKeyUp(keyCode, pressDownTime)
-            ?: Log.w("ButtonView", "KeyInjectionService not available")
     }
 
     fun isInsideShape(localX: Float, localY: Float): Boolean {
