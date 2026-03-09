@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/overlay_bg">
+    android:background="@drawable/bg_overlay"
+    android:clipToOutline="true">
 
     <!-- Top padding: weight=21 (out of 426 total height units) -->
     <View
