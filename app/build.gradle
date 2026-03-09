@@ -27,7 +27,16 @@ android {
         }
     }
 
+    buildFeatures {
+        buildConfig true
+    }
+
     buildTypes {
+        debug {
+            def sha = System.getenv("GITHUB_SHA")
+            def shortSha = sha ? sha.substring(0, Math.min(7, sha.length())) : "local"
+            buildConfigField "String", "BUILD_COMMIT", "\"${shortSha}\""
+        }
         release {
             minifyEnabled true
             shrinkResources true
