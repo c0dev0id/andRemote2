@@ -4,16 +4,12 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Path
-import android.os.Handler
-import android.os.Looper
-import android.os.SystemClock
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import android.util.Log
 import androidx.core.content.ContextCompat
-import de.codevoid.andremote2.KeyInjectionService
 import de.codevoid.andremote2.R
+import de.codevoid.andremote2.RemoteControl
 
 class LeverView @JvmOverloads constructor(
     context: Context,
@@ -24,17 +20,8 @@ class LeverView @JvmOverloads constructor(
     private var keycodeDown = 137
 
     private var currentKeyCode = -1
-    private var pressDownTime = 0L
     private var startY = 0f
     private var leverY = 0f
-
-    private val longPressHandler = Handler(Looper.getMainLooper())
-    private val longPressRunnable = Runnable {
-        if (currentKeyCode != -1) {
-            KeyInjectionService.instance?.injectKeyLongPress(currentKeyCode, pressDownTime)
-                ?: Log.w("LeverView", "KeyInjectionService not available for long press")
-        }
-    }
 
     private val paintTrack = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = ContextCompat.getColor(context, R.color.control_track)
@@ -121,14 +108,14 @@ class LeverView @JvmOverloads constructor(
                 }
 
                 if (newKeyCode != currentKeyCode) {
-                    if (currentKeyCode != -1) sendKeyUp(currentKeyCode)
+                    if (currentKeyCode != -1) RemoteControl.sendRelease(context, currentKeyCode)
                     currentKeyCode = newKeyCode
-                    if (newKeyCode != -1) sendKeyDown(newKeyCode)
+                    if (newKeyCode != -1) RemoteControl.sendPress(context, newKeyCode)
                 }
                 return true
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                if (currentKeyCode != -1) sendKeyUp(currentKeyCode)
+                if (currentKeyCode != -1) RemoteControl.sendRelease(context, currentKeyCode)
                 currentKeyCode = -1
                 leverY = height / 2f
                 invalidate()
@@ -136,20 +123,6 @@ class LeverView @JvmOverloads constructor(
             }
         }
         return super.onTouchEvent(event)
-    }
-
-    private fun sendKeyDown(keyCode: Int) {
-        pressDownTime = SystemClock.uptimeMillis()
-        KeyInjectionService.instance?.injectKeyDown(keyCode, pressDownTime)
-            ?: Log.w("LeverView", "KeyInjectionService not available")
-        longPressHandler.removeCallbacks(longPressRunnable)
-        longPressHandler.postDelayed(longPressRunnable, 500)
-    }
-
-    private fun sendKeyUp(keyCode: Int) {
-        longPressHandler.removeCallbacks(longPressRunnable)
-        KeyInjectionService.instance?.injectKeyUp(keyCode, pressDownTime)
-            ?: Log.w("LeverView", "KeyInjectionService not available")
     }
 
     fun isInsideShape(localX: Float, localY: Float): Boolean {
