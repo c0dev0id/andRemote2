@@ -39,7 +39,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvSize: TextView
     private lateinit var tvOpacity: TextView
     private lateinit var btnCheckUpdates: MaterialButton
-    private lateinit var tvCurrentVersion: TextView
 
     private var activeDownloadId: Long = -1
     private var downloadCompleteReceiver: BroadcastReceiver? = null
@@ -59,13 +58,6 @@ class MainActivity : AppCompatActivity() {
         tvSize = findViewById(R.id.tvSize)
         tvOpacity = findViewById(R.id.tvOpacity)
         btnCheckUpdates = findViewById(R.id.btnCheckUpdates)
-        tvCurrentVersion = findViewById(R.id.tvCurrentVersion)
-
-        tvCurrentVersion.text = if (BuildConfig.DEBUG) {
-            getString(R.string.current_version_dev, BuildConfig.VERSION_NAME, BuildConfig.BUILD_COMMIT)
-        } else {
-            getString(R.string.current_version, BuildConfig.VERSION_NAME)
-        }
 
         loadSettings()
 
