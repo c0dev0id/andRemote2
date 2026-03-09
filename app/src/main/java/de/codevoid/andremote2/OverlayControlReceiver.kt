@@ -30,7 +30,7 @@ class OverlayControlReceiver : BroadcastReceiver() {
 
     private fun hide(context: Context) {
         if (OverlayService.isRunning) {
-            context.stopService(Intent(context, OverlayService::class.java))
+            context.startService(Intent(context, OverlayService::class.java).apply { action = "STOP" })
         }
     }
 }
