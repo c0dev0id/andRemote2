@@ -41,4 +41,6 @@
     <string name="update_check_failed">Update check failed</string>
     <string name="update_download_failed">Download failed</string>
     <string name="allow_installs_prompt">Allow installing apps from this source to proceed.</string>
+    <string name="joystick_360_title">Enable 360°</string>
+    <string name="joystick_360_desc">Use analog joy sensor instead of D-pad keycodes</string>
 </resources>

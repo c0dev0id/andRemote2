@@ -20,4 +20,11 @@ object RemoteControl {
             putExtra("deviceName", DEVICE_NAME)
         })
     }
+
+    fun sendJoy(context: Context, joy: String) {
+        context.sendBroadcast(Intent(ACTION).apply {
+            putExtra("joy", joy)
+            putExtra("deviceName", DEVICE_NAME)
+        })
+    }
 }

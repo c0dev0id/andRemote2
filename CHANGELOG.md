@@ -8,7 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Enable 360° setting**: new toggle in Overlay Settings switches the joystick from 4-direction keycode mode to the analog `joy` intent protocol (`com.thorkracing.wireddevices.keypress`, `deviceName=Remote2`). Supports diagonal input and 4 deflection magnitudes (2–5) with a dead zone. The running overlay reacts to the setting change without restart.
 - `OverlayControlReceiver`: exported `BroadcastReceiver` to enable/disable the overlay via ADB intents.
-  - `adb shell am broadcast -a de.codevoid.andremote2.OVERLAY_SHOW` — starts the overlay (no-op if already running or overlay permission not granted)
-  - `adb shell am broadcast -a de.codevoid.andremote2.OVERLAY_HIDE` — stops the overlay (no-op if not running)
-  - `adb shell am broadcast -a de.codevoid.andremote2.OVERLAY_TOGGLE` — toggles the overlay on/off
+  - `adb shell am broadcast -a de.codevoid.andremote2.OVERLAY_SHOW -p de.codevoid.andremote2` — starts the overlay (no-op if already running or overlay permission not granted)
+  - `adb shell am broadcast -a de.codevoid.andremote2.OVERLAY_HIDE -p de.codevoid.andremote2` — stops the overlay (no-op if not running)
+  - `adb shell am broadcast -a de.codevoid.andremote2.OVERLAY_TOGGLE -p de.codevoid.andremote2` — toggles the overlay on/off
+  - Note: `-p de.codevoid.andremote2` is required — Android 8+ does not deliver implicit broadcasts to manifest receivers

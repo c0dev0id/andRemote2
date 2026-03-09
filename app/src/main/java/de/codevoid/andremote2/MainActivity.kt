@@ -22,6 +22,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.materialswitch.MaterialSwitch
 import com.google.android.material.slider.Slider
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.Dispatchers
@@ -38,6 +39,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var sliderOpacity: Slider
     private lateinit var tvSize: TextView
     private lateinit var tvOpacity: TextView
+    private lateinit var switchAnalog: MaterialSwitch
     private lateinit var btnCheckUpdates: MaterialButton
 
     private var activeDownloadId: Long = -1
@@ -57,6 +59,7 @@ class MainActivity : AppCompatActivity() {
         sliderOpacity = findViewById(R.id.sliderOpacity)
         tvSize = findViewById(R.id.tvSize)
         tvOpacity = findViewById(R.id.tvOpacity)
+        switchAnalog = findViewById(R.id.switchAnalog)
         btnCheckUpdates = findViewById(R.id.btnCheckUpdates)
 
         loadSettings()
@@ -71,6 +74,10 @@ class MainActivity : AppCompatActivity() {
             val opacity = value.toInt()
             tvOpacity.text = "$opacity%"
             if (fromUser) prefs.edit().putInt(PrefKeys.OVERLAY_OPACITY, opacity).apply()
+        }
+
+        switchAnalog.setOnCheckedChangeListener { _, checked ->
+            prefs.edit().putBoolean(PrefKeys.JOYSTICK_ANALOG, checked).apply()
         }
 
         btnToggleOverlay.setOnClickListener {
@@ -129,6 +136,7 @@ class MainActivity : AppCompatActivity() {
         sliderOpacity.value = opacity.toFloat()
         tvSize.text = "$size%"
         tvOpacity.text = "$opacity%"
+        switchAnalog.isChecked = prefs.getBoolean(PrefKeys.JOYSTICK_ANALOG, false)
     }
 
     private fun requestOverlayPermission() {

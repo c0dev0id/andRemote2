@@ -18,6 +18,8 @@ class JoystickView @JvmOverloads constructor(
     attrs: AttributeSet? = null
 ) : View(context, attrs) {
 
+    var analogMode = false
+
     private var keycodeUp = 19
     private var keycodeDown = 20
     private var keycodeLeft = 21
@@ -48,6 +50,7 @@ class JoystickView @JvmOverloads constructor(
     private var knobX = 0f
     private var knobY = 0f
     private var currentKeyCode = -1
+    private var lastJoyString = ""
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         centerX = w / 2f
@@ -98,29 +101,59 @@ class JoystickView @JvmOverloads constructor(
                 knobY = centerY + dy * ratio
                 invalidate()
 
-                if (dist > baseRadius * 0.3f) {
-                    val direction = getDirection(dx, dy)
-                    if (direction != currentKeyCode) {
-                        if (currentKeyCode != -1) RemoteControl.sendRelease(context, currentKeyCode)
-                        currentKeyCode = direction
-                        RemoteControl.sendPress(context, direction)
+                if (analogMode) {
+                    val joy = buildJoyString(dx * ratio, dy * ratio, maxDist)
+                    if (joy != lastJoyString) {
+                        lastJoyString = joy
+                        RemoteControl.sendJoy(context, joy)
                     }
                 } else {
-                    if (currentKeyCode != -1) RemoteControl.sendRelease(context, currentKeyCode)
-                    currentKeyCode = -1
+                    if (dist > baseRadius * 0.3f) {
+                        val direction = getDirection(dx, dy)
+                        if (direction != currentKeyCode) {
+                            if (currentKeyCode != -1) RemoteControl.sendRelease(context, currentKeyCode)
+                            currentKeyCode = direction
+                            RemoteControl.sendPress(context, direction)
+                        }
+                    } else {
+                        if (currentKeyCode != -1) RemoteControl.sendRelease(context, currentKeyCode)
+                        currentKeyCode = -1
+                    }
                 }
                 return true
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                if (currentKeyCode != -1) RemoteControl.sendRelease(context, currentKeyCode)
+                if (analogMode) {
+                    if (lastJoyString != "Y0X0") RemoteControl.sendJoy(context, "Y0X0")
+                    lastJoyString = ""
+                } else {
+                    if (currentKeyCode != -1) RemoteControl.sendRelease(context, currentKeyCode)
+                    currentKeyCode = -1
+                }
                 knobX = centerX
                 knobY = centerY
-                currentKeyCode = -1
                 invalidate()
                 return true
             }
         }
         return super.onTouchEvent(event)
+    }
+
+    private fun buildJoyString(dx: Float, dy: Float, maxDist: Float): String {
+        if (maxDist == 0f) return "Y0X0"
+        val xNorm = (abs(dx) / maxDist).coerceIn(0f, 1f)
+        val yNorm = (abs(dy) / maxDist).coerceIn(0f, 1f)
+        val yPart = toMagnitude(yNorm)?.let { mag -> if (dy < 0) "U$mag" else "D$mag" } ?: ""
+        val xPart = toMagnitude(xNorm)?.let { mag -> if (dx < 0) "L$mag" else "R$mag" } ?: ""
+        return if (yPart.isEmpty() && xPart.isEmpty()) "Y0X0" else "$yPart$xPart"
+    }
+
+    private fun toMagnitude(norm: Float): Int? = when {
+        norm < 0.25f -> null
+        norm < 0.50f -> 2
+        norm < 0.70f -> 3
+        norm < 0.85f -> 4
+        else         -> 5
     }
 
     private fun getDirection(dx: Float, dy: Float): Int {
