@@ -23,6 +23,16 @@
             </intent-filter>
         </activity>
 
+        <receiver
+            android:name=".OverlayControlReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="de.codevoid.andremote2.OVERLAY_SHOW"/>
+                <action android:name="de.codevoid.andremote2.OVERLAY_HIDE"/>
+                <action android:name="de.codevoid.andremote2.OVERLAY_TOGGLE"/>
+            </intent-filter>
+        </receiver>
+
         <service
             android:name=".OverlayService"
             android:exported="false"
