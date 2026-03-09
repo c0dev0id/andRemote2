@@ -38,7 +38,7 @@ class ButtonView @JvmOverloads constructor(
         textSize = 32f
     }
 
-    var label: String = "BTN"
+    var label: String = ""
         set(value) {
             field = value
             contentDescription = value
