@@ -162,7 +162,7 @@ class MainActivity : AppCompatActivity() {
             result.fold(
                 onSuccess = { release ->
                     if (release == null) {
-                        AlertDialog.Builder(this)
+                        AlertDialog.Builder(this@MainActivity)
                             .setTitle(R.string.check_for_updates)
                             .setMessage(R.string.up_to_date)
                             .setPositiveButton(android.R.string.ok, null)
