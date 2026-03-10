@@ -162,11 +162,11 @@ class MainActivity : AppCompatActivity() {
             result.fold(
                 onSuccess = { release ->
                     if (release == null) {
-                        Snackbar.make(
-                            findViewById(android.R.id.content),
-                            R.string.up_to_date,
-                            Snackbar.LENGTH_SHORT
-                        ).show()
+                        AlertDialog.Builder(this)
+                            .setTitle(R.string.check_for_updates)
+                            .setMessage(R.string.up_to_date)
+                            .setPositiveButton(android.R.string.ok, null)
+                            .show()
                     } else {
                         showUpdateDialog(release)
                     }
@@ -186,7 +186,7 @@ class MainActivity : AppCompatActivity() {
         AlertDialog.Builder(this)
             .setTitle(getString(R.string.update_available, release.tagName))
             .setMessage(getString(R.string.update_dialog_message, release.tagName))
-            .setPositiveButton(R.string.download) { _, _ ->
+            .setPositiveButton(R.string.action_update) { _, _ ->
                 if (packageManager.canRequestPackageInstalls()) {
                     downloadAndInstall(release)
                 } else {
@@ -210,7 +210,7 @@ class MainActivity : AppCompatActivity() {
     private fun downloadAndInstall(release: ReleaseInfo) {
         val progressBar = ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal).apply {
             max = 100
-            isIndeterminate = false
+            isIndeterminate = true
             layoutParams = android.widget.LinearLayout.LayoutParams(
                 android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
                 android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
@@ -272,7 +272,6 @@ class MainActivity : AppCompatActivity() {
         // Poll progress
         lifecycleScope.launch {
             while (progressDialog.isShowing) {
-                delay(500)
                 val query = DownloadManager.Query().setFilterById(activeDownloadId)
                 val cursor = withContext(Dispatchers.IO) { downloadManager.query(query) }
                 if (cursor.moveToFirst()) {
@@ -282,11 +281,13 @@ class MainActivity : AppCompatActivity() {
                         val downloaded = cursor.getLong(downloadedCol)
                         val total = cursor.getLong(totalCol)
                         if (total > 0) {
-                            progressBar.progress = ((downloaded * 100) / total).toInt()
+                            if (progressBar.isIndeterminate) progressBar.isIndeterminate = false
+                            progressBar.setProgress(((downloaded * 100) / total).toInt(), false)
                         }
                     }
                 }
                 cursor.close()
+                delay(200)
             }
         }
     }

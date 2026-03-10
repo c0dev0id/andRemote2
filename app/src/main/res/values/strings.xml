@@ -32,7 +32,8 @@
     <string name="updates">Updates</string>
     <string name="check_for_updates">Check for Updates</string>
     <string name="checking_for_updates">Checking…</string>
-    <string name="up_to_date">You\'re up to date</string>
+    <string name="up_to_date">You are using the latest version.</string>
+    <string name="action_update">Update</string>
     <string name="update_available">Update available: %1$s</string>
     <string name="update_dialog_message">Version %1$s is available.\nWould you like to download and install it?</string>
     <string name="download">Download</string>
