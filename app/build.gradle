@@ -38,6 +38,9 @@ android {
             buildConfigField "String", "BUILD_COMMIT", "\"${shortSha}\""
         }
         release {
+            def sha = System.getenv("GITHUB_SHA")
+            def shortSha = sha ? sha.substring(0, Math.min(7, sha.length())) : "release"
+            buildConfigField "String", "BUILD_COMMIT", "\"${shortSha}\""
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
