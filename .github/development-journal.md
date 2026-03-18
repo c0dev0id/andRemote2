@@ -7,7 +7,6 @@
 - **Target SDK**: 34 (Android 14)
 - **Build system**: Gradle (Groovy DSL)
 - **UI**: XML layouts + Material Components (`com.google.android.material:material:1.11.0`)
-- **Key dependency**: [Shizuku](https://shizuku.rikka.app) — required at runtime to send keycodes to the foreground app (not a compile-time dependency; interacted with via ADB/shell)
 
 ## Core Features
 

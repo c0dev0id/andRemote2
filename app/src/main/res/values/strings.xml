@@ -7,13 +7,7 @@
     <string name="overlay_size">Overlay Size</string>
     <string name="overlay_opacity">Overlay Opacity</string>
     <string name="key_mappings">Key Mappings</string>
-    <string name="grant_via_shizuku">Enable Shizuku Key Injection</string>
-    <string name="shizuku_not_running">Shizuku is not running. Please start Shizuku first.</string>
-    <string name="shizuku_permission_denied">Shizuku permission was denied. Please allow when prompted.</string>
-    <string name="shizuku_grant_success">Shizuku key injection enabled successfully</string>
-    <string name="shizuku_grant_failed">Failed to enable Shizuku: %1$s</string>
-    <string name="shizuku_not_installed">Shizuku is not installed. Install it from the Play Store or shizuku.rikka.app</string>
-    <string name="preset">Preset</string>
+<string name="preset">Preset</string>
     <string name="preset_custom">Custom</string>
     <string name="preset_dmd_remote_2">DMD Remote 2</string>
     <string name="overlay_settings">Overlay Settings</string>
