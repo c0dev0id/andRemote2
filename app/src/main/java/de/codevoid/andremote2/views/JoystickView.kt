@@ -18,8 +18,6 @@ class JoystickView @JvmOverloads constructor(
     attrs: AttributeSet? = null
 ) : View(context, attrs) {
 
-    var analogMode = false
-
     private var keycodeUp = 19
     private var keycodeDown = 20
     private var keycodeLeft = 21
@@ -101,35 +99,30 @@ class JoystickView @JvmOverloads constructor(
                 knobY = centerY + dy * ratio
                 invalidate()
 
-                if (analogMode) {
-                    val joy = buildJoyString(dx * ratio, dy * ratio, maxDist)
-                    if (joy != lastJoyString) {
-                        lastJoyString = joy
-                        RemoteControl.sendJoy(context, joy)
-                    }
-                } else {
-                    if (dist > baseRadius * 0.3f) {
-                        val direction = getDirection(dx, dy)
-                        if (direction != currentKeyCode) {
-                            if (currentKeyCode != -1) RemoteControl.sendRelease(context, currentKeyCode)
-                            currentKeyCode = direction
-                            RemoteControl.sendPress(context, direction)
-                        }
-                    } else {
-                        if (currentKeyCode != -1) RemoteControl.sendRelease(context, currentKeyCode)
-                        currentKeyCode = -1
-                    }
+                val joy = buildJoyString(dx * ratio, dy * ratio, maxDist)
+                if (joy != lastJoyString) {
+                    lastJoyString = joy
+                    RemoteControl.sendJoy(context, joy)
                 }
-                return true
-            }
-            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                if (analogMode) {
-                    if (lastJoyString != "Y0X0") RemoteControl.sendJoy(context, "Y0X0")
-                    lastJoyString = ""
+
+                if (dist > baseRadius * 0.3f) {
+                    val direction = getDirection(dx, dy)
+                    if (direction != currentKeyCode) {
+                        if (currentKeyCode != -1) RemoteControl.sendRelease(context, currentKeyCode)
+                        currentKeyCode = direction
+                        RemoteControl.sendPress(context, direction)
+                    }
                 } else {
                     if (currentKeyCode != -1) RemoteControl.sendRelease(context, currentKeyCode)
                     currentKeyCode = -1
                 }
+                return true
+            }
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                if (lastJoyString != "Y0X0") RemoteControl.sendJoy(context, "Y0X0")
+                lastJoyString = ""
+                if (currentKeyCode != -1) RemoteControl.sendRelease(context, currentKeyCode)
+                currentKeyCode = -1
                 knobX = centerX
                 knobY = centerY
                 invalidate()

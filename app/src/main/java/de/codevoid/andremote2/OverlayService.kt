@@ -16,7 +16,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
 import androidx.core.app.NotificationCompat
-import de.codevoid.andremote2.views.JoystickView
 
 class OverlayService : Service() {
 
@@ -41,8 +40,6 @@ class OverlayService : Service() {
         when (key) {
             PrefKeys.OVERLAY_SIZE, PrefKeys.OVERLAY_OPACITY ->
                 mainHandler.post { applyScaleAndAlpha() }
-            PrefKeys.JOYSTICK_ANALOG ->
-                mainHandler.post { applyAnalogMode() }
         }
     }
 
@@ -124,8 +121,6 @@ class OverlayService : Service() {
 
         applyScaleAndAlpha()
 
-        applyAnalogMode()
-
         // Set bottom button to keycode 111 (ROUND BUTTON 2 per protocol)
         val buttonBottom = overlayView.findViewById<de.codevoid.andremote2.views.ButtonView>(R.id.buttonBottom)
         buttonBottom.setKeyCode(111)
@@ -142,11 +137,6 @@ class OverlayService : Service() {
         }
 
         windowManager.addView(overlayView, overlayParams)
-    }
-
-    private fun applyAnalogMode() {
-        overlayView.findViewById<JoystickView>(R.id.joystickView).analogMode =
-            prefs.getBoolean(PrefKeys.JOYSTICK_ANALOG, false)
     }
 
     private fun applyScaleAndAlpha() {
