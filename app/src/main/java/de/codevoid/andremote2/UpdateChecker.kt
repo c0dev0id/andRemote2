@@ -1,5 +1,6 @@
 package de.codevoid.andremote2
 
+import org.json.JSONArray
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
@@ -17,8 +18,8 @@ object UpdateChecker {
     /**
      * Checks whether a newer version is available on GitHub.
      *
-     * For release builds (DEBUG=false): queries /releases/latest and compares tag_name
-     * against BuildConfig.VERSION_NAME.
+     * For release builds (DEBUG=false): queries /releases?per_page=1 (includes pre-releases,
+     * sorted newest first) and compares tag_name against BuildConfig.VERSION_NAME.
      *
      * For prerelease/dev builds (DEBUG=true): queries /releases/tags/dev and compares the
      * short SHA embedded in the APK asset name against BuildConfig.BUILD_COMMIT.
@@ -37,7 +38,7 @@ object UpdateChecker {
     }
 
     private fun checkRelease(): ReleaseInfo? {
-        val json = fetchJson("$GITHUB_API_BASE/latest")
+        val json = fetchJsonArray("$GITHUB_API_BASE?per_page=1").getJSONObject(0)
         val tagName = json.getString("tag_name")          // e.g. "v1.2.3"
         val remoteVersion = tagName.trimStart('v')         // e.g. "1.2.3"
         val currentVersion = BuildConfig.VERSION_NAME      // e.g. "1.0"
@@ -86,14 +87,20 @@ object UpdateChecker {
     }
 
     private fun fetchJson(urlString: String): JSONObject {
-        val url = URL(urlString)
-        val conn = url.openConnection() as HttpURLConnection
+        return JSONObject(fetch(urlString))
+    }
+
+    private fun fetchJsonArray(urlString: String): JSONArray {
+        return JSONArray(fetch(urlString))
+    }
+
+    private fun fetch(urlString: String): String {
+        val conn = URL(urlString).openConnection() as HttpURLConnection
         conn.connectTimeout = 10_000
         conn.readTimeout = 10_000
         conn.setRequestProperty("Accept", "application/vnd.github.v3+json")
         try {
-            val response = conn.inputStream.bufferedReader().readText()
-            return JSONObject(response)
+            return conn.inputStream.bufferedReader().readText()
         } finally {
             conn.disconnect()
         }
