@@ -2,12 +2,14 @@
 
 ## Overview
 
-The joystick control (`JoystickView`) emits **two independent signal streams** on every position change:
+The joystick control (`JoystickView`) operates in one of two exclusive modes, selectable via the **Enable 360°** toggle in the app settings:
 
-1. **Analog signal** — a `joy` string encoding direction and magnitude on both axes
-2. **D-pad signal** — discrete `key_press` / `key_release` broadcast events for the dominant axis
+| Mode | Signal sent | Signal suppressed |
+|------|-------------|-------------------|
+| D-pad (default) | `key_press` / `key_release` | `joy` string |
+| 360° | `joy` string | `key_press` / `key_release` |
 
-Both signals are sent via the `com.thorkracing.wireddevices.keypress` broadcast intent with `deviceName = "Remote2"`. Each signal is carried in a separate broadcast with its own extra key.
+Both modes use the `com.thorkracing.wireddevices.keypress` broadcast intent with `deviceName = "Remote2"`. When the mode is changed while the overlay is running, any active state (held key or non-neutral joy string) is released/reset before switching.
 
 ---
 

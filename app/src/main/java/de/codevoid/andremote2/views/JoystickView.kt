@@ -49,6 +49,7 @@ class JoystickView @JvmOverloads constructor(
     private var knobY = 0f
     private var currentKeyCode = -1
     private var lastJoyString = ""
+    private var mode360 = false
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         centerX = w / 2f
@@ -99,30 +100,35 @@ class JoystickView @JvmOverloads constructor(
                 knobY = centerY + dy * ratio
                 invalidate()
 
-                val joy = buildJoyString(dx * ratio, dy * ratio, maxDist)
-                if (joy != lastJoyString) {
-                    lastJoyString = joy
-                    RemoteControl.sendJoy(context, joy)
-                }
-
-                if (dist > baseRadius * 0.3f) {
-                    val direction = getDirection(dx, dy)
-                    if (direction != currentKeyCode) {
-                        if (currentKeyCode != -1) RemoteControl.sendRelease(context, currentKeyCode)
-                        currentKeyCode = direction
-                        RemoteControl.sendPress(context, direction)
+                if (mode360) {
+                    val joy = buildJoyString(dx * ratio, dy * ratio, maxDist)
+                    if (joy != lastJoyString) {
+                        lastJoyString = joy
+                        RemoteControl.sendJoy(context, joy)
                     }
                 } else {
-                    if (currentKeyCode != -1) RemoteControl.sendRelease(context, currentKeyCode)
-                    currentKeyCode = -1
+                    if (dist > baseRadius * 0.3f) {
+                        val direction = getDirection(dx, dy)
+                        if (direction != currentKeyCode) {
+                            if (currentKeyCode != -1) RemoteControl.sendRelease(context, currentKeyCode)
+                            currentKeyCode = direction
+                            RemoteControl.sendPress(context, direction)
+                        }
+                    } else {
+                        if (currentKeyCode != -1) RemoteControl.sendRelease(context, currentKeyCode)
+                        currentKeyCode = -1
+                    }
                 }
                 return true
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                if (lastJoyString != "Y0X0") RemoteControl.sendJoy(context, "Y0X0")
-                lastJoyString = ""
-                if (currentKeyCode != -1) RemoteControl.sendRelease(context, currentKeyCode)
-                currentKeyCode = -1
+                if (mode360) {
+                    if (lastJoyString != "Y0X0") RemoteControl.sendJoy(context, "Y0X0")
+                    lastJoyString = ""
+                } else {
+                    if (currentKeyCode != -1) RemoteControl.sendRelease(context, currentKeyCode)
+                    currentKeyCode = -1
+                }
                 knobX = centerX
                 knobY = centerY
                 invalidate()
@@ -161,6 +167,19 @@ class JoystickView @JvmOverloads constructor(
         val dx = localX - centerX
         val dy = localY - centerY
         return dx * dx + dy * dy <= baseRadius * baseRadius
+    }
+
+    fun setMode360(enabled: Boolean) {
+        if (mode360 == enabled) return
+        // Release any active state from the previous mode before switching
+        if (mode360) {
+            if (lastJoyString != "Y0X0") RemoteControl.sendJoy(context, "Y0X0")
+            lastJoyString = ""
+        } else {
+            if (currentKeyCode != -1) RemoteControl.sendRelease(context, currentKeyCode)
+            currentKeyCode = -1
+        }
+        mode360 = enabled
     }
 
     fun setKeyCodes(up: Int, down: Int, left: Int, right: Int) {

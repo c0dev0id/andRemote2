@@ -24,6 +24,7 @@ import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.slider.Slider
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.switchmaterial.SwitchMaterial
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -39,6 +40,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvSize: TextView
     private lateinit var tvOpacity: TextView
     private lateinit var btnCheckUpdates: MaterialButton
+    private lateinit var switchJoystick360: SwitchMaterial
 
     private var activeDownloadId: Long = -1
     private var downloadCompleteReceiver: BroadcastReceiver? = null
@@ -58,6 +60,7 @@ class MainActivity : AppCompatActivity() {
         tvSize = findViewById(R.id.tvSize)
         tvOpacity = findViewById(R.id.tvOpacity)
         btnCheckUpdates = findViewById(R.id.btnCheckUpdates)
+        switchJoystick360 = findViewById(R.id.switchJoystick360)
 
         loadSettings()
 
@@ -71,6 +74,10 @@ class MainActivity : AppCompatActivity() {
             val opacity = value.toInt()
             tvOpacity.text = "$opacity%"
             if (fromUser) prefs.edit().putInt(PrefKeys.OVERLAY_OPACITY, opacity).apply()
+        }
+
+        switchJoystick360.setOnCheckedChangeListener { _, checked ->
+            prefs.edit().putBoolean(PrefKeys.JOYSTICK_360, checked).apply()
         }
 
         btnToggleOverlay.setOnClickListener {
@@ -129,6 +136,7 @@ class MainActivity : AppCompatActivity() {
         sliderOpacity.value = opacity.toFloat()
         tvSize.text = "$size%"
         tvOpacity.text = "$opacity%"
+        switchJoystick360.isChecked = prefs.getBoolean(PrefKeys.JOYSTICK_360, false)
     }
 
     private fun requestOverlayPermission() {

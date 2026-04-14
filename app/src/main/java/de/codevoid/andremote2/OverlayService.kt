@@ -36,10 +36,12 @@ class OverlayService : Service() {
 
     private val mainHandler = Handler(Looper.getMainLooper())
 
-    private val prefListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+    private val prefListener = SharedPreferences.OnSharedPreferenceChangeListener { prefs, key ->
         when (key) {
             PrefKeys.OVERLAY_SIZE, PrefKeys.OVERLAY_OPACITY ->
                 mainHandler.post { applyScaleAndAlpha() }
+            PrefKeys.JOYSTICK_360 ->
+                mainHandler.post { applyJoystickMode(prefs) }
         }
     }
 
@@ -136,7 +138,14 @@ class OverlayService : Service() {
                 .apply()
         }
 
+        applyJoystickMode(prefs)
+
         windowManager.addView(overlayView, overlayParams)
+    }
+
+    private fun applyJoystickMode(prefs: SharedPreferences) {
+        val joystick = overlayView.findViewById<de.codevoid.andremote2.views.JoystickView>(R.id.joystickView)
+        joystick.setMode360(prefs.getBoolean(PrefKeys.JOYSTICK_360, false))
     }
 
     private fun applyScaleAndAlpha() {
