@@ -25,7 +25,7 @@ class OverlayService : Service() {
         const val CHANNEL_ID = "overlay_channel"
         private const val BASE_WIDTH_DP = 242
         private const val BASE_HEIGHT_DP = 426
-        private const val HANDLE_SIZE_DP = 48
+        private const val HANDLE_SIZE_DP = 32
     }
 
     private lateinit var windowManager: WindowManager

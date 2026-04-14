@@ -8,6 +8,8 @@
         android:id="@+id/overlayContent"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
         android:orientation="vertical"
         android:background="@drawable/bg_overlay"
         android:clipToOutline="true">
@@ -114,8 +116,8 @@
 
     <de.codevoid.andremote2.views.CollapseHandleView
         android:id="@+id/collapseHandle"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
         android:layout_gravity="top|start"/>
 
     <LinearLayout
@@ -124,7 +126,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="top|start"
         android:layout_marginStart="4dp"
-        android:layout_marginTop="52dp"
+        android:layout_marginTop="36dp"
         android:orientation="vertical"
         android:background="@drawable/bg_menu"
         android:paddingStart="12dp"
