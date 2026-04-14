@@ -38,4 +38,8 @@
     <string name="allow_installs_prompt">Allow installing apps from this source to proceed.</string>
     <string name="joystick_360_title">Enable 360°</string>
     <string name="joystick_360_desc">Use analog joy sensor instead of D-pad keycodes</string>
+    <string name="menu_collapse">Collapse</string>
+    <string name="menu_expand">Expand</string>
+    <string name="menu_360_on">360°: On</string>
+    <string name="menu_360_off">360°: Off</string>
 </resources>

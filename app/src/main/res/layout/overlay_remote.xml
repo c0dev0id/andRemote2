@@ -1,108 +1,156 @@
 <?xml version="1.0" encoding="utf-8"?>
-<de.codevoid.andremote2.views.DraggableOverlayLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/overlayRoot"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@drawable/bg_overlay"
-    android:clipToOutline="true">
+    android:layout_height="match_parent">
 
-    <!-- Top padding: weight=21 (out of 426 total height units) -->
-    <View
+    <de.codevoid.andremote2.views.DraggableOverlayLayout
+        android:id="@+id/overlayContent"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="21"/>
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="@drawable/bg_overlay"
+        android:clipToOutline="true">
 
-    <!-- Joystick: weight=200 -->
-    <de.codevoid.andremote2.views.JoystickView
-        android:id="@+id/joystickView"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="200"/>
-
-    <!-- Joystick-to-row gap: weight=11 -->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="11"/>
-
-    <!-- Bottom row: weight=173 -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="173"
-        android:orientation="horizontal">
-
-        <!-- Left padding: weight=36 (21 root padding + 15 centering, out of 242 total width units) -->
+        <!-- Top padding: weight=21 (out of 426 total height units) -->
         <View
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="36"/>
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="21"/>
 
-        <!-- Lever: weight=66 -->
-        <de.codevoid.andremote2.views.LeverView
-            android:id="@+id/leverView"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="66"/>
+        <!-- Joystick: weight=200 -->
+        <de.codevoid.andremote2.views.JoystickView
+            android:id="@+id/joystickView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="200"/>
 
-        <!-- Lever-to-buttons gap: weight=11 -->
+        <!-- Joystick-to-row gap: weight=11 -->
         <View
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
             android:layout_weight="11"/>
 
-        <!-- Buttons column: weight=93 -->
+        <!-- Bottom row: weight=173 -->
         <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="93"
-            android:orientation="vertical">
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="173"
+            android:orientation="horizontal">
 
-            <!-- Top centering spacer: weight=8 ((173-157)/2) -->
+            <!-- Left padding: weight=36 (21 root padding + 15 centering, out of 242 total width units) -->
             <View
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="8"/>
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="36"/>
 
-            <de.codevoid.andremote2.views.ButtonView
-                android:id="@+id/buttonTop"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="73"/>
+            <!-- Lever: weight=66 -->
+            <de.codevoid.andremote2.views.LeverView
+                android:id="@+id/leverView"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="66"/>
 
-            <!-- Button gap: weight=11 -->
+            <!-- Lever-to-buttons gap: weight=11 -->
             <View
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
                 android:layout_weight="11"/>
 
-            <de.codevoid.andremote2.views.ButtonView
-                android:id="@+id/buttonBottom"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="73"/>
+            <!-- Buttons column: weight=93 -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="93"
+                android:orientation="vertical">
 
-            <!-- Bottom centering spacer: weight=8 -->
+                <!-- Top centering spacer: weight=8 ((173-157)/2) -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="8"/>
+
+                <de.codevoid.andremote2.views.ButtonView
+                    android:id="@+id/buttonTop"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="73"/>
+
+                <!-- Button gap: weight=11 -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="11"/>
+
+                <de.codevoid.andremote2.views.ButtonView
+                    android:id="@+id/buttonBottom"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="73"/>
+
+                <!-- Bottom centering spacer: weight=8 -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="8"/>
+
+            </LinearLayout>
+
+            <!-- Right padding: weight=36 (21 root padding + 15 centering, out of 242 total width units) -->
             <View
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="8"/>
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="36"/>
 
         </LinearLayout>
 
-        <!-- Right padding: weight=36 (21 root padding + 15 centering, out of 242 total width units) -->
+        <!-- Bottom padding: weight=21 -->
         <View
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="36"/>
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="21"/>
+
+    </de.codevoid.andremote2.views.DraggableOverlayLayout>
+
+    <de.codevoid.andremote2.views.CollapseHandleView
+        android:id="@+id/collapseHandle"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="top|start"/>
+
+    <LinearLayout
+        android:id="@+id/handleMenu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|start"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="52dp"
+        android:orientation="vertical"
+        android:background="@drawable/bg_menu"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/menuItemCollapse"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/menu_collapse"
+            android:textColor="#CCCCCC"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/menuItem360"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/menu_360_off"
+            android:textColor="#CCCCCC"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"/>
 
     </LinearLayout>
 
-    <!-- Bottom padding: weight=21 -->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="21"/>
-
-</de.codevoid.andremote2.views.DraggableOverlayLayout>
+</FrameLayout>

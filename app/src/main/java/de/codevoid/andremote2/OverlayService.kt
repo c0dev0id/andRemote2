@@ -15,6 +15,7 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
+import android.widget.TextView
 import androidx.core.app.NotificationCompat
 
 class OverlayService : Service() {
@@ -24,6 +25,7 @@ class OverlayService : Service() {
         const val CHANNEL_ID = "overlay_channel"
         private const val BASE_WIDTH_DP = 242
         private const val BASE_HEIGHT_DP = 426
+        private const val HANDLE_SIZE_DP = 48
     }
 
     private lateinit var windowManager: WindowManager
@@ -123,12 +125,11 @@ class OverlayService : Service() {
 
         applyScaleAndAlpha()
 
-        // Set bottom button to keycode 111 (ROUND BUTTON 2 per protocol)
         val buttonBottom = overlayView.findViewById<de.codevoid.andremote2.views.ButtonView>(R.id.buttonBottom)
         buttonBottom.setKeyCode(111)
 
-        val root = overlayView.findViewById<de.codevoid.andremote2.views.DraggableOverlayLayout>(R.id.overlayRoot)
-        root.onDrag = { dx, dy ->
+        val overlayContent = overlayView.findViewById<de.codevoid.andremote2.views.DraggableOverlayLayout>(R.id.overlayContent)
+        overlayContent.onDrag = { dx, dy ->
             overlayParams.x += dx
             overlayParams.y += dy
             windowManager.updateViewLayout(overlayView, overlayParams)
@@ -138,9 +139,88 @@ class OverlayService : Service() {
                 .apply()
         }
 
+        val handle = overlayView.findViewById<de.codevoid.andremote2.views.CollapseHandleView>(R.id.collapseHandle)
+        handle.onDrag = { dx, dy ->
+            overlayParams.x += dx
+            overlayParams.y += dy
+            windowManager.updateViewLayout(overlayView, overlayParams)
+            prefs.edit()
+                .putInt(PrefKeys.OVERLAY_X, overlayParams.x)
+                .putInt(PrefKeys.OVERLAY_Y, overlayParams.y)
+                .apply()
+        }
+        handle.onTap = { toggleMenu() }
+
+        overlayView.findViewById<TextView>(R.id.menuItemCollapse).setOnClickListener {
+            toggleCollapsed()
+            hideMenu()
+        }
+        overlayView.findViewById<TextView>(R.id.menuItem360).setOnClickListener {
+            toggleJoystick360()
+            hideMenu()
+        }
+
         applyJoystickMode(prefs)
 
         windowManager.addView(overlayView, overlayParams)
+
+        applyCollapsed(prefs.getBoolean(PrefKeys.OVERLAY_COLLAPSED, false))
+    }
+
+    private fun toggleMenu() {
+        val menu = overlayView.findViewById<View>(R.id.handleMenu)
+        if (menu.visibility == View.VISIBLE) hideMenu() else showMenu()
+    }
+
+    private fun showMenu() {
+        val collapsed = prefs.getBoolean(PrefKeys.OVERLAY_COLLAPSED, false)
+        overlayView.findViewById<TextView>(R.id.menuItemCollapse).setText(
+            if (collapsed) R.string.menu_expand else R.string.menu_collapse
+        )
+        val is360 = prefs.getBoolean(PrefKeys.JOYSTICK_360, false)
+        overlayView.findViewById<TextView>(R.id.menuItem360).setText(
+            if (is360) R.string.menu_360_on else R.string.menu_360_off
+        )
+        if (collapsed) expandWindowForMenu()
+        overlayView.findViewById<View>(R.id.handleMenu).visibility = View.VISIBLE
+    }
+
+    private fun hideMenu() {
+        overlayView.findViewById<View>(R.id.handleMenu).visibility = View.GONE
+        if (prefs.getBoolean(PrefKeys.OVERLAY_COLLAPSED, false)) applyCollapsedWindowSize()
+    }
+
+    private fun expandWindowForMenu() {
+        val size = prefs.getInt(PrefKeys.OVERLAY_SIZE, 75).coerceIn(10, 200)
+        val scale = size / 100f
+        overlayParams.width = (baseWidth * scale).toInt()
+        overlayParams.height = (baseHeight * scale).toInt()
+        windowManager.updateViewLayout(overlayView, overlayParams)
+    }
+
+    private fun toggleCollapsed() {
+        val collapsed = !prefs.getBoolean(PrefKeys.OVERLAY_COLLAPSED, false)
+        prefs.edit().putBoolean(PrefKeys.OVERLAY_COLLAPSED, collapsed).apply()
+        applyCollapsed(collapsed)
+    }
+
+    private fun applyCollapsed(collapsed: Boolean) {
+        overlayView.findViewById<View>(R.id.overlayContent).visibility =
+            if (collapsed) View.GONE else View.VISIBLE
+        if (collapsed) applyCollapsedWindowSize() else applyScaleAndAlpha()
+    }
+
+    private fun applyCollapsedWindowSize() {
+        val px = (HANDLE_SIZE_DP * resources.displayMetrics.density + 0.5f).toInt()
+        overlayParams.width = px
+        overlayParams.height = px
+        windowManager.updateViewLayout(overlayView, overlayParams)
+    }
+
+    private fun toggleJoystick360() {
+        val enabled = !prefs.getBoolean(PrefKeys.JOYSTICK_360, false)
+        prefs.edit().putBoolean(PrefKeys.JOYSTICK_360, enabled).apply()
+        // prefListener handles applyJoystickMode via the JOYSTICK_360 case
     }
 
     private fun applyJoystickMode(prefs: SharedPreferences) {
@@ -149,6 +229,9 @@ class OverlayService : Service() {
     }
 
     private fun applyScaleAndAlpha() {
+        if (prefs.getBoolean(PrefKeys.OVERLAY_COLLAPSED, false) &&
+            overlayView.findViewById<View>(R.id.handleMenu).visibility != View.VISIBLE) return
+
         val size = prefs.getInt(PrefKeys.OVERLAY_SIZE, 75).coerceIn(10, 200)
         val opacity = prefs.getInt(PrefKeys.OVERLAY_OPACITY, 80).coerceIn(0, 100)
         val scale = size / 100f
