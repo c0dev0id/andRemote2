@@ -18,7 +18,7 @@
 
 ## Key Decisions
 
-- **Overlay collapse handle + in-overlay menu**: `CollapseHandleView` (48dp circle) floats in the top-left of the overlay window. Tap → opens a mini context menu; drag → repositions the window. When collapsed, the WindowManager window is shrunk to 48dp×48dp so only the handle is visible. A `FrameLayout` root wraps the original `DraggableOverlayLayout` (`overlayContent`) to allow the handle and menu to float on top.
+- **Overlay collapse handle + in-overlay menu**: `CollapseHandleView` (32dp circle) floats at the top-left of the overlay window, half-outside the `bg_overlay` background. This is achieved by giving `overlayContent` `marginStart=16dp` / `marginTop=16dp` (half handle size) while keeping the handle at position (0,0) of the window. Tap → opens a mini context menu; drag → repositions the window. When collapsed, the WindowManager window is shrunk to 32dp×32dp so only the handle is visible. A `FrameLayout` root wraps the original `DraggableOverlayLayout` (`overlayContent`) to allow the handle and menu to float on top.
 - **In-overlay menu without focus**: `FLAG_NOT_FOCUSABLE` prevents `PopupMenu`/`AlertDialog`. The menu is a `LinearLayout` child of the root `FrameLayout`, toggled `GONE`/`VISIBLE`. Window is temporarily expanded to full size when opening the menu while collapsed.
 - **`applyScaleAndAlpha()` guard**: if collapsed and menu is hidden, scale/alpha changes from the `SharedPreferences` listener are suppressed so the window stays at handle size.
 - **Foreground service for overlay**: Android requires a foreground service for persistent `TYPE_APPLICATION_OVERLAY` windows. The notification provides the mandatory user-visible indicator and a quick-stop action.
