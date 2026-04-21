@@ -1,5 +1,6 @@
 package de.codevoid.andremote2
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Handler
@@ -83,13 +84,14 @@ object RemoteControl {
         return pkg !in NAV_APPS
     }
 
+    @SuppressLint("WrongConstant")
     private fun injectKey(context: Context, keyCode: Int, pressed: Boolean) {
         val now = SystemClock.uptimeMillis()
         val action = if (pressed) KeyEvent.ACTION_DOWN else KeyEvent.ACTION_UP
         val downTime = if (pressed) now else 0L
         context.sendBroadcast(Intent(INJECT_ACTION).apply {
-            addFlags(0x00000020)  // FLAG_INCLUDE_STOPPED_PACKAGES
-            addFlags(0x01000000)  // FLAG_RECEIVER_INCLUDE_BACKGROUND
+            addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
+            addFlags(0x01000000)  // FLAG_RECEIVER_INCLUDE_BACKGROUND (@hide)
             putExtra("event", KeyEvent(downTime, now, action, keyCode, 0, 0))
         })
     }
