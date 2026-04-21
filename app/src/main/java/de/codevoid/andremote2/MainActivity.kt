@@ -1,5 +1,6 @@
 package de.codevoid.andremote2
 
+import android.app.AppOpsManager
 import android.app.DownloadManager
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -10,6 +11,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.os.Process
 import android.provider.Settings
 import android.view.Menu
 import android.view.MenuItem
@@ -40,7 +42,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvSize: TextView
     private lateinit var tvOpacity: TextView
     private lateinit var btnCheckUpdates: MaterialButton
-    private lateinit var switchJoystick360: SwitchMaterial
+    private lateinit var switchReduceSensitivity: SwitchMaterial
+    private lateinit var btnGrantUsageStats: com.google.android.material.button.MaterialButton
+    private lateinit var tvUsageStatsStatus: TextView
 
     private var activeDownloadId: Long = -1
     private var downloadCompleteReceiver: BroadcastReceiver? = null
@@ -60,7 +64,9 @@ class MainActivity : AppCompatActivity() {
         tvSize = findViewById(R.id.tvSize)
         tvOpacity = findViewById(R.id.tvOpacity)
         btnCheckUpdates = findViewById(R.id.btnCheckUpdates)
-        switchJoystick360 = findViewById(R.id.switchJoystick360)
+        switchReduceSensitivity = findViewById(R.id.switchReduceSensitivity)
+        btnGrantUsageStats = findViewById(R.id.btnGrantUsageStats)
+        tvUsageStatsStatus = findViewById(R.id.tvUsageStatsStatus)
 
         loadSettings()
 
@@ -76,8 +82,12 @@ class MainActivity : AppCompatActivity() {
             if (fromUser) prefs.edit().putInt(PrefKeys.OVERLAY_OPACITY, opacity).apply()
         }
 
-        switchJoystick360.setOnCheckedChangeListener { _, checked ->
-            prefs.edit().putBoolean(PrefKeys.JOYSTICK_360, checked).apply()
+        switchReduceSensitivity.setOnCheckedChangeListener { _, checked ->
+            prefs.edit().putBoolean(PrefKeys.REDUCE_SENSITIVITY, checked).apply()
+        }
+
+        btnGrantUsageStats.setOnClickListener {
+            startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
         }
 
         btnToggleOverlay.setOnClickListener {
@@ -105,6 +115,7 @@ class MainActivity : AppCompatActivity() {
             getString(R.string.stop_overlay)
         else
             getString(R.string.start_overlay)
+        updateUsageStatsStatus()
     }
 
     override fun onDestroy() {
@@ -136,7 +147,25 @@ class MainActivity : AppCompatActivity() {
         sliderOpacity.value = opacity.toFloat()
         tvSize.text = "$size%"
         tvOpacity.text = "$opacity%"
-        switchJoystick360.isChecked = prefs.getBoolean(PrefKeys.JOYSTICK_360, false)
+        switchReduceSensitivity.isChecked = prefs.getBoolean(PrefKeys.REDUCE_SENSITIVITY, false)
+    }
+
+    private fun hasUsageStatsPermission(): Boolean {
+        val appOps = getSystemService(APP_OPS_SERVICE) as AppOpsManager
+        val mode = appOps.checkOpNoThrow(
+            AppOpsManager.OPSTR_GET_USAGE_STATS,
+            Process.myUid(),
+            packageName
+        )
+        return mode == AppOpsManager.MODE_ALLOWED
+    }
+
+    private fun updateUsageStatsStatus() {
+        val granted = hasUsageStatsPermission()
+        tvUsageStatsStatus.setText(
+            if (granted) R.string.usage_stats_granted else R.string.usage_stats_not_granted
+        )
+        btnGrantUsageStats.isEnabled = !granted
     }
 
     private fun requestOverlayPermission() {

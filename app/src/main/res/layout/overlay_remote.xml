@@ -145,10 +145,10 @@
             android:paddingBottom="8dp"/>
 
         <TextView
-            android:id="@+id/menuItem360"
+            android:id="@+id/menuItemReduceSensitivity"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/menu_360_off"
+            android:text="@string/menu_reduce_off"
             android:textColor="#CCCCCC"
             android:paddingTop="8dp"
             android:paddingBottom="8dp"/>

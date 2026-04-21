@@ -1,16 +1,19 @@
 package de.codevoid.andremote2
 
+import android.app.AppOpsManager
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.app.usage.UsageStatsManager
 import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.PixelFormat
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.os.Process
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -38,12 +41,22 @@ class OverlayService : Service() {
 
     private val mainHandler = Handler(Looper.getMainLooper())
 
+    private val dmd2PollRunnable = object : Runnable {
+        override fun run() {
+            val isDMD2 = isDMD2InView()
+            RemoteControl.isDMD2InView = isDMD2
+            overlayView.findViewById<de.codevoid.andremote2.views.JoystickView>(R.id.joystickView)
+                .setMode360(isDMD2)
+            mainHandler.postDelayed(this, 500)
+        }
+    }
+
     private val prefListener = SharedPreferences.OnSharedPreferenceChangeListener { prefs, key ->
         when (key) {
             PrefKeys.OVERLAY_SIZE, PrefKeys.OVERLAY_OPACITY ->
                 mainHandler.post { applyScaleAndAlpha() }
-            PrefKeys.JOYSTICK_360 ->
-                mainHandler.post { applyJoystickMode(prefs) }
+            PrefKeys.REDUCE_SENSITIVITY ->
+                mainHandler.post { applyReduceSensitivity(prefs) }
         }
     }
 
@@ -57,11 +70,14 @@ class OverlayService : Service() {
         startForeground(1, buildNotification())
         showOverlay()
         prefs.registerOnSharedPreferenceChangeListener(prefListener)
+        mainHandler.post(dmd2PollRunnable)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         isRunning = false
+        RemoteControl.isDMD2InView = false
+        mainHandler.removeCallbacks(dmd2PollRunnable)
         prefs.unregisterOnSharedPreferenceChangeListener(prefListener)
         if (::overlayView.isInitialized) {
             windowManager.removeView(overlayView)
@@ -155,12 +171,12 @@ class OverlayService : Service() {
             toggleCollapsed()
             hideMenu()
         }
-        overlayView.findViewById<TextView>(R.id.menuItem360).setOnClickListener {
-            toggleJoystick360()
+        overlayView.findViewById<TextView>(R.id.menuItemReduceSensitivity).setOnClickListener {
+            toggleReduceSensitivity()
             hideMenu()
         }
 
-        applyJoystickMode(prefs)
+        applyReduceSensitivity(prefs)
 
         windowManager.addView(overlayView, overlayParams)
 
@@ -177,9 +193,9 @@ class OverlayService : Service() {
         overlayView.findViewById<TextView>(R.id.menuItemCollapse).setText(
             if (collapsed) R.string.menu_expand else R.string.menu_collapse
         )
-        val is360 = prefs.getBoolean(PrefKeys.JOYSTICK_360, false)
-        overlayView.findViewById<TextView>(R.id.menuItem360).setText(
-            if (is360) R.string.menu_360_on else R.string.menu_360_off
+        val reduced = prefs.getBoolean(PrefKeys.REDUCE_SENSITIVITY, false)
+        overlayView.findViewById<TextView>(R.id.menuItemReduceSensitivity).setText(
+            if (reduced) R.string.menu_reduce_on else R.string.menu_reduce_off
         )
         if (collapsed) expandWindowForMenu()
         overlayView.findViewById<View>(R.id.handleMenu).visibility = View.VISIBLE
@@ -217,15 +233,34 @@ class OverlayService : Service() {
         windowManager.updateViewLayout(overlayView, overlayParams)
     }
 
-    private fun toggleJoystick360() {
-        val enabled = !prefs.getBoolean(PrefKeys.JOYSTICK_360, false)
-        prefs.edit().putBoolean(PrefKeys.JOYSTICK_360, enabled).apply()
-        // prefListener handles applyJoystickMode via the JOYSTICK_360 case
+    private fun toggleReduceSensitivity() {
+        val enabled = !prefs.getBoolean(PrefKeys.REDUCE_SENSITIVITY, false)
+        prefs.edit().putBoolean(PrefKeys.REDUCE_SENSITIVITY, enabled).apply()
     }
 
-    private fun applyJoystickMode(prefs: SharedPreferences) {
+    private fun applyReduceSensitivity(prefs: SharedPreferences) {
         val joystick = overlayView.findViewById<de.codevoid.andremote2.views.JoystickView>(R.id.joystickView)
-        joystick.setMode360(prefs.getBoolean(PrefKeys.JOYSTICK_360, false))
+        joystick.setReduceSensitivity(prefs.getBoolean(PrefKeys.REDUCE_SENSITIVITY, false))
+    }
+
+    private fun hasUsageStatsPermission(): Boolean {
+        val appOps = getSystemService(APP_OPS_SERVICE) as AppOpsManager
+        val mode = appOps.checkOpNoThrow(
+            AppOpsManager.OPSTR_GET_USAGE_STATS,
+            Process.myUid(),
+            packageName
+        )
+        return mode == AppOpsManager.MODE_ALLOWED
+    }
+
+    private fun isDMD2InView(): Boolean {
+        if (!hasUsageStatsPermission()) return false
+        val usm = getSystemService(UsageStatsManager::class.java)
+        val now = System.currentTimeMillis()
+        val pkg = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, now - 5000L, now)
+            ?.maxByOrNull { it.lastTimeUsed }
+            ?.packageName ?: return false
+        return pkg == "com.thorkracing.dmd2launcher" || pkg == "com.thorkracing.dmdplayground"
     }
 
     private fun applyScaleAndAlpha() {

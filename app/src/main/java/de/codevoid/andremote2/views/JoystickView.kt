@@ -50,6 +50,7 @@ class JoystickView @JvmOverloads constructor(
     private var currentKeyCode = -1
     private var lastJoyString = ""
     private var mode360 = false
+    private var reduceSensitivity = false
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         centerX = w / 2f
@@ -148,11 +149,12 @@ class JoystickView @JvmOverloads constructor(
     }
 
     private fun toMagnitude(norm: Float): Int? = when {
-        norm < 0.25f -> null
-        norm < 0.50f -> 2
-        norm < 0.70f -> 3
-        norm < 0.85f -> 4
-        else         -> 5
+        norm < 0.25f     -> null
+        reduceSensitivity -> 1
+        norm < 0.50f     -> 2
+        norm < 0.70f     -> 3
+        norm < 0.85f     -> 4
+        else             -> 5
     }
 
     private fun getDirection(dx: Float, dy: Float): Int {
@@ -180,6 +182,10 @@ class JoystickView @JvmOverloads constructor(
             currentKeyCode = -1
         }
         mode360 = enabled
+    }
+
+    fun setReduceSensitivity(enabled: Boolean) {
+        reduceSensitivity = enabled
     }
 
     fun setKeyCodes(up: Int, down: Int, left: Int, right: Int) {

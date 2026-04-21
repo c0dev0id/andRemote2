@@ -36,10 +36,14 @@
     <string name="update_check_failed">Update check failed</string>
     <string name="update_download_failed">Download failed</string>
     <string name="allow_installs_prompt">Allow installing apps from this source to proceed.</string>
-    <string name="joystick_360_title">Enable 360°</string>
-    <string name="joystick_360_desc">Use analog joy sensor instead of D-pad keycodes</string>
+    <string name="reduce_sensitivity_title">Reduce Sensitivity</string>
+    <string name="reduce_sensitivity_desc">Clamp joystick output to magnitude 1 (matches wireddevices filter)</string>
+    <string name="usage_stats_title">Auto Joy Mode</string>
+    <string name="usage_stats_not_granted">Usage access not granted — joy mode inactive</string>
+    <string name="usage_stats_granted">Granted — switches to joy tokens when DMD2 is in view</string>
+    <string name="usage_stats_grant">Grant</string>
     <string name="menu_collapse">Collapse</string>
     <string name="menu_expand">Expand</string>
-    <string name="menu_360_on">360°: On</string>
-    <string name="menu_360_off">360°: Off</string>
+    <string name="menu_reduce_on">Sensitivity: Reduced</string>
+    <string name="menu_reduce_off">Sensitivity: Full</string>
 </resources>
