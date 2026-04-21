@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **TopIcon key injection**: for non-DMD2, non-nav apps, button and lever presses also dispatch a `hk.topicon.injectinput.INPUT_EVENT` broadcast with the corresponding `KeyEvent`, matching the secondary injection path in wireddevices. Navigation keys (arrows, Escape, F6, F7) repeat at 250ms while held. Silently no-ops on devices without TopIcon installed.
 - **Reduce Sensitivity toggle**: when enabled, all joystick output is clamped to magnitude 1 (`U1`, `D1`, `L1`, `R1`, diagonal combinations). Matches the `ReduceJoySensitivity` whitelist enforced by the wireddevices app on serial input. Toggle available in both the overlay context menu and the main settings screen.
 - **Automatic joy mode** (`isDMD2InView`): the joystick now automatically switches between analog `joy` token mode and D-pad keycode mode based on the foreground app. When `com.thorkracing.dmd2launcher` or `com.thorkracing.dmdplayground` is in view, the joystick sends `joy` tokens; otherwise it sends standard keycodes. Requires Usage Access permission (grant via the new button in Overlay Settings). Button and lever presses also switch between `down-r2`/`up-r2` (DMD2) and `key_press`/`key_release` (other apps) accordingly.
 

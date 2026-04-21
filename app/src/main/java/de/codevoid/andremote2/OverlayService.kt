@@ -43,8 +43,10 @@ class OverlayService : Service() {
 
     private val dmd2PollRunnable = object : Runnable {
         override fun run() {
-            val isDMD2 = isDMD2InView()
+            val pkg = getForegroundPackage() ?: ""
+            val isDMD2 = isDMD2Package(pkg)
             RemoteControl.isDMD2InView = isDMD2
+            RemoteControl.foregroundPackage = pkg
             overlayView.findViewById<de.codevoid.andremote2.views.JoystickView>(R.id.joystickView)
                 .setMode360(isDMD2)
             mainHandler.postDelayed(this, 500)
@@ -77,6 +79,7 @@ class OverlayService : Service() {
         super.onDestroy()
         isRunning = false
         RemoteControl.isDMD2InView = false
+        RemoteControl.foregroundPackage = ""
         mainHandler.removeCallbacks(dmd2PollRunnable)
         prefs.unregisterOnSharedPreferenceChangeListener(prefListener)
         if (::overlayView.isInitialized) {
@@ -253,15 +256,17 @@ class OverlayService : Service() {
         return mode == AppOpsManager.MODE_ALLOWED
     }
 
-    private fun isDMD2InView(): Boolean {
-        if (!hasUsageStatsPermission()) return false
+    private fun getForegroundPackage(): String? {
+        if (!hasUsageStatsPermission()) return null
         val usm = getSystemService(UsageStatsManager::class.java)
         val now = System.currentTimeMillis()
-        val pkg = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, now - 5000L, now)
+        return usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, now - 5000L, now)
             ?.maxByOrNull { it.lastTimeUsed }
-            ?.packageName ?: return false
-        return pkg == "com.thorkracing.dmd2launcher" || pkg == "com.thorkracing.dmdplayground"
+            ?.packageName
     }
+
+    private fun isDMD2Package(pkg: String) =
+        pkg == "com.thorkracing.dmd2launcher" || pkg == "com.thorkracing.dmdplayground"
 
     private fun applyScaleAndAlpha() {
         if (prefs.getBoolean(PrefKeys.OVERLAY_COLLAPSED, false) &&
