@@ -6,6 +6,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.app.usage.UsageEvents
 import android.app.usage.UsageStatsManager
 import android.content.Intent
 import android.content.SharedPreferences
@@ -260,9 +261,16 @@ class OverlayService : Service() {
         if (!hasUsageStatsPermission()) return null
         val usm = getSystemService(UsageStatsManager::class.java)
         val now = System.currentTimeMillis()
-        return usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, now - 5000L, now)
-            ?.maxByOrNull { it.lastTimeUsed }
-            ?.packageName
+        val events = usm.queryEvents(now - 30_000L, now) ?: return null
+        val event = UsageEvents.Event()
+        var lastPkg: String? = null
+        while (events.hasNextEvent()) {
+            events.getNextEvent(event)
+            if (event.eventType == UsageEvents.Event.MOVE_TO_FOREGROUND) {
+                lastPkg = event.packageName
+            }
+        }
+        return lastPkg
     }
 
     private fun isDMD2Package(pkg: String) =
