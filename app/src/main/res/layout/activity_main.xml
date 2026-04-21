@@ -198,24 +198,24 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="@string/usage_stats_title"
+                                android:text="@string/accessibility_service_title"
                                 android:textStyle="bold"/>
 
                             <TextView
-                                android:id="@+id/tvUsageStatsStatus"
+                                android:id="@+id/tvAccessibilityStatus"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="@string/usage_stats_not_granted"
+                                android:text="@string/accessibility_service_not_granted"
                                 android:textSize="12sp"/>
 
                         </LinearLayout>
 
                         <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btnGrantUsageStats"
+                            android:id="@+id/btnGrantAccessibility"
                             style="@style/Widget.Material3.Button.TextButton"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/usage_stats_grant"
+                            android:text="@string/accessibility_service_grant"
                             android:layout_marginStart="8dp"/>
 
                     </LinearLayout>

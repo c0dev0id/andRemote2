@@ -1,6 +1,5 @@
 package de.codevoid.andremote2
 
-import android.app.AppOpsManager
 import android.app.DownloadManager
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -11,7 +10,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
-import android.os.Process
 import android.provider.Settings
 import android.view.Menu
 import android.view.MenuItem
@@ -43,8 +41,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvOpacity: TextView
     private lateinit var btnCheckUpdates: MaterialButton
     private lateinit var switchReduceSensitivity: SwitchMaterial
-    private lateinit var btnGrantUsageStats: com.google.android.material.button.MaterialButton
-    private lateinit var tvUsageStatsStatus: TextView
+    private lateinit var btnGrantAccessibility: MaterialButton
+    private lateinit var tvAccessibilityStatus: TextView
 
     private var activeDownloadId: Long = -1
     private var downloadCompleteReceiver: BroadcastReceiver? = null
@@ -65,8 +63,8 @@ class MainActivity : AppCompatActivity() {
         tvOpacity = findViewById(R.id.tvOpacity)
         btnCheckUpdates = findViewById(R.id.btnCheckUpdates)
         switchReduceSensitivity = findViewById(R.id.switchReduceSensitivity)
-        btnGrantUsageStats = findViewById(R.id.btnGrantUsageStats)
-        tvUsageStatsStatus = findViewById(R.id.tvUsageStatsStatus)
+        btnGrantAccessibility = findViewById(R.id.btnGrantAccessibility)
+        tvAccessibilityStatus = findViewById(R.id.tvAccessibilityStatus)
 
         loadSettings()
 
@@ -86,8 +84,8 @@ class MainActivity : AppCompatActivity() {
             prefs.edit().putBoolean(PrefKeys.REDUCE_SENSITIVITY, checked).apply()
         }
 
-        btnGrantUsageStats.setOnClickListener {
-            startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
+        btnGrantAccessibility.setOnClickListener {
+            startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
         }
 
         btnToggleOverlay.setOnClickListener {
@@ -115,7 +113,7 @@ class MainActivity : AppCompatActivity() {
             getString(R.string.stop_overlay)
         else
             getString(R.string.start_overlay)
-        updateUsageStatsStatus()
+        updateAccessibilityStatus()
     }
 
     override fun onDestroy() {
@@ -150,22 +148,12 @@ class MainActivity : AppCompatActivity() {
         switchReduceSensitivity.isChecked = prefs.getBoolean(PrefKeys.REDUCE_SENSITIVITY, false)
     }
 
-    private fun hasUsageStatsPermission(): Boolean {
-        val appOps = getSystemService(APP_OPS_SERVICE) as AppOpsManager
-        val mode = appOps.checkOpNoThrow(
-            AppOpsManager.OPSTR_GET_USAGE_STATS,
-            Process.myUid(),
-            packageName
+    private fun updateAccessibilityStatus() {
+        val running = RemoteAccessibilityService.isRunning
+        tvAccessibilityStatus.setText(
+            if (running) R.string.accessibility_service_granted else R.string.accessibility_service_not_granted
         )
-        return mode == AppOpsManager.MODE_ALLOWED
-    }
-
-    private fun updateUsageStatsStatus() {
-        val granted = hasUsageStatsPermission()
-        tvUsageStatsStatus.setText(
-            if (granted) R.string.usage_stats_granted else R.string.usage_stats_not_granted
-        )
-        btnGrantUsageStats.isEnabled = !granted
+        btnGrantAccessibility.isEnabled = !running
     }
 
     private fun requestOverlayPermission() {

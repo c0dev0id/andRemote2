@@ -38,10 +38,11 @@
     <string name="allow_installs_prompt">Allow installing apps from this source to proceed.</string>
     <string name="reduce_sensitivity_title">Reduce Sensitivity</string>
     <string name="reduce_sensitivity_desc">Clamp joystick output to magnitude 1 (matches wireddevices filter)</string>
-    <string name="usage_stats_title">Auto Joy Mode</string>
-    <string name="usage_stats_not_granted">Usage access not granted — joy mode inactive</string>
-    <string name="usage_stats_granted">Granted — switches to joy tokens when DMD2 is in view</string>
-    <string name="usage_stats_grant">Grant</string>
+    <string name="accessibility_service_title">Auto Joy Mode</string>
+    <string name="accessibility_service_not_granted">Accessibility service not enabled — joy mode inactive</string>
+    <string name="accessibility_service_granted">Enabled — switches to joy tokens when DMD2 is in view</string>
+    <string name="accessibility_service_grant">Enable</string>
+    <string name="accessibility_service_description">Detects the foreground app to switch between DMD2 joy mode and standard key mode</string>
     <string name="menu_collapse">Collapse</string>
     <string name="menu_expand">Expand</string>
     <string name="menu_reduce_on">Sensitivity: Reduced</string>

@@ -6,8 +6,6 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"/>
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"/>
-    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" tools:ignore="ProtectedPermissions"
-        xmlns:tools="http://schemas.android.com/tools"/>
 
     <application
         android:allowBackup="true"
@@ -34,6 +32,18 @@
                 <action android:name="de.codevoid.andremote2.OVERLAY_TOGGLE"/>
             </intent-filter>
         </receiver>
+
+        <service
+            android:name=".RemoteAccessibilityService"
+            android:exported="true"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/accessibility_service_config"/>
+        </service>
 
         <service
             android:name=".OverlayService"

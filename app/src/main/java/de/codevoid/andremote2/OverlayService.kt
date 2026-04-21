@@ -1,20 +1,16 @@
 package de.codevoid.andremote2
 
-import android.app.AppOpsManager
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
-import android.app.usage.UsageEvents
-import android.app.usage.UsageStatsManager
 import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.PixelFormat
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
-import android.os.Process
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -44,12 +40,8 @@ class OverlayService : Service() {
 
     private val dmd2PollRunnable = object : Runnable {
         override fun run() {
-            val pkg = getForegroundPackage() ?: ""
-            val isDMD2 = isDMD2Package(pkg)
-            RemoteControl.isDMD2InView = isDMD2
-            RemoteControl.foregroundPackage = pkg
             overlayView.findViewById<de.codevoid.andremote2.views.JoystickView>(R.id.joystickView)
-                .setMode360(isDMD2)
+                .setMode360(RemoteControl.isDMD2InView)
             mainHandler.postDelayed(this, 500)
         }
     }
@@ -246,35 +238,6 @@ class OverlayService : Service() {
         val joystick = overlayView.findViewById<de.codevoid.andremote2.views.JoystickView>(R.id.joystickView)
         joystick.setReduceSensitivity(prefs.getBoolean(PrefKeys.REDUCE_SENSITIVITY, false))
     }
-
-    private fun hasUsageStatsPermission(): Boolean {
-        val appOps = getSystemService(APP_OPS_SERVICE) as AppOpsManager
-        val mode = appOps.checkOpNoThrow(
-            AppOpsManager.OPSTR_GET_USAGE_STATS,
-            Process.myUid(),
-            packageName
-        )
-        return mode == AppOpsManager.MODE_ALLOWED
-    }
-
-    private fun getForegroundPackage(): String? {
-        if (!hasUsageStatsPermission()) return null
-        val usm = getSystemService(UsageStatsManager::class.java)
-        val now = System.currentTimeMillis()
-        val events = usm.queryEvents(now - 30_000L, now) ?: return null
-        val event = UsageEvents.Event()
-        var lastPkg: String? = null
-        while (events.hasNextEvent()) {
-            events.getNextEvent(event)
-            if (event.eventType == UsageEvents.Event.MOVE_TO_FOREGROUND) {
-                lastPkg = event.packageName
-            }
-        }
-        return lastPkg
-    }
-
-    private fun isDMD2Package(pkg: String) =
-        pkg == "com.thorkracing.dmd2launcher" || pkg == "com.thorkracing.dmdplayground"
 
     private fun applyScaleAndAlpha() {
         if (prefs.getBoolean(PrefKeys.OVERLAY_COLLAPSED, false) &&
